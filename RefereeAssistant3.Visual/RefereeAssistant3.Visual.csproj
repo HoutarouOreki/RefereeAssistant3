@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ppy.osu.Framework" Version="2019.518.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RefereeAssistant3.Main\RefereeAssistant3.Main.csproj" />
+  </ItemGroup>
+
+</Project>
