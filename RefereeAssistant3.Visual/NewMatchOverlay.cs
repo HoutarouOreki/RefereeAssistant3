@@ -9,12 +9,12 @@ namespace RefereeAssistant3.Visual
 {
     public class NewMatchOverlay : OverlayContainer
     {
-        private readonly MainLoop core;
+        private readonly Core core;
 
         private readonly Dropdown<Team> team1Dropdown;
         private readonly Dropdown<Team> team2Dropdown;
 
-        public NewMatchOverlay(MainLoop core)
+        public NewMatchOverlay(Core core)
         {
             this.core = core;
             Children = new Drawable[]

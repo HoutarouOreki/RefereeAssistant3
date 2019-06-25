@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace RefereeAssistant3.Main
 {
-    public class MainLoop
+    public class Core
     {
         public event Action<Match> NewMatchAdded;
 
@@ -12,7 +12,7 @@ namespace RefereeAssistant3.Main
 
         private readonly List<Match> matches = new List<Match>();
 
-        public MainLoop(IEnumerable<Team> teams) => Teams = teams;
+        public Core(IEnumerable<Team> teams) => Teams = teams;
 
         public void AddNewMatch(Match match)
         {

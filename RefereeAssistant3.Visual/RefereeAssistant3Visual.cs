@@ -6,9 +6,9 @@ namespace RefereeAssistant3.Visual
 {
     public class RefereeAssistant3Visual : Game
     {
-        private readonly MainLoop core;
+        private readonly Core core;
 
-        public RefereeAssistant3Visual(MainLoop core) => this.core = core;
+        public RefereeAssistant3Visual(Core core) => this.core = core;
 
         protected override void LoadComplete()
         {

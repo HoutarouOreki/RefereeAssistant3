@@ -46,7 +46,7 @@ namespace RefereeAssistant3
                     teams.Add(team);
                 }
 
-                var core = new MainLoop(teams);
+                var core = new Core(teams);
 
                 switch (args.FirstOrDefault() ?? string.Empty)
                 {
