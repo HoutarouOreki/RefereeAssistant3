@@ -17,7 +17,7 @@ namespace RefereeAssistant3
             {
                 //host.ExceptionThrown += HandleException;
 
-                var dir = Utilities.PathUtils.GetBaseDirectory();
+                var dir = Utilities.GetBaseDirectory();
                 if (!dir.Exists || !File.Exists($"{dir}/teams.txt"))
                 {
                     dir.Create();
@@ -46,6 +46,8 @@ namespace RefereeAssistant3
                     teams.Add(team);
                 }
 
+                var core = new MainLoop(teams);
+
                 switch (args.FirstOrDefault() ?? string.Empty)
                 {
                     default:
@@ -55,7 +57,7 @@ namespace RefereeAssistant3
                             int.TryParse(Console.ReadKey().KeyChar.ToString(), out fullOrBasic);
                         Console.WriteLine($"Launching {(fullOrBasic == 1 ? "visual" : "basic")} mode...");
                         if (fullOrBasic == 1)
-                            host.Run(new RefereeAssistant3Visual(teams));
+                            host.Run(new RefereeAssistant3Visual(core));
                         else
                             break;
                         break;
