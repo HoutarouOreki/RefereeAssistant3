@@ -1,6 +1,9 @@
 ﻿using osu.Framework;
+using RefereeAssistant3.Main;
 using RefereeAssistant3.Visual;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace RefereeAssistant3
@@ -14,6 +17,35 @@ namespace RefereeAssistant3
             {
                 //host.ExceptionThrown += HandleException;
 
+                var dir = Utilities.PathUtils.GetBaseDirectory();
+                if (!dir.Exists || !File.Exists($"{dir}/teams.txt"))
+                {
+                    dir.Create();
+                    File.WriteAllText($"{dir}/teams.txt", "teamName:captain,player2,player3");
+                }
+                if (File.ReadAllLines($"{dir}/teams.txt").Length < 2)
+                {
+                    Console.WriteLine($"Add teams to {dir}/teams.txt according to this syntax:");
+                    Console.WriteLine("Team:captain,player2,player3");
+                    Console.WriteLine("and then run again.");
+                    Console.WriteLine("Press 1 to open the file. Or close the program.");
+                    var res = Console.ReadKey(true);
+                    if (res.Key == ConsoleKey.D1)
+                        host.OpenFileExternally($"{dir}/teams.txt");
+                    Environment.Exit(0);
+                }
+
+                var teamsText = File.ReadAllLines($"{dir}/teams.txt");
+                var teams = new List<Team>(teamsText.Length);
+                foreach (var teamLine in teamsText.Where(t => t.Contains(':') && t.Length > 4))
+                {
+                    var temp = teamLine.Split(':');
+                    var teamName = temp[0];
+                    var memberNames = temp[1].Split(',');
+                    var team = new Team(teamName, memberNames.Select(name => new Player(name)));
+                    teams.Add(team);
+                }
+
                 switch (args.FirstOrDefault() ?? string.Empty)
                 {
                     default:
@@ -23,7 +55,7 @@ namespace RefereeAssistant3
                             int.TryParse(Console.ReadKey().KeyChar.ToString(), out fullOrBasic);
                         Console.WriteLine($"Launching {(fullOrBasic == 1 ? "visual" : "basic")} mode...");
                         if (fullOrBasic == 1)
-                            host.Run(new RefereeAssistant3Visual());
+                            host.Run(new RefereeAssistant3Visual(teams));
                         else
                             break;
                         break;

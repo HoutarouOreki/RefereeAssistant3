@@ -11,11 +11,14 @@ namespace RefereeAssistant3.Visual
     public class RefereeAssistant3Visual : Game
     {
         private readonly List<Match> matches = new List<Match>();
-        private TextBox player1TextBox;
-        private TextBox player2TextBox;
+        private Dropdown<Team> team1Dropdown;
+        private Dropdown<Team> team2Dropdown;
+        private List<Team> teams;
         public const float COMPONENTS_WIDTH = 100;
         public const float COMPONENTS_HEIGHT = 30;
         public const float SPACING = 24;
+
+        public RefereeAssistant3Visual(List<Team> teams) => this.teams = teams;
 
         protected override void LoadComplete()
         {
@@ -30,17 +33,15 @@ namespace RefereeAssistant3.Visual
                     Spacing = new Vector2(SPACING),
                     Children = new Drawable[]
                     {
-                        player1TextBox = new BasicTextBox
+                        team1Dropdown = new BasicDropdown<Team>
                         {
-                            PlaceholderText = "Player 1 username",
                             Width = COMPONENTS_WIDTH,
-                            Height = COMPONENTS_HEIGHT,
+                            //Height = COMPONENTS_HEIGHT,
                         },
-                        player2TextBox = new BasicTextBox
+                        team2Dropdown = new BasicDropdown<Team>
                         {
-                            PlaceholderText = "Player 2 username",
                             Width = COMPONENTS_WIDTH,
-                            Height = COMPONENTS_HEIGHT,
+                            //Height = COMPONENTS_HEIGHT,
                         },
                         new Button
                         {
@@ -53,14 +54,18 @@ namespace RefereeAssistant3.Visual
                     }
                 }
             };
+            team1Dropdown.Items = team2Dropdown.Items = teams;
         }
 
         private void AddNewMatch()
         {
-            var player1 = new Player(player1TextBox.Text);
-            var player2 = new Player(player2TextBox.Text);
-            var match = new Match(new[] { player1, player2 }, new Mappool(), TournamentStage.Qualifiers);
+            var team1 = team1Dropdown.Current.Value;
+            var team2 = team2Dropdown.Current.Value;
+            if (team1 == null || team2 == null || team1 == team2)
+                return;
+            var match = new Match(team1, team2, new Mappool(), TournamentStage.Qualifiers);
             matches.Add(match);
+            // update match list
         }
     }
 }
