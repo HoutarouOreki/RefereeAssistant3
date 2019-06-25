@@ -4,5 +4,7 @@
     {
         public int Id;
         public string Username;
+
+        public Player(string username) => Username = username;
     }
 }
