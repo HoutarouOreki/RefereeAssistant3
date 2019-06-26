@@ -3,6 +3,7 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input.Events;
+using osuTK.Graphics;
 using RefereeAssistant3.Main;
 
 namespace RefereeAssistant3.Visual
@@ -30,7 +31,7 @@ namespace RefereeAssistant3.Visual
                     RelativeSizeAxes = Axes.Both,
                     Colour = FrameworkColour.Blue
                 },
-                hoverOverlay = new Box { RelativeSizeAxes = Axes.Both, Alpha = 0 },
+                hoverOverlay = new Box { RelativeSizeAxes = Axes.Both, Alpha = 0, Colour = Color4.Gray },
                 new FillFlowContainer
                 {
                     RelativeSizeAxes = Axes.X,
@@ -58,7 +59,7 @@ namespace RefereeAssistant3.Visual
                                 {
                                     Text = match.Team2.TeamName,
                                     Anchor = Anchor.Centre,
-                                    Origin = Anchor.CentreLeft,
+                                    Origin = Anchor.CentreLeft
                                 }
                             }
                         },
@@ -92,7 +93,7 @@ namespace RefereeAssistant3.Visual
 
         protected override bool OnHover(HoverEvent e)
         {
-            hoverOverlay.FadeTo(0.25f, 200, Easing.OutCubic);
+            hoverOverlay.FadeTo(0.3f, 200, Easing.OutCubic);
             return base.OnHover(e);
         }
 
