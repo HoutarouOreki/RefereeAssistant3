@@ -21,6 +21,8 @@ namespace RefereeAssistant3.Visual
 
         protected override void LoadComplete()
         {
+            Host.Window.Title = "Referee Assistant 3";
+
             Resources.AddStore(new DllResourceStore(@"RefereeAssistant3.Resources.dll"));
 
             Fonts.AddStore(new GlyphStore(Resources, @"Fonts/Noto-Basic"));
