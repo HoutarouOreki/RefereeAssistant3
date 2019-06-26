@@ -19,9 +19,6 @@ namespace RefereeAssistant3.Main
 
         public Team RollWinner;
 
-        public int AmountOfBansPerRound = 2;
-        public int AmountOfPicksPerRound = 4;
-
         public Map CurrentMap;
 
         public Dictionary<Team, int> Score = new Dictionary<Team, int>();
