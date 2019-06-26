@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
@@ -10,6 +10,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RefereeAssistant3.Main\RefereeAssistant3.Main.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RefereeAssistant3.Resources\RefereeAssistant3.Resources.csproj" />
   </ItemGroup>
 
 </Project>

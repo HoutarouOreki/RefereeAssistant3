@@ -2,6 +2,7 @@
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.IO.Stores;
 using osuTK;
 using RefereeAssistant3.Main;
 
@@ -20,6 +21,13 @@ namespace RefereeAssistant3.Visual
 
         protected override void LoadComplete()
         {
+            Resources.AddStore(new DllResourceStore(@"RefereeAssistant3.Resources.dll"));
+
+            Fonts.AddStore(new GlyphStore(Resources, @"Fonts/Noto-Basic"));
+            Fonts.AddStore(new GlyphStore(Resources, @"Fonts/Noto-Hangul"));
+            Fonts.AddStore(new GlyphStore(Resources, @"Fonts/Noto-CJK-Basic"));
+            Fonts.AddStore(new GlyphStore(Resources, @"Fonts/Noto-CJK-Compatibility"));
+
             base.LoadComplete();
             // doing this in the initializer throws
             var newMatchOverlay = new NewMatchOverlay(core);
