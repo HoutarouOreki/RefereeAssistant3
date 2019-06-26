@@ -77,11 +77,9 @@ namespace RefereeAssistant3.Visual
         private void GenerateLayout()
         {
             scoreText.Text = $"| {Match.Score[Match.Team1]} - {Match.Score[Match.Team2]} |";
-            if (Match.State == MatchState.SettingUp)
-            {
-                stateLabel.Text = "Setting up...";
+            if (Match.CurrentProcedure == MatchProcedure.SettingUp)
                 scoreText.Text = "VS";
-            }
+            stateLabel.Text = Match.ReadableCurrentState;
         }
 
         protected override void Update()

@@ -29,6 +29,9 @@ namespace RefereeAssistant3.Visual
         private readonly SpriteText team1NameLabel;
         private readonly SpriteText team2NameLabel;
         private readonly TextFlowContainer matchStateLabel;
+        private readonly Container matchControls;
+        private readonly SpriteText tournamentLabel;
+        private readonly SpriteText stageLabel;
 
         public MatchVisualManager()
         {
@@ -100,6 +103,61 @@ namespace RefereeAssistant3.Visual
                             Origin = Anchor.Centre
                         }
                     }
+                },
+                new Container
+                {
+                    RelativeSizeAxes = Axes.X,
+                    Height = match_state_height * 0.7f,
+                    Y = (2 * team_name_score_height) + match_state_height,
+                    Depth = 2,
+                    Masking = true,
+                    Children = new Drawable[]
+                    {
+                        new Box
+                        {
+                            RelativeSizeAxes = Axes.Both,
+                            Anchor = Anchor.BottomLeft,
+                            Origin = Anchor.BottomLeft,
+                            Rotation = -3,
+                            EdgeSmoothness = new osuTK.Vector2(1),
+                            Colour = Color4.Black
+                        },
+                        new Box
+                        {
+                            RelativeSizeAxes = Axes.Both,
+                            Anchor = Anchor.BottomRight,
+                            Origin = Anchor.BottomRight,
+                            Rotation = 3,
+                            EdgeSmoothness = new osuTK.Vector2(1),
+                            Colour = Color4.Black
+                        },
+                        new Container
+                        {
+                            RelativeSizeAxes = Axes.Both,
+                            Padding = new MarginPadding { Horizontal = 8, Vertical = 4 },
+                            Children = new Drawable[]
+                            {
+                                tournamentLabel = new SpriteText
+                                {
+                                    Font = new FontUsage(null, 15),
+                                    Colour = Color4.Gray
+                                },
+                                stageLabel = new SpriteText
+                                {
+                                    Anchor = Anchor.TopRight,
+                                    Origin = Anchor.TopRight,
+                                    Font = new FontUsage(null, 15),
+                                    Colour = Color4.Gray
+                                }
+                            }
+                        }
+                    }
+                },
+                matchControls = new Container
+                {
+                    RelativeSizeAxes = Axes.X,
+                    Anchor = Anchor.BottomCentre,
+                    Origin = Anchor.BottomCentre
                 }
             };
         }
@@ -111,7 +169,17 @@ namespace RefereeAssistant3.Visual
             team2ScoreBox.Label.Text = match.Score[match.Team2].ToString();
             team2NameLabel.Text = match.Team2.TeamName;
 
-            matchStateLabel.Text = match.State.ToString();
+            tournamentLabel.Text = match.Tournament.TournamentName;
+            stageLabel.Text = match.TournamentStage.TournamentStageName;
+
+            matchStateLabel.Text = "";
+            matchStateLabel.AddText(match.ReadableCurrentState);
+        }
+
+        protected override void Update()
+        {
+            matchControls.Height = DrawHeight - (2 * team_name_score_height) - match_state_height;
+            base.Update();
         }
 
         private class ScoreNumberBox : Container

@@ -16,7 +16,7 @@ namespace RefereeAssistant3.Main
 
         public readonly Tournament Tournament;
         public readonly TournamentStage TournamentStage;
-        public MatchState State = MatchState.SettingUp;
+        public MatchProcedure CurrentProcedure = MatchProcedure.SettingUp;
 
         public Team RollWinner;
         public Team RollLoser => Team1 == RollWinner ? Team2 : Team1;
@@ -26,6 +26,22 @@ namespace RefereeAssistant3.Main
         public Dictionary<Team, int> Score = new Dictionary<Team, int>();
 
         public readonly Dictionary<Map, Dictionary<Player, int>> MapResults = new Dictionary<Map, Dictionary<Player, int>>();
+
+        // after warmups, picks and tiebreaker a map is played
+        private Dictionary<MatchProcedure, string> readableMatchStateDictionary => new Dictionary<MatchProcedure, string>
+        {
+            { MatchProcedure.SettingUp, "Setting up the match" },
+            { MatchProcedure.WarmUp1, $"Warmup by {Team1}" },
+            { MatchProcedure.WarmUp2, $"Warmup by {Team2}" },
+            { MatchProcedure.Rolling, $"Teams are rolling" },
+            { MatchProcedure.Banning1, $"{Team1} are banning" },
+            { MatchProcedure.Banning2, $"{Team2} are banning" },
+            { MatchProcedure.Picking1, $"{Team1} are picking" },
+            { MatchProcedure.Picking2, $"{Team2} are picking" },
+            { MatchProcedure.GettingReady, "Players are getting ready" },
+            { MatchProcedure.TieBreaker, "Tiebreaker!" },
+            { MatchProcedure.Playing, $"Playing {CurrentMap?.MapCode}: {CurrentMap?.DisplayName}" }
+        };
 
         public string Title => TournamentStage.RoomName.Replace("TEAM1", Team1.TeamName).Replace("TEAM2", Team2.TeamName);
 
@@ -40,7 +56,7 @@ namespace RefereeAssistant3.Main
             TournamentStage = tournamentStage;
         }
 
-        public void BeginRollingPhase() => State = MatchState.Rolling;
+        public void BeginRollingPhase() => CurrentProcedure = MatchProcedure.Rolling;
 
         /// <summary>
         /// Automatically begins banning phase.
@@ -48,35 +64,23 @@ namespace RefereeAssistant3.Main
         public void SpecifyRollWinner(Team team)
         {
             RollWinner = team;
-            BeginBanningPhase();
         }
 
-        public void BeginBanningPhase() => State = MatchState.Banning;
-
-        public void BanMap(Map map)
-        {
-        }
-
-        public void BeginPickingPhase() => State = MatchState.Picking;
-
-        public void PickMap(Map map)
-        {
-        }
-
-        public void BeginWaitingForPlayersToGetReady() => State = MatchState.GettingReady;
-
-        public void StartMap() => State = MatchState.Playing;
-
-        public void AddResults(Dictionary<Player, int> scores) => MapResults.Add(CurrentMap, scores);
+        public string ReadableCurrentState => readableMatchStateDictionary[CurrentProcedure];
     }
 
-    public enum MatchState
+    public enum MatchProcedure
     {
         SettingUp = 0,
-        Rolling = 1,
-        Banning = 2,
-        Picking = 3,
-        GettingReady = 4,
-        Playing = 5,
+        WarmUp1 = 1,
+        WarmUp2 = 2,
+        Rolling = 3,
+        Banning1 = 4,
+        Banning2 = 5,
+        Picking1 = 6,
+        Picking2 = 7,
+        GettingReady = 8,
+        TieBreaker = 9,
+        Playing = 10,
     }
 }
