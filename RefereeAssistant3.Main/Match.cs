@@ -26,7 +26,7 @@ namespace RefereeAssistant3.Main
 
         public readonly Dictionary<Map, Dictionary<Player, int>> MapResults = new Dictionary<Map, Dictionary<Player, int>>();
 
-        public string Title => ComputeTitle();
+        public string Title => TournamentStage.RoomName.Replace("TEAM1", Team1.TeamName).Replace("TEAM2", Team2.TeamName);
 
         public Match(Team team1, Team team2, Tournament tournament, TournamentStage tournamentStage)
         {
@@ -37,12 +37,6 @@ namespace RefereeAssistant3.Main
             Score.Add(Team2, 0);
             Tournament = tournament;
             TournamentStage = tournamentStage;
-        }
-
-        private string ComputeTitle()
-        {
-            var prefix = $"{TournamentStage}";
-            return $"{prefix}: {Team1.TeamName} vs {Team2.TeamName}";
         }
 
         public void BeginRollingPhase() => State = MatchState.Rolling;
