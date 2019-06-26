@@ -6,15 +6,22 @@ namespace RefereeAssistant3.Visual
 {
     public class RA3OverlayContainer : FocusedOverlayContainer
     {
+        public RA3OverlayContainer()
+        {
+            Anchor = Anchor.Centre;
+            Origin = Anchor.Centre;
+        }
+
         protected override void PopIn()
         {
-            Content.FadeIn(100);
+            Content.Scale = new osuTK.Vector2(1.2f);
+            Content.FadeIn(100, Easing.OutCubic).ScaleTo(1, 100, Easing.OutCubic);
             base.PopIn();
         }
 
         protected override void PopOut()
         {
-            Content.FadeOut(100);
+            Content.FadeOut(120, Easing.OutCubic).ScaleTo(1.06f, 120, Easing.OutCubic);
             base.PopOut();
         }
 
