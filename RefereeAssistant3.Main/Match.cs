@@ -19,6 +19,7 @@ namespace RefereeAssistant3.Main
         public MatchState State = MatchState.SettingUp;
 
         public Team RollWinner;
+        public Team RollLoser => Team1 == RollWinner ? Team2 : Team1;
 
         public Map CurrentMap;
 
