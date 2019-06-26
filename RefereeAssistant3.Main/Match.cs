@@ -26,7 +26,7 @@ namespace RefereeAssistant3.Main
         public Team RollWinner;
         public Team RollLoser => Team1 == RollWinner ? Team2 : Team1;
 
-        public Map CurrentMap;
+        public Map SelectedMap;
 
         public Dictionary<Team, int> Score = new Dictionary<Team, int>();
 
@@ -45,7 +45,9 @@ namespace RefereeAssistant3.Main
             { MatchProcedure.Picking2, $"{Team2} are picking" },
             { MatchProcedure.GettingReady, "Players are getting ready" },
             { MatchProcedure.TieBreaker, "Tiebreaker!" },
-            { MatchProcedure.Playing, $"Playing {CurrentMap?.MapCode}: {CurrentMap?.DisplayName}" }
+            { MatchProcedure.Playing, $"Playing {SelectedMap?.MapCode}: {SelectedMap?.DisplayName}" },
+            { MatchProcedure.FreePoint1, $"{Team1} receives a free point" },
+            { MatchProcedure.FreePoint2, $"{Team2} receives a free point" }
         };
 
         public string Title => TournamentStage.RoomName.Replace("TEAM1", Team1.TeamName).Replace("TEAM2", Team2.TeamName);
@@ -142,6 +144,60 @@ namespace RefereeAssistant3.Main
                 return true;
             else
                 return false;
+        }
+
+        public bool Proceed()
+        {
+            if (CurrentProcedure == MatchProcedure.SettingUp)
+                return GoToNextProcedure();
+            if (CurrentProcedure == MatchProcedure.WarmUp1 || CurrentProcedure == MatchProcedure.WarmUp2)
+                return GoToNextProcedure();
+            if (CurrentProcedure == MatchProcedure.Rolling && RollWinner != null)
+                return GoToNextProcedure();
+            if (SelectedMap != null)
+            {
+                if (CurrentProcedure == MatchProcedure.Banning1)
+                {
+                    Team1.BannedMaps.Add(SelectedMap);
+                }
+                if (CurrentProcedure == MatchProcedure.Banning2)
+                {
+                    Team2.BannedMaps.Add(SelectedMap);
+                }
+                if (CurrentProcedure == MatchProcedure.Picking1)
+                {
+                    Team1.PickedMaps.Add(SelectedMap);
+                }
+                if (CurrentProcedure == MatchProcedure.Picking2)
+                {
+                    Team2.PickedMaps.Add(SelectedMap);
+                }
+            }
+            if (CurrentProcedure == MatchProcedure.GettingReady)
+                return GoToNextProcedure();
+            if (CurrentProcedure == MatchProcedure.TieBreaker)
+                return GoToNextProcedure();
+            if (CurrentProcedure == MatchProcedure.Playing)
+                return GoToNextProcedure();
+            if (CurrentProcedure == MatchProcedure.FreePoint1 || CurrentProcedure == MatchProcedure.FreePoint2)
+                return GoToNextProcedure();
+            return false;
+        }
+
+        private bool GoToNextProcedure()
+        {
+            currentProcedureIndex++;
+            DoNewProcedureJobs();
+            Updated?.Invoke();
+            return true;
+        }
+
+        private void DoNewProcedureJobs()
+        {
+            if (CurrentProcedure == MatchProcedure.Rolling)
+                RollWinner = null;
+            if (CurrentProcedure == MatchProcedure.Banning1 || CurrentProcedure == MatchProcedure.Banning2)
+                SelectedMap = null;
         }
     }
 

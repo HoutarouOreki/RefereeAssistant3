@@ -1,4 +1,5 @@
-﻿using osu.Framework.Graphics;
+﻿using System;
+using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
@@ -19,10 +20,14 @@ namespace RefereeAssistant3.Visual
             get => match;
             set
             {
+                if (match != null)
+                    match.Updated -= OnMatchUpdate;
                 match = value;
+                match.Updated += OnMatchUpdate;
                 GenerateLayout();
             }
         }
+
         private Match match;
         private readonly ScoreNumberBox team1ScoreBox;
         private readonly ScoreNumberBox team2ScoreBox;
@@ -157,7 +162,19 @@ namespace RefereeAssistant3.Visual
                 {
                     RelativeSizeAxes = Axes.X,
                     Anchor = Anchor.BottomCentre,
-                    Origin = Anchor.BottomCentre
+                    Origin = Anchor.BottomCentre,
+                    Children = new Drawable[]
+                    {
+                        new RA3Button
+                        {
+                            Anchor = Anchor.Centre,
+                            Origin = Anchor.Centre,
+                            Size = new osuTK.Vector2(200),
+                            BackgroundColour = FrameworkColour.BlueGreen,
+                            Text = "Proceed",
+                            Action = () => Match?.Proceed()
+                        }
+                    }
                 }
             };
         }
@@ -181,6 +198,8 @@ namespace RefereeAssistant3.Visual
             matchControls.Height = DrawHeight - (2 * team_name_score_height) - match_state_height;
             base.Update();
         }
+
+        private void OnMatchUpdate() => GenerateLayout();
 
         private class ScoreNumberBox : Container
         {
