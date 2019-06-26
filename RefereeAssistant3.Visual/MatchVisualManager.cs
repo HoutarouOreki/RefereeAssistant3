@@ -48,7 +48,7 @@ namespace RefereeAssistant3.Visual
                         {
                             RelativeSizeAxes = Axes.Both,
                             Colour = Style.Red,
-                            Alpha = 0.3f
+                            Alpha = 0.4f
                         },
                         team1ScoreBox = new ScoreNumberBox(),
                         team1NameLabel = new SpriteText
@@ -71,7 +71,7 @@ namespace RefereeAssistant3.Visual
                         {
                             RelativeSizeAxes = Axes.Both,
                             Colour = Style.Blue,
-                            Alpha = 0.3f
+                            Alpha = 0.4f
                         },
                         team2ScoreBox = new ScoreNumberBox { Anchor = Anchor.TopRight, Origin = Anchor.TopRight },
                         team2NameLabel = new SpriteText

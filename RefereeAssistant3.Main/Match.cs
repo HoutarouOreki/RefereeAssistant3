@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace RefereeAssistant3.Main
 {
@@ -16,7 +17,11 @@ namespace RefereeAssistant3.Main
 
         public readonly Tournament Tournament;
         public readonly TournamentStage TournamentStage;
-        public MatchProcedure CurrentProcedure = MatchProcedure.SettingUp;
+
+        public List<MatchProcedure> Procedures = new List<MatchProcedure>();
+
+        public MatchProcedure CurrentProcedure => Procedures[currentProcedureIndex];
+        private int currentProcedureIndex;
 
         public Team RollWinner;
         public Team RollLoser => Team1 == RollWinner ? Team2 : Team1;
@@ -54,19 +59,90 @@ namespace RefereeAssistant3.Main
             Score.Add(Team2, 0);
             Tournament = tournament;
             TournamentStage = tournamentStage;
-        }
 
-        public void BeginRollingPhase() => CurrentProcedure = MatchProcedure.Rolling;
-
-        /// <summary>
-        /// Automatically begins banning phase.
-        /// </summary>
-        public void SpecifyRollWinner(Team team)
-        {
-            RollWinner = team;
+            Procedures.Add(MatchProcedure.SettingUp);
+            foreach (var procedureParameter in tournamentStage.MatchProceedings)
+                GenerateMatchProcedure(procedureParameter.ToLowerInvariant());
         }
 
         public string ReadableCurrentState => readableMatchStateDictionary[CurrentProcedure];
+
+        private void GenerateMatchProcedure(string param)
+        {
+            if (warmup_regex.IsMatch(param))
+                GenerateWarmupProcedure(TeamFromLetter(warmup_regex.Match(param).Groups[1].Value));
+            else if (roll_regex.IsMatch(param))
+                GenerateRollingProcedure();
+            else if (pick_regex.IsMatch(param))
+                GeneratePickingProcedure(TeamFromLetter(pick_regex.Match(param).Groups[1].Value));
+            else if (ban_regex.IsMatch(param))
+                GenerateBanningProcedure(TeamFromLetter(ban_regex.Match(param).Groups[1].Value));
+            else if (tiebreaker_regex.IsMatch(param))
+                GenerateTiebreakerProcedure();
+            else if (free_point_regex.IsMatch(param))
+                GenerateFreePointProcedure(TeamFromLetter(free_point_regex.Match(param).Groups[1].Value));
+        }
+
+        private void GenerateWarmupProcedure(ProcedureTeam team)
+        {
+            Procedures.Add(IsProcedureTeamTeam1(team) ? MatchProcedure.WarmUp1 : MatchProcedure.WarmUp2);
+            Procedures.Add(MatchProcedure.GettingReady);
+            Procedures.Add(MatchProcedure.Playing);
+        }
+
+        private void GenerateRollingProcedure() => Procedures.Add(MatchProcedure.Rolling);
+
+        private void GeneratePickingProcedure(ProcedureTeam team)
+        {
+            Procedures.Add(IsProcedureTeamTeam1(team) ? MatchProcedure.Picking1 : MatchProcedure.Picking2);
+            Procedures.Add(MatchProcedure.GettingReady);
+            Procedures.Add(MatchProcedure.Playing);
+        }
+
+        private void GenerateBanningProcedure(ProcedureTeam team) => Procedures.Add(IsProcedureTeamTeam1(team) ? MatchProcedure.Banning1 : MatchProcedure.Banning2);
+
+        private void GenerateTiebreakerProcedure()
+        {
+            Procedures.Add(MatchProcedure.TieBreaker);
+            Procedures.Add(MatchProcedure.GettingReady);
+            Procedures.Add(MatchProcedure.Playing);
+        }
+
+        private void GenerateFreePointProcedure(ProcedureTeam team) => Procedures.Add(IsProcedureTeamTeam1(team) ? MatchProcedure.FreePoint1 : MatchProcedure.FreePoint2);
+
+        private static readonly Regex warmup_regex = new Regex(@"^warm(1|2|w|l)$");
+        private static readonly Regex roll_regex = new Regex(@"^roll$");
+        private static readonly Regex pick_regex = new Regex(@"^p(1|2|w|l)$");
+        private static readonly Regex ban_regex = new Regex(@"^b(1|2|w|l)$");
+        private static readonly Regex tiebreaker_regex = new Regex(@"^tb$");
+        private static readonly Regex free_point_regex = new Regex(@"^free(1|2|w|l)$");
+
+        private ProcedureTeam TeamFromLetter(string letter)
+        {
+            switch (letter)
+            {
+                case "w":
+                    return ProcedureTeam.RollWinner;
+                case "l":
+                    return ProcedureTeam.RollLoser;
+                case "1":
+                    return ProcedureTeam.Team1;
+                case "2":
+                    return ProcedureTeam.Team2;
+                default:
+                    throw new Exception();
+            }
+        }
+
+        private bool IsProcedureTeamTeam1(ProcedureTeam procedureTeam)
+        {
+            if (procedureTeam == ProcedureTeam.Team1)
+                return true;
+            if (procedureTeam == ProcedureTeam.RollWinner && RollWinner == Team1)
+                return true;
+            else
+                return false;
+        }
     }
 
     public enum MatchProcedure
@@ -82,5 +158,15 @@ namespace RefereeAssistant3.Main
         GettingReady = 8,
         TieBreaker = 9,
         Playing = 10,
+        FreePoint1 = 11,
+        FreePoint2 = 12,
+    }
+
+    public enum ProcedureTeam
+    {
+        Team1 = 0,
+        Team2 = 1,
+        RollWinner = 2,
+        RollLoser = 3
     }
 }
