@@ -14,6 +14,7 @@ namespace RefereeAssistant3.Main
 
         public readonly Mappool Mappool;
 
+        public readonly Tournament Tournament;
         public readonly TournamentStage TournamentStage;
         public MatchState State = MatchState.SettingUp;
 
@@ -27,14 +28,14 @@ namespace RefereeAssistant3.Main
 
         public string Title => ComputeTitle();
 
-        public Match(Team team1, Team team2, Mappool mappool, TournamentStage tournamentStage)
+        public Match(Team team1, Team team2, Tournament tournament, TournamentStage tournamentStage)
         {
             // store info about the match
             Team1 = team1;
             Team2 = team2;
             Score.Add(Team1, 0);
             Score.Add(Team2, 0);
-            Mappool = mappool;
+            Tournament = tournament;
             TournamentStage = tournamentStage;
         }
 
@@ -72,12 +73,6 @@ namespace RefereeAssistant3.Main
         public void StartMap() => State = MatchState.Playing;
 
         public void AddResults(Dictionary<Player, int> scores) => MapResults.Add(CurrentMap, scores);
-    }
-
-    public enum TournamentStage
-    {
-        Unspecified = 0,
-        Qualifiers = 1,
     }
 
     public enum MatchState

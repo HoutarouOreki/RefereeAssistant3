@@ -18,35 +18,52 @@ namespace RefereeAssistant3
                 //host.ExceptionThrown += HandleException;
 
                 var dir = Utilities.GetBaseDirectory();
-                if (!dir.Exists || !File.Exists($"{dir}/teams.txt"))
+                var tournamentsDirectory = new DirectoryInfo($"{dir}/tournaments");
+                if (!dir.Exists || !tournamentsDirectory.Exists || tournamentsDirectory.GetDirectories().Length == 0)
                 {
                     dir.Create();
-                    File.WriteAllText($"{dir}/teams.txt", "teamName:captain,player2,player3");
-                }
-                if (File.ReadAllLines($"{dir}/teams.txt").Length < 2)
-                {
-                    Console.WriteLine($"Add teams to {dir}/teams.txt according to this syntax:");
-                    Console.WriteLine("Team:captain,player2,player3");
-                    Console.WriteLine("and then run again.");
-                    Console.WriteLine("Press 1 to open the file. Or close the program.");
-                    var res = Console.ReadKey(true);
-                    if (res.Key == ConsoleKey.D1)
-                        host.OpenFileExternally($"{dir}/teams.txt");
-                    Environment.Exit(0);
+                    tournamentsDirectory.Create();
+                    var exampleTournament = new DirectoryInfo($"{tournamentsDirectory}/Example Tournament");
+                    exampleTournament.Create();
+                    File.WriteAllLines($"{exampleTournament}/configuration.txt", new[]
+                    {
+                        "Example Tournament",
+                        "no"
+                    });
+                    File.WriteAllLines($"{exampleTournament}/stages.txt", new[]
+                    {
+                        "Group Stage|||o!AOT: (TEAM1) vs (TEAM2)|||Roll BL BW PW PL PW PL PW PL PW PL TB|||5",
+                        "___",
+                        "NM1|||42352|||Lady Gaga - Bad Romance [Extra]|||NM",
+                        "HD1|||1070437|||Dave Rodgers - Deja Vu [Multi Track Drifting]|||HD",
+                        "FM1|||432783249|||Kansas - Carry on Wayward [Supernatural]|||FM",
+                        "###",
+                        "Grand Finals|||o!AOT Grand Finals: (TEAM1) vs (TEAM2)|||Free1 Warm1 Warm2 Roll BL BW PW PL PW PL BL BW PW PL B1 PW PL PW PL PW TB|||7",
+                        "___",
+                        "NM1|||42352|||Lady Gaga - Bad Romance [Extra]|||NM",
+                        "HD1|||1070437|||Dave Rodgers - Deja Vu [Multi Track Drifting]|||HD",
+                        "FM1|||432783249|||Kansas - Carry on Wayward [Supernatural]|||FM"
+                    });
+                    File.WriteAllLines($"{exampleTournament}/teams.txt", new[]
+                    {
+                        "teamName1:Houtarou Oreki,nya10",
+                        "teamName2:Kujo Qtaro,Fujiwara Takumi"
+                    });
                 }
 
-                var teamsText = File.ReadAllLines($"{dir}/teams.txt");
-                var teams = new List<Team>(teamsText.Length);
-                foreach (var teamLine in teamsText.Where(t => t.Contains(':') && t.Length > 4))
+                var tournaments = new List<Tournament>();
+
+                foreach (var tournamentDirectory in tournamentsDirectory.GetDirectories())
                 {
-                    var temp = teamLine.Split(':');
-                    var teamName = temp[0];
-                    var memberNames = temp[1].Split(',');
-                    var team = new Team(teamName, memberNames.Select(name => new Player(name)));
-                    teams.Add(team);
+                    var confFile = new FileInfo($"{tournamentDirectory}/configuration.txt");
+                    var stagesFile = new FileInfo($"{tournamentDirectory}/stages.txt");
+                    var teamsFile = new FileInfo($"{tournamentDirectory}/teams.txt");
+                    if (!confFile.Exists || !stagesFile.Exists || !teamsFile.Exists)
+                        continue;
+                    tournaments.Add(new Tournament(File.ReadAllText(confFile.FullName), File.ReadAllText(stagesFile.FullName), File.ReadAllText(teamsFile.FullName)));
                 }
 
-                var core = new Core(teams);
+                var core = new Core(tournaments);
 
                 //switch (args.FirstOrDefault() ?? string.Empty)
                 //{

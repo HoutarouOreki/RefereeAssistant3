@@ -8,11 +8,11 @@ namespace RefereeAssistant3.Main
         public event Action<Match> NewMatchAdded;
 
         public IReadOnlyList<Match> Matches => matches;
-        public IEnumerable<Team> Teams { get; }
+        public IEnumerable<Tournament> Tournaments { get; }
 
         private readonly List<Match> matches = new List<Match>();
 
-        public Core(IEnumerable<Team> teams) => Teams = teams;
+        public Core(IEnumerable<Tournament> tournaments) => Tournaments = tournaments;
 
         public void AddNewMatch(Match match)
         {

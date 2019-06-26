@@ -22,7 +22,7 @@ namespace RefereeAssistant3.Visual
                 {
                     RelativeSizeAxes = Axes.Both,
                     Colour = FrameworkColour.Blue,
-                    Alpha = 0.5f
+                    Alpha = 0.8f
                 },
                 new ScrollContainer
                 {
