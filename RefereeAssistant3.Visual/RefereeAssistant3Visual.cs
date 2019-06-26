@@ -107,6 +107,7 @@ namespace RefereeAssistant3.Visual
                 Action = () => SelectMatch(match)
             };
             matchListDisplayer.Add(matchPreviewPanel);
+            SelectMatch(match);
         }
 
         private void SelectMatch(Match match)
