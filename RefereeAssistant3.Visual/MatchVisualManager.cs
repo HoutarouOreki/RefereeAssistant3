@@ -12,6 +12,7 @@ namespace RefereeAssistant3.Visual
         private static readonly float team_name_score_height = 84;
         private static readonly float team_name_score_padding = 18;
         private static readonly float team_name_score_font_size = team_name_score_height - (2 * team_name_score_padding);
+        private static readonly float match_state_height = 42;
 
         public Match Match
         {
@@ -27,6 +28,7 @@ namespace RefereeAssistant3.Visual
         private readonly ScoreNumberBox team2ScoreBox;
         private readonly SpriteText team1NameLabel;
         private readonly SpriteText team2NameLabel;
+        private readonly TextFlowContainer matchStateLabel;
 
         public MatchVisualManager()
         {
@@ -77,6 +79,27 @@ namespace RefereeAssistant3.Visual
                             Font = new FontUsage(null, team_name_score_font_size)
                         }
                     }
+                },
+                new Container
+                {
+                    RelativeSizeAxes = Axes.X,
+                    Height = match_state_height,
+                    Y = 2 * team_name_score_height,
+                    Children = new Drawable[]
+                    {
+                        new Box
+                        {
+                            RelativeSizeAxes = Axes.Both,
+                            Colour = FrameworkColour.Yellow,
+                            Alpha = 0.42f
+                        },
+                        matchStateLabel = new TextFlowContainer
+                        {
+                            AutoSizeAxes = Axes.Both,
+                            Anchor = Anchor.Centre,
+                            Origin = Anchor.Centre
+                        }
+                    }
                 }
             };
         }
@@ -87,6 +110,8 @@ namespace RefereeAssistant3.Visual
             team1NameLabel.Text = match.Team1.TeamName;
             team2ScoreBox.Label.Text = match.Score[match.Team2].ToString();
             team2NameLabel.Text = match.Team2.TeamName;
+
+            matchStateLabel.Text = match.State.ToString();
         }
 
         private class ScoreNumberBox : Container

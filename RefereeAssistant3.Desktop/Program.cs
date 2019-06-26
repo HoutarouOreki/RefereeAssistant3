@@ -48,20 +48,20 @@ namespace RefereeAssistant3
 
                 var core = new Core(teams);
 
-                switch (args.FirstOrDefault() ?? string.Empty)
-                {
-                    default:
-                        var fullOrBasic = 0;
-                        Console.WriteLine("1 for visual, 2 for basic");
-                        while (fullOrBasic < 1 || fullOrBasic > 2)
-                            int.TryParse(Console.ReadKey().KeyChar.ToString(), out fullOrBasic);
-                        Console.WriteLine($"Launching {(fullOrBasic == 1 ? "visual" : "basic")} mode...");
-                        if (fullOrBasic == 1)
-                            host.Run(new RefereeAssistant3Visual(core));
-                        else
-                            break;
-                        break;
-                }
+                //switch (args.FirstOrDefault() ?? string.Empty)
+                //{
+                //    default:
+                //        var fullOrBasic = 0;
+                //        Console.WriteLine("1 for visual, 2 for basic");
+                //        while (fullOrBasic < 1 || fullOrBasic > 2)
+                //            int.TryParse(Console.ReadKey().KeyChar.ToString(), out fullOrBasic);
+                //        Console.WriteLine($"Launching {(fullOrBasic == 1 ? "visual" : "basic")} mode...");
+                //        if (fullOrBasic == 1)
+                host.Run(new RefereeAssistant3Visual(core));
+                //        else
+                //            break;
+                //        break;
+                //}
 
                 return 0;
             }

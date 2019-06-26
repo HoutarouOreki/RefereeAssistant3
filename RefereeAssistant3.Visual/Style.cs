@@ -11,5 +11,6 @@ namespace RefereeAssistant3.Visual
 
         public static ColourInfo Red = new Color4(222, 33, 55, 255);
         public static ColourInfo Blue = new Color4(105, 222, 222, 255);
+        public static ColourInfo Violet = new Color4(138, 43, 226, 255);
     }
 }
