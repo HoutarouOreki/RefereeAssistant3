@@ -18,7 +18,7 @@ namespace RefereeAssistant3.Main
             RoomName = metadata[1];
             MatchProceedings = metadata[2].Split(' ').ToList();
             ScoreRequiredToWin = int.Parse(metadata[3]);
-            var mapTexts = stageText.Split("\n___\n")[1].Split('\n');
+            var mapTexts = stageText.Split("\n___\n").ElementAtOrDefault(1)?.Split('\n') ?? new string[0];
             foreach (var mapText in mapTexts)
             {
                 var map = new Map(mapText);
