@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System;
+using System.Collections.Generic;
 
 namespace RefereeAssistant3.Main
 {
@@ -9,6 +9,8 @@ namespace RefereeAssistant3.Main
         public readonly Team Team2;
 
         public readonly List<IOperation> History = new List<IOperation>(); // in case we need to undo anything
+
+        public event Action Updated;
 
         public readonly Mappool Mappool;
 
@@ -22,6 +24,8 @@ namespace RefereeAssistant3.Main
 
         public Map CurrentMap;
 
+        public Dictionary<Team, int> Score = new Dictionary<Team, int>();
+
         public readonly Dictionary<Map, Dictionary<Player, int>> MapResults = new Dictionary<Map, Dictionary<Player, int>>();
 
         public string Title => ComputeTitle();
@@ -31,6 +35,8 @@ namespace RefereeAssistant3.Main
             // store info about the match
             Team1 = team1;
             Team2 = team2;
+            Score.Add(Team1, 0);
+            Score.Add(Team2, 0);
             Mappool = mappool;
             TournamentStage = tournamentStage;
         }
