@@ -14,6 +14,7 @@ namespace RefereeAssistant3.Visual
         private readonly Core core;
         private FillFlowContainer<MatchPreviewPanel> matchListDisplayer;
         private Match selectedMatch;
+        private MatchVisualManager matchVisualManager;
 
         public RefereeAssistant3Visual(Core core) => this.core = core;
 
@@ -28,7 +29,15 @@ namespace RefereeAssistant3.Visual
                 new Container // main content
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Padding = new MarginPadding { Right = match_list_width }
+                    Padding = new MarginPadding { Right = match_list_width },
+                    Children = new Drawable[]
+                    {
+                        new Container
+                        {
+                            RelativeSizeAxes = Axes.Both,
+                            Child = matchVisualManager = new MatchVisualManager()
+                        }
+                    }
                 },
                 new Container // match list
                 {
@@ -100,6 +109,7 @@ namespace RefereeAssistant3.Visual
                 else
                     matchPanel.Deselect();
             }
+            matchVisualManager.Match = match;
         }
     }
 }
