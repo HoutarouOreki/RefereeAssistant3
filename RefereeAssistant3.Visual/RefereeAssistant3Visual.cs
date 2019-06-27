@@ -62,7 +62,7 @@ namespace RefereeAssistant3.Visual
                         {
                             RelativeSizeAxes = Axes.Both,
                             Padding = new MarginPadding { Bottom = match_list_controls_height },
-                            Child = new ScrollContainer
+                            Child = new BasicScrollContainer
                             {
                                 RelativeSizeAxes = Axes.Both,
                                 Child = matchListDisplayer = new FillFlowContainer<MatchPreviewPanel>

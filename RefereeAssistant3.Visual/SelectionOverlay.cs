@@ -24,7 +24,7 @@ namespace RefereeAssistant3.Visual
                     Colour = FrameworkColour.GreenDarker,
                     Alpha = 0.9f
                 },
-                new ScrollContainer
+                new BasicScrollContainer
                 {
                     RelativeSizeAxes = Axes.Y,
                     Anchor = Anchor.TopCentre,

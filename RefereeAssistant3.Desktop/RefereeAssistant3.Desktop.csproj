@@ -8,10 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ppy.osu.Framework" Version="2019.518.0" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\RefereeAssistant3.Basic\RefereeAssistant3.Basic.csproj" />
     <ProjectReference Include="..\RefereeAssistant3.Visual\RefereeAssistant3.Visual.csproj" />
   </ItemGroup>
