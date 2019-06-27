@@ -1,10 +1,13 @@
-﻿using osu.Framework;
+﻿using Newtonsoft.Json;
+using osu.Framework;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.IO.Stores;
 using osuTK;
 using RefereeAssistant3.Main;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace RefereeAssistant3.Visual
 {
@@ -12,16 +15,39 @@ namespace RefereeAssistant3.Visual
     {
         private const float match_list_width = 396;
         private const float match_list_controls_height = 50;
+        private readonly string config_path = $"{Utilities.GetBaseDirectory()}/visualConfig.json";
         private readonly Core core;
         private FillFlowContainer<MatchPreviewPanel> matchListDisplayer;
         private Match selectedMatch;
         private MatchVisualManager matchVisualManager;
+        private readonly VisualConfig visualConfig;
 
-        public RefereeAssistant3Visual(Core core) => this.core = core;
+        public RefereeAssistant3Visual(Core core)
+        {
+            this.core = core;
+            if (!File.Exists(config_path))
+            {
+                visualConfig = new VisualConfig();
+                SaveVisualConfig();
+            }
+            else
+                visualConfig = JsonConvert.DeserializeObject<VisualConfig>(File.ReadAllText(config_path));
+        }
+
+        private void OnWindowStateChanged(object sender, System.EventArgs e)
+        {
+            visualConfig.WindowState = Host.Window.WindowState;
+            SaveVisualConfig();
+        }
+
+        private void SaveVisualConfig() => File.WriteAllTextAsync(config_path, JsonConvert.SerializeObject(visualConfig));
 
         protected override void LoadComplete()
         {
             Host.Window.Title = "Referee Assistant 3";
+
+            Host.Window.WindowState = visualConfig.WindowState != WindowState.Minimized ? visualConfig.WindowState : WindowState.Normal;
+            Host.Window.WindowStateChanged += OnWindowStateChanged;
 
             Resources.AddStore(new DllResourceStore(@"RefereeAssistant3.Resources.dll"));
 
