@@ -190,7 +190,7 @@ namespace RefereeAssistant3.Main
         {
             if (procedureUtilities.CurrentProcedureRequireSelectedMap())
             {
-                SendAlert($"Current operation ({procedureUtilities.GetProcedureDescription(CurrentProcedure)}) requires a specified map.");
+                SendAlert($"Current operation ({procedureUtilities.GetProcedureDescription(CurrentProcedure)} -> {procedureUtilities.GetProcedureDescription(Procedures[CurrentProcedureIndex + 1])}) requires a map to be specified.");
                 return false;
             }
             if (IsFinished)

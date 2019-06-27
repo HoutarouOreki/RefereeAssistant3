@@ -144,6 +144,9 @@ namespace RefereeAssistant3.Visual
 
         protected override void PopIn()
         {
+            tournament = null;
+            stage = null;
+            team1 = team2 = null;
             UpdateDisplay();
             base.PopIn();
         }
@@ -232,7 +235,10 @@ namespace RefereeAssistant3.Visual
             team1SelectionButton.Text = team1?.TeamName ?? "Select team 1";
             team2SelectionButton.Text = team2?.TeamName ?? "Select team 2";
 
-            if (stage == null)
+            if (tournament == null)
+                stageSelectionButton.Action = null;
+
+            if (tournament == null || stage == null)
                 team1SelectionButton.Action = team2SelectionButton.Action = null;
 
             addNewMatchButton.Action = AreOptionsValid() ? AddNewMatch : (Action)null;

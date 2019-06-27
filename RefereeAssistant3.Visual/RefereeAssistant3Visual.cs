@@ -112,7 +112,15 @@ namespace RefereeAssistant3.Visual
             SelectMatch(match);
         }
 
-        private void OnMatchAlert(Match source, string text) => throw new NotImplementedException();
+        private void OnMatchAlert(Match source, string text)
+        {
+            if (source == selectedMatch)
+            {
+                var alert = new Alert(source, text);
+                Add(alert);
+                alert.Show();
+            }
+        }
 
         private void SelectMatch(Match match)
         {
