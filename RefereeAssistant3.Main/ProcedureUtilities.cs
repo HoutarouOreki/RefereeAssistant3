@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace RefereeAssistant3.Main
 {
@@ -45,32 +46,57 @@ namespace RefereeAssistant3.Main
             { MatchProcedure.FreePointRollLoser, $"{rollLoser} receives a free point" }
         };
 
+        private static readonly IReadOnlyList<MatchProcedure> procedures_requiring_selected_map = new List<MatchProcedure>
+        {
+            MatchProcedure.Banning1,
+            MatchProcedure.Banning2,
+            MatchProcedure.BanningRollLoser,
+            MatchProcedure.BanningRollWinner,
+            MatchProcedure.GettingReady,
+            MatchProcedure.Picking1,
+            MatchProcedure.Picking2,
+            MatchProcedure.PickingRollLoser,
+            MatchProcedure.PickingRollWinner,
+            MatchProcedure.Playing,
+            MatchProcedure.TieBreaker
+        };
+
+        public bool CurrentProcedureRequireSelectedMap() => procedures_requiring_selected_map.Contains(match.CurrentProcedure);
+
         public string GetProcedureDescription(MatchProcedure procedure) => readableMatchStateDictionary.GetValueOrDefault(procedure) ?? procedure.ToString();
     }
 
     public enum MatchProcedure
     {
         SettingUp = 0,
-        WarmUp1 = 1,
-        WarmUp2 = 2,
-        Rolling = 3,
-        Banning1 = 4,
-        Banning2 = 5,
-        Picking1 = 6,
-        Picking2 = 7,
-        GettingReady = 8,
-        TieBreaker = 9,
-        Playing = 10,
-        FreePoint1 = 11,
-        FreePoint2 = 12,
-        BanningRollWinner = 13,
-        BanningRollLoser = 14,
-        PickingRollWinner = 15,
-        PickingRollLoser = 16,
-        WarmUpRollWinner = 17,
-        WarmUpRollLoser = 18,
-        FreePointRollWinner = 19,
-        FreePointRollLoser = 20
+
+        WarmUp1 = 11,
+        WarmUp2 = 12,
+        WarmUpRollWinner = 13,
+        WarmUpRollLoser = 14,
+
+        Rolling = 20,
+
+        Banning1 = 31,
+        Banning2 = 32,
+        BanningRollWinner = 33,
+        BanningRollLoser = 34,
+
+        Picking1 = 41,
+        Picking2 = 42,
+        PickingRollWinner = 43,
+        PickingRollLoser = 44,
+
+        GettingReady = 50,
+
+        TieBreaker = 60,
+
+        Playing = 70,
+
+        FreePoint1 = 81,
+        FreePoint2 = 82,
+        FreePointRollWinner = 83,
+        FreePointRollLoser = 84
     }
 
     public enum ProcedureTeam

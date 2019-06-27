@@ -8,20 +8,27 @@ namespace RefereeAssistant3.Main
         public readonly Team Team1;
         public readonly Team Team2;
 
-        public readonly List<ReversibleOperation> History = new List<ReversibleOperation>(); // in case we need to undo anything
+        private readonly List<MatchSnapshot> history = new List<MatchSnapshot>();
+        public IReadOnlyList<MatchSnapshot> History => history;
+        private readonly List<MatchSnapshot> cancelledOperations = new List<MatchSnapshot>();
+        public IReadOnlyList<MatchSnapshot> CancelledOperations => cancelledOperations;
 
         public event Action Updated;
+        public event Action<Match, string> Alert;
 
-        public readonly Mappool Mappool;
+        private readonly List<Map> playedMaps = new List<Map>();
+        public IReadOnlyList<Map> PlayedMaps => playedMaps;
 
         public readonly Tournament Tournament;
         public readonly TournamentStage TournamentStage;
 
+        public bool IsFinished => Scores[Team1] == TournamentStage.ScoreRequiredToWin || Scores[Team2] == TournamentStage.ScoreRequiredToWin;
+
         public List<MatchProcedure> Procedures = new List<MatchProcedure>();
         private readonly ProcedureUtilities procedureUtilities;
 
-        public MatchProcedure CurrentProcedure => Procedures[currentProcedureIndex];
-        private int currentProcedureIndex;
+        public MatchProcedure CurrentProcedure => Procedures[CurrentProcedureIndex];
+        public int CurrentProcedureIndex { get; private set; }
 
         public Team RollWinner;
         public Team RollLoser => RollWinner == null ? null :
@@ -29,9 +36,9 @@ namespace RefereeAssistant3.Main
 
         public Map SelectedMap;
 
-        public Dictionary<Team, int> Score = new Dictionary<Team, int>();
+        public Dictionary<Team, int> Scores = new Dictionary<Team, int>();
 
-        public readonly Dictionary<Map, Dictionary<Player, int>> MapResults = new Dictionary<Map, Dictionary<Player, int>>();
+        public readonly Dictionary<Map, IReadOnlyDictionary<Player, int>> MapResults = new Dictionary<Map, IReadOnlyDictionary<Player, int>>();
 
         public string Title => TournamentStage.RoomName.Replace("TEAM1", Team1.TeamName).Replace("TEAM2", Team2.TeamName);
 
@@ -40,8 +47,8 @@ namespace RefereeAssistant3.Main
             // store info about the match
             Team1 = team1;
             Team2 = team2;
-            Score.Add(Team1, 0);
-            Score.Add(Team2, 0);
+            Scores.Add(Team1, 0);
+            Scores.Add(Team2, 0);
             Tournament = tournament;
             TournamentStage = tournamentStage;
 
@@ -54,6 +61,7 @@ namespace RefereeAssistant3.Main
         private void GenerateMatchProcedures()
         {
             Procedures.Clear();
+            Procedures.Add(MatchProcedure.SettingUp);
             foreach (var procedureParameter in TournamentStage.MatchProceedings)
                 GenerateMatchProcedure(procedureParameter);
             foreach (var procedure in Procedures)
@@ -180,49 +188,108 @@ namespace RefereeAssistant3.Main
 
         public bool Proceed()
         {
-            if (CurrentProcedure == MatchProcedure.SettingUp)
-                return GoToNextProcedure();
-            if (CurrentProcedure == MatchProcedure.WarmUp1 || CurrentProcedure == MatchProcedure.WarmUp2)
-                return GoToNextProcedure();
-            if (CurrentProcedure == MatchProcedure.Rolling && RollWinner != null)
+            if (procedureUtilities.CurrentProcedureRequireSelectedMap())
             {
-                GenerateMatchProcedures();
-                return GoToNextProcedure();
+                SendAlert($"Current operation ({procedureUtilities.GetProcedureDescription(CurrentProcedure)}) requires a specified map.");
+                return false;
             }
-            if (SelectedMap != null)
+            if (IsFinished)
             {
-                if (CurrentProcedure == MatchProcedure.Banning1)
-                {
+                SendAlert("Can't progress in a finished match.");
+                return false;
+            }
+            if (CurrentProcedure == MatchProcedure.Rolling && RollWinner == null)
+            {
+                SendAlert("Roll winner needs to be specified.");
+                return false;
+            }
+            var snapshotName = string.Empty;
+            switch (CurrentProcedure)
+            {
+                case MatchProcedure.SettingUp:
+                    snapshotName = "Finish setting up";
+                    break;
+                case MatchProcedure.WarmUp1:
+                    snapshotName = $"Set up team's \"{Team1}\" warmup";
+                    break;
+                case MatchProcedure.WarmUp2:
+                    snapshotName = $"Set up team's \"{Team2}\" warmup";
+                    break;
+                case MatchProcedure.WarmUpRollWinner:
+                    snapshotName = $"Set up team's \"{RollWinner}\" warmup";
+                    break;
+                case MatchProcedure.WarmUpRollLoser:
+                    snapshotName = $"Set up team's \"{RollLoser}\" warmup";
+                    break;
+                case MatchProcedure.Rolling:
+                    snapshotName = $"Set roll winner: {RollWinner}";
+                    break;
+                case MatchProcedure.Banning1:
+                    snapshotName = $"{Team1} bans {SelectedMap}";
                     Team1.BannedMaps.Add(SelectedMap);
-                }
-                if (CurrentProcedure == MatchProcedure.Banning2)
-                {
+                    break;
+                case MatchProcedure.Banning2:
+                    snapshotName = $"{Team2} bans {SelectedMap}";
                     Team2.BannedMaps.Add(SelectedMap);
-                }
-                if (CurrentProcedure == MatchProcedure.Picking1)
-                {
+                    break;
+                case MatchProcedure.BanningRollWinner:
+                    snapshotName = $"{RollWinner} bans {SelectedMap}";
+                    RollWinner.BannedMaps.Add(SelectedMap);
+                    break;
+                case MatchProcedure.BanningRollLoser:
+                    snapshotName = $"{RollLoser} bans {SelectedMap}";
+                    RollLoser.BannedMaps.Add(SelectedMap);
+                    break;
+                case MatchProcedure.Picking1:
+                    snapshotName = $"{Team1} picks {SelectedMap}";
                     Team1.PickedMaps.Add(SelectedMap);
-                }
-                if (CurrentProcedure == MatchProcedure.Picking2)
-                {
+                    break;
+                case MatchProcedure.Picking2:
+                    snapshotName = $"{Team2} picks {SelectedMap}";
                     Team2.PickedMaps.Add(SelectedMap);
-                }
+                    break;
+                case MatchProcedure.PickingRollWinner:
+                    snapshotName = $"{RollWinner} picks {SelectedMap}";
+                    RollWinner.PickedMaps.Add(SelectedMap);
+                    break;
+                case MatchProcedure.PickingRollLoser:
+                    snapshotName = $"{RollLoser} picks {SelectedMap}";
+                    RollLoser.PickedMaps.Add(SelectedMap);
+                    break;
+                case MatchProcedure.GettingReady:
+                    snapshotName = $"Start map: {SelectedMap}";
+                    break;
+                case MatchProcedure.TieBreaker:
+                    snapshotName = $"Set up the tiebreaker";
+                    break;
+                case MatchProcedure.Playing:
+                    snapshotName = $"Finish playing {SelectedMap}";
+                    break;
+                case MatchProcedure.FreePoint1:
+                    snapshotName = $"Free point for {Team1}";
+                    Scores[Team1]++;
+                    break;
+                case MatchProcedure.FreePoint2:
+                    snapshotName = $"Free point for {Team2}";
+                    Scores[Team2]++;
+                    break;
+                case MatchProcedure.FreePointRollWinner:
+                    snapshotName = $"Free point for {RollWinner}";
+                    Scores[RollWinner]++;
+                    break;
+                case MatchProcedure.FreePointRollLoser:
+                    snapshotName = $"Free point for {RollLoser}";
+                    Scores[RollLoser]++;
+                    break;
             }
-            if (CurrentProcedure == MatchProcedure.GettingReady)
-                return GoToNextProcedure();
-            if (CurrentProcedure == MatchProcedure.TieBreaker)
-                return GoToNextProcedure();
-            if (CurrentProcedure == MatchProcedure.Playing)
-                return GoToNextProcedure();
-            if (CurrentProcedure == MatchProcedure.FreePoint1 || CurrentProcedure == MatchProcedure.FreePoint2)
-                return GoToNextProcedure();
-            return false;
+            return GoToNextProcedure(snapshotName);
         }
 
-        private bool GoToNextProcedure()
+        private bool GoToNextProcedure(string snapshotName)
         {
-            currentProcedureIndex++;
+            CurrentProcedureIndex++;
             DoNewProcedureJobs();
+            history.Add(new MatchSnapshot(this, snapshotName));
             Updated?.Invoke();
             return true;
         }
@@ -234,5 +301,9 @@ namespace RefereeAssistant3.Main
             if (CurrentProcedure == MatchProcedure.Banning1 || CurrentProcedure == MatchProcedure.Banning2)
                 SelectedMap = null;
         }
+
+        public void ReverseLastOperation() => Updated?.Invoke();
+
+        private void SendAlert(string message) => Alert.Invoke(this, message);
     }
 }

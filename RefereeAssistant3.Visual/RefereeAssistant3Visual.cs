@@ -1,4 +1,5 @@
-﻿using osu.Framework;
+﻿using System;
+using osu.Framework;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
@@ -107,8 +108,11 @@ namespace RefereeAssistant3.Visual
                 Action = () => SelectMatch(match)
             };
             matchListDisplayer.Add(matchPreviewPanel);
+            match.Alert += OnMatchAlert;
             SelectMatch(match);
         }
+
+        private void OnMatchAlert(Match source, string text) => throw new NotImplementedException();
 
         private void SelectMatch(Match match)
         {

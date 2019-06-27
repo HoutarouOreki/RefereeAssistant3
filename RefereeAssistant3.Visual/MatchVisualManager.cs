@@ -180,9 +180,9 @@ namespace RefereeAssistant3.Visual
 
         private void GenerateLayout()
         {
-            team1ScoreBox.Label.Text = match.Score[match.Team1].ToString();
+            team1ScoreBox.Label.Text = match.Scores[match.Team1].ToString();
             team1NameLabel.Text = match.Team1.TeamName;
-            team2ScoreBox.Label.Text = match.Score[match.Team2].ToString();
+            team2ScoreBox.Label.Text = match.Scores[match.Team2].ToString();
             team2NameLabel.Text = match.Team2.TeamName;
 
             tournamentLabel.Text = match.Tournament.TournamentName;
