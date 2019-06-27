@@ -11,11 +11,12 @@ namespace RefereeAssistant3
         public static int Main()
         {
             //var cwd = Environment.CurrentDirectory;
-            using (var host = Host.GetSuitableHost(@"Referee Assistant 3", true, true))
+            using (var host = Host.GetSuitableHost(@"RefereeAssistant3", true))
             {
                 //host.ExceptionThrown += HandleException;
 
                 var dir = Utilities.GetBaseDirectory();
+                Directory.SetCurrentDirectory(dir.FullName);
                 var tournamentsDirectory = new DirectoryInfo($"{dir}/tournaments");
                 if (!dir.Exists || !tournamentsDirectory.Exists || tournamentsDirectory.GetDirectories().Length == 0)
                 {
