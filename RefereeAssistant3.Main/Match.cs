@@ -8,7 +8,7 @@ namespace RefereeAssistant3.Main
         public readonly Team Team1;
         public readonly Team Team2;
 
-        public readonly List<IOperation> History = new List<IOperation>(); // in case we need to undo anything
+        public readonly List<ReversibleOperation> History = new List<ReversibleOperation>(); // in case we need to undo anything
 
         public event Action Updated;
 
