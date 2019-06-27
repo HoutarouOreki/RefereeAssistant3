@@ -1,11 +1,10 @@
-﻿using System;
-using System.Reflection;
-using osu.Framework.Graphics;
+﻿using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osuTK;
 using RefereeAssistant3.Main;
+using System;
 
 namespace RefereeAssistant3.Visual
 {
@@ -37,8 +36,8 @@ namespace RefereeAssistant3.Visual
                 new Box
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Colour = FrameworkColour.BlueGreenDark,
-                    Alpha = 0.8f
+                    Colour = FrameworkColour.GreenDarker,
+                    Alpha = 0.9f
                 },
                 new FillFlowContainer
                 {
@@ -84,8 +83,7 @@ namespace RefereeAssistant3.Visual
                                         Height = Style.COMPONENTS_HEIGHT,
                                         Anchor = Anchor.TopCentre,
                                         Origin = Anchor.TopCentre,
-                                        BackgroundColour = FrameworkColour.Green,
-                                        Alpha = 0
+                                        BackgroundColour = FrameworkColour.Green
                                     },
                                 }
                             }
@@ -108,12 +106,7 @@ namespace RefereeAssistant3.Visual
                                         Width = Style.COMPONENTS_WIDTH,
                                         Height = Style.COMPONENTS_HEIGHT,
                                         BackgroundColour = FrameworkColour.BlueGreen,
-                                        AlwaysPresent = true,
-                                        Action = () =>
-                                        {
-                                            teamSelectionOverlay.Action = SetTeam1;
-                                            teamSelectionOverlay.Show();
-                                        }
+                                        AlwaysPresent = true
                                     },
                                     vsLabel = new SpriteText
                                     {
@@ -135,7 +128,6 @@ namespace RefereeAssistant3.Visual
                         addNewMatchButton = new RA3Button
                         {
                             Text = "Add match",
-                            Action = AddNewMatch,
                             Width = Style.COMPONENTS_WIDTH,
                             Height = Style.COMPONENTS_HEIGHT,
                             Anchor = Anchor.TopCentre,
@@ -148,18 +140,6 @@ namespace RefereeAssistant3.Visual
                 tournamentSelectionOverlay = new SelectionOverlay<Tournament>(core.Tournaments)
             };
             tournamentSelectionOverlay.Hide();
-        }
-
-        protected override void LoadComplete()
-        {
-            Precompile();
-            base.LoadComplete();
-        }
-
-        private void Precompile()
-        {
-            var a = nameof(SetStage);
-            System.Runtime.CompilerServices.RuntimeHelpers.PrepareMethod(GetType().GetMethod(nameof(SetStage), BindingFlags.Instance | BindingFlags.NonPublic, null, new Type[] { typeof(TournamentStage) }, null).MethodHandle);
         }
 
         protected override void PopIn()
@@ -212,19 +192,25 @@ namespace RefereeAssistant3.Visual
             team1 = team2 = null;
             if (teamSelectionOverlay != null)
                 Remove(teamSelectionOverlay);
-            Add(teamSelectionOverlay = new SelectionOverlay<Team>(tournament.Teams));
-            teamSelectionOverlay.Hide();
-            team1SelectionButton.Action = () =>
+            stageSelectionButton.Text = "Loading...";
+
+            // async because JIT takes too long on the first run
+            LoadComponentAsync(teamSelectionOverlay = new SelectionOverlay<Team>(tournament.Teams), d =>
             {
-                teamSelectionOverlay.Action = SetTeam1;
-                teamSelectionOverlay.Show();
-            };
-            team2SelectionButton.Action = () =>
-            {
-                teamSelectionOverlay.Action = SetTeam2;
-                teamSelectionOverlay.Show();
-            };
-            UpdateDisplay();
+                Add(d);
+                teamSelectionOverlay.Hide();
+                team1SelectionButton.Action = () =>
+                {
+                    teamSelectionOverlay.Action = SetTeam1;
+                    teamSelectionOverlay.Show();
+                };
+                team2SelectionButton.Action = () =>
+                {
+                    teamSelectionOverlay.Action = SetTeam2;
+                    teamSelectionOverlay.Show();
+                };
+                UpdateDisplay();
+            });
         }
 
         private void SetTeam1(Team team)
@@ -246,21 +232,12 @@ namespace RefereeAssistant3.Visual
             team1SelectionButton.Text = team1?.TeamName ?? "Select team 1";
             team2SelectionButton.Text = team2?.TeamName ?? "Select team 2";
 
-            var teamsDependentAlpha = AreOptionsValid() ? 1 : 0;
+            if (stage == null)
+                team1SelectionButton.Action = team2SelectionButton.Action = null;
 
-            addNewMatchButton.FadeTo(teamsDependentAlpha);
+            addNewMatchButton.Action = AreOptionsValid() ? AddNewMatch : (Action)null;
 
-            var stageDependentAlpha = stage != null ? 1 : 0;
-
-            team1SelectionButton.FadeTo(stageDependentAlpha);
-            team2SelectionButton.FadeTo(stageDependentAlpha);
-            vsLabel.FadeTo(stageDependentAlpha);
-
-            var tournamentDependentAlpha = tournament != null ? 1 : 0.2f;
-
-            stageSelectionButton.FadeTo(tournamentDependentAlpha);
-            if (teamsDependentAlpha == 0.2f)
-                stageSelectionButton.Action = null;
+            vsLabel.FadeTo(stage != null ? 1 : 0.5f);
         }
     }
 }

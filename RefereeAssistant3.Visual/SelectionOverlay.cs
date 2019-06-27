@@ -21,8 +21,8 @@ namespace RefereeAssistant3.Visual
                 new Box
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Colour = FrameworkColour.Blue,
-                    Alpha = 0.8f
+                    Colour = FrameworkColour.GreenDarker,
+                    Alpha = 0.9f
                 },
                 new ScrollContainer
                 {

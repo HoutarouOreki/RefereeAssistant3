@@ -15,7 +15,7 @@ namespace RefereeAssistant3.Visual
         protected override void PopIn()
         {
             Content.Scale = new osuTK.Vector2(1.2f);
-            Content.FadeIn(100, Easing.OutCubic).ScaleTo(1, 100, Easing.OutCubic);
+            Content.FadeIn(50, Easing.InExpo).ScaleTo(1, 100, Easing.OutCubic);
             base.PopIn();
         }
 
