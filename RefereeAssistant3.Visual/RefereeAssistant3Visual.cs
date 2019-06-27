@@ -116,7 +116,7 @@ namespace RefereeAssistant3.Visual
         {
             if (source == selectedMatch)
             {
-                var alert = new Alert(source, text);
+                var alert = new Alert(text);
                 Add(alert);
                 alert.Show();
             }

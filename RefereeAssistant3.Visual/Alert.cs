@@ -1,7 +1,6 @@
 ﻿using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
-using osu.Framework.Graphics.Sprites;
 using osuTK;
 using RefereeAssistant3.Main;
 
@@ -11,7 +10,7 @@ namespace RefereeAssistant3.Visual
     {
         public override bool RemoveWhenNotAlive => true;
 
-        public Alert(Match match, string message)
+        public Alert(string message)
         {
             RelativeSizeAxes = Axes.Both;
             Children = new Drawable[]
