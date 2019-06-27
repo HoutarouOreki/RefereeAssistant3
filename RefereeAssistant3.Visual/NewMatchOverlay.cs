@@ -1,4 +1,6 @@
-﻿using osu.Framework.Graphics;
+﻿using System;
+using System.Reflection;
+using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
@@ -38,120 +40,126 @@ namespace RefereeAssistant3.Visual
                     Colour = FrameworkColour.BlueGreenDark,
                     Alpha = 0.8f
                 },
-                new ScrollContainer
+                new FillFlowContainer
                 {
-                    RelativeSizeAxes = Axes.Both,
-                    Padding = new MarginPadding(Style.SPACING),
-                    Child = new FillFlowContainer
+                    AutoSizeAxes = Axes.Y,
+                    RelativeSizeAxes = Axes.X,
+                    Anchor = Anchor.Centre,
+                    Origin = Anchor.Centre,
+                    Spacing = new Vector2(Style.SPACING),
+                    Direction = FillDirection.Vertical,
+                    Children = new Drawable[]
                     {
-                        AutoSizeAxes = Axes.Y,
-                        RelativeSizeAxes = Axes.X,
-                        Anchor = Anchor.TopCentre,
-                        Origin = Anchor.TopCentre,
-                        Spacing = new Vector2(Style.SPACING),
-                        Direction = FillDirection.Vertical,
-                        Children = new Drawable[]
+                        new Container
                         {
-                            new Container
+                            RelativeSizeAxes = Axes.X,
+                            AutoSizeAxes = Axes.Y,
+                            Child = new FillFlowContainer
                             {
-                                RelativeSizeAxes = Axes.X,
-                                AutoSizeAxes = Axes.Y,
-                                Child = new FillFlowContainer
+                                AutoSizeAxes = Axes.Both,
+                                Spacing = new Vector2(Style.SPACING),
+                                Direction = FillDirection.Horizontal,
+                                Anchor = Anchor.Centre,
+                                Origin = Anchor.Centre,
+                                Children = new Drawable[]
                                 {
-                                    AutoSizeAxes = Axes.Both,
-                                    Spacing = new Vector2(Style.SPACING),
-                                    Direction = FillDirection.Horizontal,
-                                    Anchor = Anchor.Centre,
-                                    Origin = Anchor.Centre,
-                                    Children = new Drawable[]
+                                    tournamentSelectionButton = new RA3Button
                                     {
-                                        tournamentSelectionButton = new RA3Button
+                                        Text = "Select tournament",
+                                        Width = Style.COMPONENTS_WIDTH,
+                                        Height = Style.COMPONENTS_HEIGHT,
+                                        Anchor = Anchor.TopCentre,
+                                        Origin = Anchor.TopCentre,
+                                        BackgroundColour = FrameworkColour.Green,
+                                        Action = () =>
                                         {
-                                            Text = "Select tournament",
-                                            Width = Style.COMPONENTS_WIDTH,
-                                            Height = Style.COMPONENTS_HEIGHT,
-                                            Anchor = Anchor.TopCentre,
-                                            Origin = Anchor.TopCentre,
-                                            BackgroundColour = FrameworkColour.Green,
-                                            Action = () =>
-                                            {
-                                                tournamentSelectionOverlay.Action = SetTournament;
-                                                tournamentSelectionOverlay.Show();
-                                            }
-                                        },
-                                        stageSelectionButton = new RA3Button
+                                            tournamentSelectionOverlay.Action = SetTournament;
+                                            tournamentSelectionOverlay.Show();
+                                        }
+                                    },
+                                    stageSelectionButton = new RA3Button
+                                    {
+                                        Text = "Select tournament's stage",
+                                        Width = Style.COMPONENTS_WIDTH,
+                                        Height = Style.COMPONENTS_HEIGHT,
+                                        Anchor = Anchor.TopCentre,
+                                        Origin = Anchor.TopCentre,
+                                        BackgroundColour = FrameworkColour.Green,
+                                        Alpha = 0
+                                    },
+                                }
+                            }
+                        },
+                        new Container
+                        {
+                            RelativeSizeAxes = Axes.X,
+                            AutoSizeAxes = Axes.Y,
+                            Child = new FillFlowContainer
+                            {
+                                AutoSizeAxes = Axes.Both,
+                                Spacing = new Vector2(Style.SPACING),
+                                Direction = FillDirection.Horizontal,
+                                Anchor = Anchor.Centre,
+                                Origin = Anchor.Centre,
+                                Children = new Drawable[]
+                                {
+                                    team1SelectionButton = new RA3Button
+                                    {
+                                        Width = Style.COMPONENTS_WIDTH,
+                                        Height = Style.COMPONENTS_HEIGHT,
+                                        BackgroundColour = FrameworkColour.BlueGreen,
+                                        AlwaysPresent = true,
+                                        Action = () =>
                                         {
-                                            Text = "Select tournament's stage",
-                                            Width = Style.COMPONENTS_WIDTH,
-                                            Height = Style.COMPONENTS_HEIGHT,
-                                            Anchor = Anchor.TopCentre,
-                                            Origin = Anchor.TopCentre,
-                                            BackgroundColour = FrameworkColour.Green,
-                                            Alpha = 0
-                                        },
+                                            teamSelectionOverlay.Action = SetTeam1;
+                                            teamSelectionOverlay.Show();
+                                        }
+                                    },
+                                    vsLabel = new SpriteText
+                                    {
+                                        Text = "VS",
+                                        Anchor = Anchor.CentreLeft,
+                                        Origin = Anchor.CentreLeft,
+                                        AlwaysPresent = true
+                                    },
+                                    team2SelectionButton = new RA3Button
+                                    {
+                                        Width = Style.COMPONENTS_WIDTH,
+                                        Height = Style.COMPONENTS_HEIGHT,
+                                        BackgroundColour = FrameworkColour.BlueGreen,
+                                        AlwaysPresent = true
                                     }
                                 }
-                            },
-                            new Container
-                            {
-                                RelativeSizeAxes = Axes.X,
-                                AutoSizeAxes = Axes.Y,
-                                Child = new FillFlowContainer
-                                {
-                                    AutoSizeAxes = Axes.Both,
-                                    Spacing = new Vector2(Style.SPACING),
-                                    Direction = FillDirection.Horizontal,
-                                    Anchor = Anchor.Centre,
-                                    Origin = Anchor.Centre,
-                                    Children = new Drawable[]
-                                    {
-                                        team1SelectionButton = new RA3Button
-                                        {
-                                            Width = Style.COMPONENTS_WIDTH,
-                                            Height = Style.COMPONENTS_HEIGHT,
-                                            BackgroundColour = FrameworkColour.BlueGreen,
-                                            Action = () =>
-                                            {
-                                                teamSelectionOverlay.Action = SetTeam1;
-                                                teamSelectionOverlay.Show();
-                                            }
-                                        },
-                                        vsLabel = new SpriteText
-                                        {
-                                            Text = "VS",
-                                            Anchor = Anchor.CentreLeft,
-                                            Origin = Anchor.CentreLeft
-                                        },
-                                        team2SelectionButton = new RA3Button
-                                        {
-                                            Width = Style.COMPONENTS_WIDTH,
-                                            Height = Style.COMPONENTS_HEIGHT,
-                                            BackgroundColour = FrameworkColour.BlueGreen,
-                                            Action = () =>
-                                            {
-                                                teamSelectionOverlay.Action = SetTeam2;
-                                                teamSelectionOverlay.Show();
-                                            }
-                                        },
-                                    }
-                                },
-                            },
-                            addNewMatchButton = new RA3Button
-                            {
-                                Text = "Add match",
-                                Action = AddNewMatch,
-                                Width = Style.COMPONENTS_WIDTH,
-                                Height = Style.COMPONENTS_HEIGHT,
-                                Anchor = Anchor.TopCentre,
-                                Origin = Anchor.TopCentre,
-                                BackgroundColour = FrameworkColour.Green,
                             }
+                        },
+                        addNewMatchButton = new RA3Button
+                        {
+                            Text = "Add match",
+                            Action = AddNewMatch,
+                            Width = Style.COMPONENTS_WIDTH,
+                            Height = Style.COMPONENTS_HEIGHT,
+                            Anchor = Anchor.TopCentre,
+                            Origin = Anchor.TopCentre,
+                            BackgroundColour = FrameworkColour.Green,
+                            AlwaysPresent = true
                         }
                     }
                 },
                 tournamentSelectionOverlay = new SelectionOverlay<Tournament>(core.Tournaments)
             };
             tournamentSelectionOverlay.Hide();
+        }
+
+        protected override void LoadComplete()
+        {
+            Precompile();
+            base.LoadComplete();
+        }
+
+        private void Precompile()
+        {
+            var a = nameof(SetStage);
+            System.Runtime.CompilerServices.RuntimeHelpers.PrepareMethod(GetType().GetMethod(nameof(SetStage), BindingFlags.Instance | BindingFlags.NonPublic, null, new Type[] { typeof(TournamentStage) }, null).MethodHandle);
         }
 
         protected override void PopIn()
