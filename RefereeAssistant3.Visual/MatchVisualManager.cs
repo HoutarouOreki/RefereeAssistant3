@@ -1,7 +1,9 @@
-﻿using osu.Framework.Graphics;
+﻿using osu.Framework.Extensions.Color4Extensions;
+using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
+using osuTK;
 using osuTK.Graphics;
 using RefereeAssistant3.Main;
 
@@ -97,8 +99,7 @@ namespace RefereeAssistant3.Visual
                         new Box
                         {
                             RelativeSizeAxes = Axes.Both,
-                            Colour = FrameworkColour.Yellow,
-                            Alpha = 0.42f
+                            Colour = FrameworkColour.Yellow.Darken(1),
                         },
                         matchStateLabel = new TextFlowContainer
                         {
@@ -123,7 +124,7 @@ namespace RefereeAssistant3.Visual
                             Anchor = Anchor.BottomLeft,
                             Origin = Anchor.BottomLeft,
                             Rotation = -3,
-                            EdgeSmoothness = new osuTK.Vector2(1),
+                            EdgeSmoothness = new Vector2(1),
                             Colour = Color4.Black
                         },
                         new Box
@@ -132,7 +133,7 @@ namespace RefereeAssistant3.Visual
                             Anchor = Anchor.BottomRight,
                             Origin = Anchor.BottomRight,
                             Rotation = 3,
-                            EdgeSmoothness = new osuTK.Vector2(1),
+                            EdgeSmoothness = new Vector2(1),
                             Colour = Color4.Black
                         },
                         new Container
@@ -162,16 +163,25 @@ namespace RefereeAssistant3.Visual
                     RelativeSizeAxes = Axes.X,
                     Anchor = Anchor.BottomCentre,
                     Origin = Anchor.BottomCentre,
+                    Masking = true,
                     Children = new Drawable[]
                     {
-                        new RA3Button
+                        new CircularContainer
                         {
-                            Anchor = Anchor.Centre,
+                            Size = new Vector2(200),
+                            Anchor = Anchor.TopCentre,
                             Origin = Anchor.Centre,
-                            Size = new osuTK.Vector2(200),
-                            BackgroundColour = FrameworkColour.BlueGreen,
-                            Text = "Proceed",
-                            Action = () => Match?.Proceed()
+                            Masking = true,
+                            Child = new RA3Button
+                            {
+                                RelativeSizeAxes = Axes.Both,
+                                Anchor = Anchor.BottomCentre,
+                                Origin = Anchor.BottomCentre,
+                                Size = new Vector2(1, 0.6f),
+                                BackgroundColour = FrameworkColour.Blue,
+                                Text = "Proceed",
+                                Action = () => Match?.Proceed()
+                            }
                         }
                     }
                 }
@@ -206,7 +216,7 @@ namespace RefereeAssistant3.Visual
 
             public ScoreNumberBox()
             {
-                Size = new osuTK.Vector2(team_name_score_height);
+                Size = new Vector2(team_name_score_height);
                 Children = new Drawable[]
                 {
                     new Box
