@@ -1,16 +1,14 @@
 ﻿using osu.Framework;
 using RefereeAssistant3.Main;
 using RefereeAssistant3.Visual;
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace RefereeAssistant3
 {
     public class Program
     {
-        public static int Main(string[] args)
+        public static int Main()
         {
             //var cwd = Environment.CurrentDirectory;
             using (var host = Host.GetSuitableHost(@"Referee Assistant 3", true, true))
