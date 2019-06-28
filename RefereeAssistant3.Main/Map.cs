@@ -13,7 +13,6 @@
             var mapData = mapText.Split("|||");
             MapCode = mapData[0];
             DifficultyId = int.Parse(mapData[1]);
-            DisplayName = mapData[2];
             switch (mapData[3])
             {
                 case "NM":

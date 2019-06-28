@@ -33,15 +33,15 @@ namespace RefereeAssistant3
                     {
                         "Group Stage|||o!AOT: (TEAM1) vs (TEAM2)|||Roll BL BW PW PL PW PL PW PL PW PL TB|||5",
                         "___",
-                        "NM1|||42352|||Lady Gaga - Bad Romance [Extra]|||NM",
-                        "HD1|||1070437|||Dave Rodgers - Deja Vu [Multi Track Drifting]|||HD",
-                        "FM1|||432783249|||Kansas - Carry on Wayward [Supernatural]|||FM",
+                        "NM|||42352",
+                        "HD|||1070437",
+                        "FM|||432783",
                         "###",
                         "Grand Finals|||o!AOT Grand Finals: (TEAM1) vs (TEAM2)|||Free1 Warm1 Warm2 Roll BL BW PW PL PW PL BL BW PW PL B1 PW PL PW PL PW TB|||7",
                         "___",
-                        "NM1|||42352|||Lady Gaga - Bad Romance [Extra]|||NM",
-                        "HD1|||1070437|||Dave Rodgers - Deja Vu [Multi Track Drifting]|||HD",
-                        "FM1|||432783249|||Kansas - Carry on Wayward [Supernatural]|||FM"
+                        "NM|||42352",
+                        "HD|||1070437",
+                        "FM|||432783"
                     });
                     File.WriteAllLines($"{exampleTournament}/teams.txt", new[]
                     {
