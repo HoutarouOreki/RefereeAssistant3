@@ -19,7 +19,6 @@ namespace RefereeAssistant3.Visual
         private readonly string config_path = $"{Utilities.GetBaseDirectory()}/visualConfig.json";
         private readonly Core core;
         private FillFlowContainer<MatchPreviewPanel> matchListDisplayer;
-        private Match selectedMatch;
         private MatchVisualManager matchVisualManager;
         private readonly VisualConfig visualConfig;
 
@@ -68,6 +67,7 @@ namespace RefereeAssistant3.Visual
             // doing this in the initializer throws
             var newMatchOverlay = new NewMatchOverlay(core);
             var settingsOverlay = new SettingsOverlay(core);
+            var mapPickerOverlay = new MapPickerOverlay(core);
             Children = new Drawable[]
             {
                 new Box { RelativeSizeAxes = Axes.Both, Colour = FrameworkColour.GreenDarker },
@@ -80,7 +80,7 @@ namespace RefereeAssistant3.Visual
                         new Container
                         {
                             RelativeSizeAxes = Axes.Both,
-                            Child = matchVisualManager = new MatchVisualManager()
+                            Child = matchVisualManager = new MatchVisualManager(mapPickerOverlay)
                         }
                     }
                 },
@@ -136,11 +136,10 @@ namespace RefereeAssistant3.Visual
                     }
                 },
                 newMatchOverlay,
-                settingsOverlay
+                settingsOverlay,
+                mapPickerOverlay,
             };
             core.NewMatchAdded += OnNewMatchAdded;
-            newMatchOverlay.Hide();
-            settingsOverlay.Hide();
         }
 
         private void OnNewMatchAdded(Match match)
@@ -156,7 +155,7 @@ namespace RefereeAssistant3.Visual
 
         private void OnMatchAlert(Match source, string text)
         {
-            if (source == selectedMatch)
+            if (source == core.SelectedMatch)
             {
                 var alert = new Alert(text);
                 Add(alert);
@@ -166,10 +165,10 @@ namespace RefereeAssistant3.Visual
 
         private void SelectMatch(Match match)
         {
-            selectedMatch = match;
+            core.SelectedMatch = match;
             foreach (var matchPanel in matchListDisplayer)
             {
-                if (matchPanel.Match == selectedMatch)
+                if (matchPanel.Match == core.SelectedMatch)
                     matchPanel.Select();
                 else
                     matchPanel.Deselect();

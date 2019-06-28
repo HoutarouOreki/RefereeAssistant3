@@ -7,6 +7,9 @@ namespace RefereeAssistant3.Main
         [JsonProperty("beatmap_id")]
         public int Id;
 
+        [JsonProperty("beatmapset_id")]
+        public int MapsetId;
+
         [JsonProperty("artist")]
         public string Artist;
 

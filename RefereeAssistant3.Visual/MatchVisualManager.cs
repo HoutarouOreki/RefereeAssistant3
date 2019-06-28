@@ -6,11 +6,14 @@ using osu.Framework.Graphics.Sprites;
 using osuTK;
 using osuTK.Graphics;
 using RefereeAssistant3.Main;
+using System;
+using System.Linq;
 
 namespace RefereeAssistant3.Visual
 {
     public class MatchVisualManager : Container
     {
+        private const int proceed_button_width = 240;
         private static readonly float team_name_score_height = 84;
         private static readonly float team_name_score_padding = 18;
         private static readonly float team_name_score_font_size = team_name_score_height - (2 * team_name_score_padding);
@@ -38,9 +41,14 @@ namespace RefereeAssistant3.Visual
         private readonly Container matchControls;
         private readonly SpriteText tournamentLabel;
         private readonly SpriteText stageLabel;
+        private readonly RA3Button mapPickerButton;
+        private readonly MapPickerOverlay mapPicker;
+        private readonly RA3Button team1Button;
+        private readonly RA3Button team2Button;
 
-        public MatchVisualManager()
+        public MatchVisualManager(MapPickerOverlay mapPicker)
         {
+            this.mapPicker = mapPicker;
             RelativeSizeAxes = Axes.Both;
             Children = new Drawable[]
             {
@@ -109,55 +117,6 @@ namespace RefereeAssistant3.Visual
                         }
                     }
                 },
-                new Container
-                {
-                    RelativeSizeAxes = Axes.X,
-                    Height = match_state_height * 0.7f,
-                    Y = (2 * team_name_score_height) + match_state_height,
-                    Depth = 2,
-                    Masking = true,
-                    Children = new Drawable[]
-                    {
-                        new Box
-                        {
-                            RelativeSizeAxes = Axes.Both,
-                            Anchor = Anchor.BottomLeft,
-                            Origin = Anchor.BottomLeft,
-                            Rotation = -3,
-                            EdgeSmoothness = new Vector2(1),
-                            Colour = Color4.Black
-                        },
-                        new Box
-                        {
-                            RelativeSizeAxes = Axes.Both,
-                            Anchor = Anchor.BottomRight,
-                            Origin = Anchor.BottomRight,
-                            Rotation = 3,
-                            EdgeSmoothness = new Vector2(1),
-                            Colour = Color4.Black
-                        },
-                        new Container
-                        {
-                            RelativeSizeAxes = Axes.Both,
-                            Padding = new MarginPadding { Horizontal = 8, Vertical = 4 },
-                            Children = new Drawable[]
-                            {
-                                tournamentLabel = new SpriteText
-                                {
-                                    Font = new FontUsage(null, 15),
-                                    Colour = Color4.Gray
-                                },
-                                stageLabel = new SpriteText
-                                {
-                                    Anchor = Anchor.TopRight,
-                                    Origin = Anchor.TopRight,
-                                    Font = new FontUsage(null, 15),
-                                    Colour = Color4.Gray
-                                }
-                            }
-                        }
-                    }
-                },
                 matchControls = new Container
                 {
                     RelativeSizeAxes = Axes.X,
@@ -166,9 +125,66 @@ namespace RefereeAssistant3.Visual
                     Masking = true,
                     Children = new Drawable[]
                     {
+                        new Container
+                        {
+                            RelativeSizeAxes = Axes.X,
+                            Height = match_state_height * 0.7f,
+                            Depth = 2,
+                            Masking = true,
+                            Children = new Drawable[]
+                            {
+                                new Box
+                                {
+                                    RelativeSizeAxes = Axes.Both,
+                                    Anchor = Anchor.BottomLeft,
+                                    Origin = Anchor.BottomLeft,
+                                    Rotation = -3,
+                                    EdgeSmoothness = new Vector2(1),
+                                    Colour = Color4.Black
+                                },
+                                new Box
+                                {
+                                    RelativeSizeAxes = Axes.Both,
+                                    Anchor = Anchor.BottomRight,
+                                    Origin = Anchor.BottomRight,
+                                    Rotation = 3,
+                                    EdgeSmoothness = new Vector2(1),
+                                    Colour = Color4.Black
+                                },
+                                new Container
+                                {
+                                    RelativeSizeAxes = Axes.Both,
+                                    Padding = new MarginPadding { Horizontal = 8, Vertical = 4 },
+                                    Children = new Drawable[]
+                                    {
+                                        tournamentLabel = new SpriteText
+                                        {
+                                            Font = new FontUsage(null, 15),
+                                            Colour = Color4.Gray
+                                        },
+                                        stageLabel = new SpriteText
+                                        {
+                                            Anchor = Anchor.TopRight,
+                                            Origin = Anchor.TopRight,
+                                            Font = new FontUsage(null, 15),
+                                            Colour = Color4.Gray
+                                        }
+                                    }
+                                }
+                            }
+                        },
                         new CircularContainer
                         {
-                            Size = new Vector2(200),
+                            Size = new Vector2(proceed_button_width + 2),
+                            Anchor = Anchor.TopCentre,
+                            Origin = Anchor.Centre,
+                            Masking = true,
+                            MaskingSmoothness = 3,
+                            Child = new Box { RelativeSizeAxes = Axes.Both, Colour = Color4.Black }
+                        },
+                        new CircularContainer
+                        {
+                            Size = new Vector2(proceed_button_width),
                             Anchor = Anchor.TopCentre,
                             Origin = Anchor.Centre,
                             Masking = true,
@@ -181,6 +197,38 @@ namespace RefereeAssistant3.Visual
                                 BackgroundColour = FrameworkColour.Blue,
                                 Text = "Proceed",
                                 Action = () => Match?.Proceed()
+                            }
+                        },
+                        mapPickerButton = new RA3Button
+                        {
+                            Anchor = Anchor.Centre,
+                            Origin = Anchor.Centre,
+                            Size = new Vector2(Style.COMPONENTS_WIDTH, Style.COMPONENTS_HEIGHT),
+                            BackgroundColour = FrameworkColour.Green,
+                            Text = "Pick map"
+                        },
+                        new Container
+                        {
+                            RelativeSizeAxes = Axes.X,
+                            Height = proceed_button_width / 2,
+                            Depth = 3,
+                            Children = new Drawable[]
+                            {
+                                team1Button = new RA3Button
+                                {
+                                    BackgroundColour = Style.Red.Darken(0.8f),
+                                    RelativeSizeAxes = Axes.Both,
+                                    Size = new Vector2(0.5f, 1),
+                                    X = -0.5f
+                                },
+                                team2Button = new RA3Button
+                                {
+                                    BackgroundColour = Style.Blue.Darken(0.8f),
+                                    RelativeSizeAxes = Axes.Both,
+                                    Size = new Vector2(0.5f, 1),
+                                    Anchor = Anchor.TopCentre,
+                                    X = 0.5f
+                                },
                             }
                         }
                     }
@@ -200,6 +248,19 @@ namespace RefereeAssistant3.Visual
 
             matchStateLabel.Text = "";
             matchStateLabel.AddText(match.ReadableCurrentState);
+
+            if (new[] { MatchProcedure.Banning1, MatchProcedure.Banning2, MatchProcedure.BanningRollWinner, MatchProcedure.BanningRollLoser, MatchProcedure.Picking1, MatchProcedure.Picking2, MatchProcedure.PickingRollWinner, MatchProcedure.PickingRollLoser, MatchProcedure.WarmUp1, MatchProcedure.WarmUp2, MatchProcedure.WarmUpRollWinner, MatchProcedure.WarmUpRollLoser }.Contains(Match.CurrentProcedure))
+            {
+                mapPickerButton.Action = mapPicker.Show;
+            }
+            else
+                mapPickerButton.Action = null;
+
+            if (Match.CurrentProcedure == MatchProcedure.Rolling)
+            {
+                team1Button.Action = () => Match.RollWinner = Match.Team1;
+                team2Button.Action = () => Match.RollWinner = Match.Team2;
+            }
         }
 
         protected override void Update()

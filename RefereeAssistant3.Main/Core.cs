@@ -12,6 +12,8 @@ namespace RefereeAssistant3.Main
 
         public MainConfig Config;
 
+        public Match SelectedMatch { get; set; }
+
         public IReadOnlyList<Match> Matches => matches;
         public IEnumerable<Tournament> Tournaments { get; }
 
@@ -33,6 +35,7 @@ namespace RefereeAssistant3.Main
 
         public void AddNewMatch(Match match)
         {
+            match.TournamentStage.Mappool.DownloadMappoolAsync(this);
             matches.Add(match);
             NewMatchAdded?.Invoke(match);
         }
