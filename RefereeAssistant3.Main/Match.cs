@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RefereeAssistant3.Main
 {
@@ -16,8 +17,7 @@ namespace RefereeAssistant3.Main
         public event Action Updated;
         public event Action<Match, string> Alert;
 
-        private readonly List<Map> playedMaps = new List<Map>();
-        public IReadOnlyList<Map> PlayedMaps => playedMaps;
+        public IEnumerable<Map> UsedMaps => Team1.PickedMaps.Concat(Team1.BannedMaps.Concat(Team2.PickedMaps.Concat(Team2.BannedMaps)));
 
         public readonly Tournament Tournament;
         public readonly TournamentStage TournamentStage;

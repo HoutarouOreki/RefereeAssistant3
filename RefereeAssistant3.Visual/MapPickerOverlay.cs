@@ -14,11 +14,11 @@ namespace RefereeAssistant3.Visual
         private readonly FillFlowContainer mapFlowContainer;
 
         private Mappool mappool => core.SelectedMatch.TournamentStage.Mappool;
-        private IEnumerable<Map> noMod => mappool.NoMod.Except(core.SelectedMatch.PlayedMaps);
-        private IEnumerable<Map> hidden => mappool.Hidden.Except(core.SelectedMatch.PlayedMaps);
-        private IEnumerable<Map> hardRock => mappool.HardRock.Except(core.SelectedMatch.PlayedMaps);
-        private IEnumerable<Map> doubleTime => mappool.DoubleTime.Except(core.SelectedMatch.PlayedMaps);
-        private IEnumerable<Map> freeMod => mappool.FreeMod.Except(core.SelectedMatch.PlayedMaps);
+        private IEnumerable<Map> noMod => mappool.NoMod.Except(core.SelectedMatch.UsedMaps);
+        private IEnumerable<Map> hidden => mappool.Hidden.Except(core.SelectedMatch.UsedMaps);
+        private IEnumerable<Map> hardRock => mappool.HardRock.Except(core.SelectedMatch.UsedMaps);
+        private IEnumerable<Map> doubleTime => mappool.DoubleTime.Except(core.SelectedMatch.UsedMaps);
+        private IEnumerable<Map> freeMod => mappool.FreeMod.Except(core.SelectedMatch.UsedMaps);
 
         public MapPickerOverlay(Core core)
         {
@@ -65,35 +65,35 @@ namespace RefereeAssistant3.Visual
             {
                 mapFlowContainer.Add(new SpriteText
                     { Text = "No mod", Font = font, Margin = new MarginPadding { Top = 8 } });
-                AddMap(mappool.NoMod);
+                AddMap(noMod);
             }
 
             if (hidden.Any())
             {
                 mapFlowContainer.Add(new SpriteText
                     { Text = "Hidden", Font = font, Margin = new MarginPadding { Top = 8 } });
-                AddMap(mappool.Hidden);
+                AddMap(hidden);
             }
 
             if (hardRock.Any())
             {
                 mapFlowContainer.Add(new SpriteText
                     { Text = "Hard rock", Font = font, Margin = new MarginPadding { Top = 8 } });
-                AddMap(mappool.HardRock);
+                AddMap(hardRock);
             }
 
             if (doubleTime.Any())
             {
                 mapFlowContainer.Add(new SpriteText
                     { Text = "Double time", Font = font, Margin = new MarginPadding { Top = 8 } });
-                AddMap(mappool.DoubleTime);
+                AddMap(doubleTime);
             }
 
             if (freeMod.Any())
             {
                 mapFlowContainer.Add(new SpriteText
                     { Text = "Free mod", Font = font, Margin = new MarginPadding { Top = 8 } });
-                AddMap(mappool.FreeMod);
+                AddMap(freeMod);
             }
         }
 

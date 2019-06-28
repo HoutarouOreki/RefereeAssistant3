@@ -48,6 +48,10 @@ namespace RefereeAssistant3.Main
 
         private static readonly IReadOnlyList<MatchProcedure> procedures_requiring_selected_map = new List<MatchProcedure>
         {
+            MatchProcedure.WarmUp1,
+            MatchProcedure.WarmUp2,
+            MatchProcedure.WarmUpRollWinner,
+            MatchProcedure.WarmUpRollLoser,
             MatchProcedure.Banning1,
             MatchProcedure.Banning2,
             MatchProcedure.BanningRollLoser,
