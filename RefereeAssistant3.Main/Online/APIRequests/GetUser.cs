@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using RestSharp;
+﻿using RestSharp;
 
 namespace RefereeAssistant3.Main.Online.APIRequests
 {
@@ -15,9 +12,9 @@ namespace RefereeAssistant3.Main.Online.APIRequests
 
         protected override string Target => $"get_user";
 
-        public GetUsers(int? userId, string username)
+        public GetUsers(int? userId, string username, Core core)
         {
-            AddParameter("k", Core.APIKey);
+            AddParameter("k", core.Config.ApiKey);
             AddParameter("u", userId.HasValue ? userId.Value.ToString() : username);
         }
     }

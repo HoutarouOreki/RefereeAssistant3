@@ -1,26 +1,29 @@
 ﻿using Newtonsoft.Json;
 using osu.Framework;
+using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.IO.Stores;
+using osu.Framework.Platform;
 using osuTK;
 using RefereeAssistant3.Main;
 using System.IO;
-using System.Threading.Tasks;
 
 namespace RefereeAssistant3.Visual
 {
     public class RefereeAssistant3Visual : Game
     {
         private const float match_list_width = 396;
-        private const float match_list_controls_height = 50;
+        private const float match_list_controls_height = 80;
         private readonly string config_path = $"{Utilities.GetBaseDirectory()}/visualConfig.json";
         private readonly Core core;
         private FillFlowContainer<MatchPreviewPanel> matchListDisplayer;
         private Match selectedMatch;
         private MatchVisualManager matchVisualManager;
         private readonly VisualConfig visualConfig;
+
+        new public GameHost Host => base.Host;
 
         public RefereeAssistant3Visual(Core core)
         {
@@ -42,8 +45,13 @@ namespace RefereeAssistant3.Visual
 
         private void SaveVisualConfig() => File.WriteAllTextAsync(config_path, JsonConvert.SerializeObject(visualConfig));
 
+        public DependencyContainer DependencyContainer;
+        protected override IReadOnlyDependencyContainer CreateChildDependencies(IReadOnlyDependencyContainer parent) => DependencyContainer = new DependencyContainer(base.CreateChildDependencies(parent));
+
         protected override void LoadComplete()
         {
+            DependencyContainer.CacheAs(this);
+
             Host.Window.Title = "Referee Assistant 3";
 
             Host.Window.WindowState = visualConfig.WindowState != WindowState.Minimized ? visualConfig.WindowState : WindowState.Normal;
@@ -59,6 +67,7 @@ namespace RefereeAssistant3.Visual
             base.LoadComplete();
             // doing this in the initializer throws
             var newMatchOverlay = new NewMatchOverlay(core);
+            var settingsOverlay = new SettingsOverlay(core);
             Children = new Drawable[]
             {
                 new Box { RelativeSizeAxes = Axes.Both, Colour = FrameworkColour.GreenDarker },
@@ -99,7 +108,7 @@ namespace RefereeAssistant3.Visual
                                 }
                             }
                         },
-                        new Container // controls container
+                        new FillFlowContainer // controls container
                         {
                             RelativeSizeAxes = Axes.X,
                             Anchor = Anchor.BottomLeft,
@@ -110,20 +119,28 @@ namespace RefereeAssistant3.Visual
                                 new RA3Button
                                 {
                                     RelativeSizeAxes = Axes.X,
-                                    Height = Style.COMPONENTS_HEIGHT,
-                                    BackgroundColour = FrameworkColour.YellowDark,
+                                    BackgroundColour = FrameworkColour.Green,
                                     Text = "Add new match",
                                     Action = newMatchOverlay.Show
+                                },
+                                new RA3Button
+                                {
+                                    RelativeSizeAxes = Axes.X,
+                                    BackgroundColour = FrameworkColour.YellowGreen,
+                                    Text = "Settings",
+                                    Action = settingsOverlay.Show
                                 }
                             }
                         },
                         new BorderContainer(1, true, false, false, false)
                     }
                 },
-                newMatchOverlay
+                newMatchOverlay,
+                settingsOverlay
             };
             core.NewMatchAdded += OnNewMatchAdded;
             newMatchOverlay.Hide();
+            settingsOverlay.Hide();
         }
 
         private void OnNewMatchAdded(Match match)

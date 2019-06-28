@@ -132,7 +132,7 @@ namespace RefereeAssistant3.Visual
                         },
                         teamMembersDisplay = new Container
                         {
-                            Width = Style.COMPONENTS_WIDTH,
+                            Width = 70,
                             AutoSizeAxes = Axes.Y,
                             AutoSizeDuration = 200,
                             AutoSizeEasing = Easing.InOutCubic,
@@ -143,7 +143,7 @@ namespace RefereeAssistant3.Visual
                                 team1MembersDisplay = new FillFlowContainer
                                 {
                                     Anchor = Anchor.TopLeft,
-                                    Origin = Anchor.TopCentre,
+                                    Origin = Anchor.TopRight,
                                     AutoSizeAxes = Axes.Both,
                                     Spacing = new Vector2(6),
                                     Direction = FillDirection.Vertical
@@ -151,7 +151,7 @@ namespace RefereeAssistant3.Visual
                                 team2MembersDisplay = new FillFlowContainer
                                 {
                                     Anchor = Anchor.TopRight,
-                                    Origin = Anchor.TopCentre,
+                                    Origin = Anchor.TopLeft,
                                     AutoSizeAxes = Axes.Both,
                                     Spacing = new Vector2(6),
                                     Direction = FillDirection.Vertical
@@ -284,27 +284,29 @@ namespace RefereeAssistant3.Visual
             if (team1 != null)
             {
                 foreach (var member in team1.Members)
-                    team1MembersDisplay.Add(new AvatarUsernameLine(member, false));
+                    team1MembersDisplay.Add(new AvatarUsernameLine(member, false, core));
             }
 
             if (team2 != null)
             {
                 foreach (var member in team2.Members)
-                    team2MembersDisplay.Add(new AvatarUsernameLine(member, true));
+                    team2MembersDisplay.Add(new AvatarUsernameLine(member, true, core));
             }
 
-            teamMembersDisplay.Width = Style.COMPONENTS_WIDTH + (2 * Style.SPACING) + vsLabel.DrawWidth;
+            teamMembersDisplay.Width = vsLabel.DrawWidth + (Style.SPACING * 2) + 5;
         }
 
         private class AvatarUsernameLine : FillFlowContainer
         {
             private readonly Player player;
             private readonly bool avatarOnLeft;
+            private readonly Core core;
 
-            public AvatarUsernameLine(Player player, bool avatarOnLeft)
+            public AvatarUsernameLine(Player player, bool avatarOnLeft, Core core)
             {
                 this.player = player;
                 this.avatarOnLeft = avatarOnLeft;
+                this.core = core;
                 Anchor = avatarOnLeft ? Anchor.TopLeft : Anchor.TopRight;
                 Origin = avatarOnLeft ? Anchor.TopLeft : Anchor.TopRight;
                 Spacing = new Vector2(6);
@@ -336,7 +338,7 @@ namespace RefereeAssistant3.Visual
                 Add(avatarContainer);
                 Add(usernameText);
                 Add(idText);
-                player.DownloadDataAsync(textures, p =>
+                player.DownloadDataAsync(textures, core, p =>
                 {
                     usernameText.Text = p.Username;
                     avatarContainer.Child = new Sprite { RelativeSizeAxes = Axes.Both, Texture = p.Avatar };

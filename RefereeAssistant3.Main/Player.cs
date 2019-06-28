@@ -15,11 +15,11 @@ namespace RefereeAssistant3.Main
 
         public Player(int id) => Id = id;
 
-        public async void DownloadDataAsync(TextureStore textures, Action<Player> OnLoaded, Scheduler scheduler)
+        public async void DownloadDataAsync(TextureStore textures, Core core, Action<Player> OnLoaded, Scheduler scheduler)
         {
             if (!Id.HasValue || string.IsNullOrEmpty(Username))
             {
-                var req = new GetUsers(Id, Username).RunTask();
+                var req = new GetUsers(Id, Username, core).RunTask();
                 await req;
                 if (req.Result != null)
                 {
@@ -28,7 +28,7 @@ namespace RefereeAssistant3.Main
                 }
             }
 
-            if (Avatar == null)
+            if (Avatar == null && Id != null)
             {
                 var avatarReq = textures.GetAsync($"https://a.ppy.sh/{Id}");
                 Avatar = await avatarReq;
