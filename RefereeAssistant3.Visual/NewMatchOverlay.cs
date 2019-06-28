@@ -1,7 +1,9 @@
-﻿using osu.Framework.Graphics;
+﻿using osu.Framework.Allocation;
+using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
+using osu.Framework.Graphics.Textures;
 using osuTK;
 using RefereeAssistant3.Main;
 using System;
@@ -282,22 +284,65 @@ namespace RefereeAssistant3.Visual
             if (team1 != null)
             {
                 foreach (var member in team1.Members)
-                {
-                    team1MembersDisplay.Add(new SpriteText
-                    { Text = member.Username, Anchor = Anchor.Centre, Origin = Anchor.Centre });
-                }
+                    team1MembersDisplay.Add(new AvatarUsernameLine(member, false));
             }
 
             if (team2 != null)
             {
                 foreach (var member in team2.Members)
-                {
-                    team2MembersDisplay.Add(new SpriteText
-                    { Text = member.Username, Anchor = Anchor.Centre, Origin = Anchor.Centre });
-                }
+                    team2MembersDisplay.Add(new AvatarUsernameLine(member, true));
             }
 
             teamMembersDisplay.Width = Style.COMPONENTS_WIDTH + (2 * Style.SPACING) + vsLabel.DrawWidth;
+        }
+
+        private class AvatarUsernameLine : FillFlowContainer
+        {
+            private readonly Player player;
+            private readonly bool avatarOnLeft;
+
+            public AvatarUsernameLine(Player player, bool avatarOnLeft)
+            {
+                this.player = player;
+                this.avatarOnLeft = avatarOnLeft;
+                Anchor = avatarOnLeft ? Anchor.TopLeft : Anchor.TopRight;
+                Origin = avatarOnLeft ? Anchor.TopLeft : Anchor.TopRight;
+                Spacing = new Vector2(6);
+                AutoSizeAxes = Axes.Both;
+                Direction = FillDirection.Horizontal;
+            }
+
+            [BackgroundDependencyLoader]
+            private void Load(TextureStore textures)
+            {
+                var avatarContainer = new Container
+                {
+                    Anchor = avatarOnLeft ? Anchor.CentreLeft : Anchor.CentreRight,
+                    Origin = avatarOnLeft ? Anchor.CentreLeft : Anchor.CentreRight,
+                    Size = new Vector2(24)
+                };
+                var usernameText = new SpriteText
+                {
+                    Anchor = avatarOnLeft ? Anchor.CentreLeft : Anchor.CentreRight,
+                    Origin = avatarOnLeft ? Anchor.CentreLeft : Anchor.CentreRight,
+                    Text = player.Username
+                };
+                var idText = new SpriteText
+                {
+                    Anchor = avatarOnLeft ? Anchor.CentreLeft : Anchor.CentreRight,
+                    Origin = avatarOnLeft ? Anchor.CentreLeft : Anchor.CentreRight,
+                    Text = player.Id.ToString()
+                };
+                Add(avatarContainer);
+                Add(usernameText);
+                Add(idText);
+                player.DownloadDataAsync(textures, p =>
+                {
+                    usernameText.Text = p.Username;
+                    avatarContainer.Child = new Sprite { RelativeSizeAxes = Axes.Both, Texture = p.Avatar };
+                    idText.Text = p.Id.ToString();
+                }, Scheduler);
+            }
         }
     }
 }

@@ -7,6 +7,8 @@ namespace RefereeAssistant3.Main
     {
         public event Action<Match> NewMatchAdded;
 
+        public static string APIKey;
+
         public IReadOnlyList<Match> Matches => matches;
         public IEnumerable<Tournament> Tournaments { get; }
 
