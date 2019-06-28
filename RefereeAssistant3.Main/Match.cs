@@ -234,36 +234,28 @@ namespace RefereeAssistant3.Main
                     snapshotName = $"Set roll winner: {RollWinner}";
                     break;
                 case MatchProcedure.Banning1:
-                    snapshotName = $"{Team1} bans {SelectedMap}";
-                    Team1.BannedMaps.Add(SelectedMap);
+                    BanMap(Team1, out snapshotName);
                     break;
                 case MatchProcedure.Banning2:
-                    snapshotName = $"{Team2} bans {SelectedMap}";
-                    Team2.BannedMaps.Add(SelectedMap);
+                    BanMap(Team2, out snapshotName);
                     break;
                 case MatchProcedure.BanningRollWinner:
-                    snapshotName = $"{RollWinner} bans {SelectedMap}";
-                    RollWinner.BannedMaps.Add(SelectedMap);
+                    BanMap(RollWinner, out snapshotName);
                     break;
                 case MatchProcedure.BanningRollLoser:
-                    snapshotName = $"{RollLoser} bans {SelectedMap}";
-                    RollLoser.BannedMaps.Add(SelectedMap);
+                    BanMap(RollLoser, out snapshotName);
                     break;
                 case MatchProcedure.Picking1:
-                    snapshotName = $"{Team1} picks {SelectedMap}";
-                    Team1.PickedMaps.Add(SelectedMap);
+                    PickMap(Team1, out snapshotName);
                     break;
                 case MatchProcedure.Picking2:
-                    snapshotName = $"{Team2} picks {SelectedMap}";
-                    Team2.PickedMaps.Add(SelectedMap);
+                    PickMap(Team2, out snapshotName);
                     break;
                 case MatchProcedure.PickingRollWinner:
-                    snapshotName = $"{RollWinner} picks {SelectedMap}";
-                    RollWinner.PickedMaps.Add(SelectedMap);
+                    PickMap(RollWinner, out snapshotName);
                     break;
                 case MatchProcedure.PickingRollLoser:
-                    snapshotName = $"{RollLoser} picks {SelectedMap}";
-                    RollLoser.PickedMaps.Add(SelectedMap);
+                    PickMap(RollLoser, out snapshotName);
                     break;
                 case MatchProcedure.GettingReady:
                     snapshotName = $"Start map: {SelectedMap}";
@@ -272,8 +264,7 @@ namespace RefereeAssistant3.Main
                     snapshotName = $"Set up the tiebreaker";
                     break;
                 case MatchProcedure.Playing:
-                    snapshotName = $"Finish playing {SelectedMap}";
-                    break;
+                    return false;
                 case MatchProcedure.FreePoint1:
                     snapshotName = $"Free point for {Team1}";
                     Scores[Team1]++;
@@ -314,5 +305,28 @@ namespace RefereeAssistant3.Main
         public void ReverseLastOperation() => Updated?.Invoke();
 
         private void SendAlert(string message) => Alert.Invoke(this, message);
+
+        private void BanMap(Team team, out string snapshotName)
+        {
+            snapshotName = $"{team} bans {SelectedMap}";
+            team.BannedMaps.Add(SelectedMap);
+            SelectedMap = null;
+        }
+
+        private void PickMap(Team team, out string snapshotName)
+        {
+            snapshotName = $"{team} picks {SelectedMap}";
+            team.PickedMaps.Add(SelectedMap);
+        }
+
+        public bool FinishMap(Team winner)
+        {
+            if (CurrentProcedure != MatchProcedure.Playing)
+                return false;
+            Scores[winner]++;
+            var snapshotName = $"{winner} won {SelectedMap}";
+            SelectedMap = null;
+            return GoToNextProcedure(snapshotName);
+        }
     }
 }

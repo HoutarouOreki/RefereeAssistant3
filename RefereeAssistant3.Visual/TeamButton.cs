@@ -41,7 +41,7 @@ namespace RefereeAssistant3.Visual
             }
         }
 
-        public TeamButton()
+        public TeamButton(bool left, float paddingWidth)
         {
             Children = new Drawable[]
             {
@@ -49,11 +49,16 @@ namespace RefereeAssistant3.Visual
                 {
                     RelativeSizeAxes = Axes.Both
                 },
-                Text = new SpriteText
+                new Container
                 {
-                    Anchor = Anchor.Centre,
-                    Origin = Anchor.Centre,
-                    AllowMultiline = true
+                    RelativeSizeAxes = Axes.Both,
+                    Padding = new MarginPadding { Left = left ? 0 : paddingWidth, Right = left ? paddingWidth : 0 },
+                    Child = Text = new SpriteText
+                    {
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        AllowMultiline = true
+                    }
                 }
             };
             Enabled.BindValueChanged(OnEnabledValueChanged);

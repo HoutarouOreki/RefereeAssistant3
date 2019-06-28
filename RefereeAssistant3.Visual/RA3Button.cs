@@ -23,7 +23,14 @@ namespace RefereeAssistant3.Visual
             Enabled.BindValueChanged(OnEnabledValueChanged, true);
         }
 
-        private void OnEnabledValueChanged(ValueChangedEvent<bool> obj) => Colour = Enabled.Value ? Color4.White : Color4.DarkGray;
+        private void OnEnabledValueChanged(ValueChangedEvent<bool> obj)
+        {
+            Colour = Enabled.Value ? Color4.White : Color4.DarkGray;
+            if (!Enabled.Value)
+                hoverOverlay.FadeOut(200, Easing.OutCubic);
+            else if (IsHovered)
+                hoverOverlay.FadeTo(0.2f, 120, Easing.OutCubic);
+        }
 
         protected override bool OnHover(HoverEvent e)
         {

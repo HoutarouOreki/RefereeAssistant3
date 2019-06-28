@@ -196,17 +196,8 @@ namespace RefereeAssistant3.Visual
                                 Origin = Anchor.BottomCentre,
                                 Size = new Vector2(1, 0.6f),
                                 BackgroundColour = FrameworkColour.Blue,
-                                Text = "Proceed",
-                                Action = () => Match?.Proceed()
+                                Text = "Proceed"
                             }
-                        },
-                        mapPickerButton = new RA3Button
-                        {
-                            Anchor = Anchor.Centre,
-                            Origin = Anchor.Centre,
-                            Size = new Vector2(Style.COMPONENTS_WIDTH, Style.COMPONENTS_HEIGHT),
-                            BackgroundColour = FrameworkColour.Green,
-                            Text = "Pick map"
                         },
                         new Container
                         {
@@ -215,7 +206,7 @@ namespace RefereeAssistant3.Visual
                             Depth = 3,
                             Children = new Drawable[]
                             {
-                                team1Button = new TeamButton
+                                team1Button = new TeamButton(true, proceed_button_width / 2)
                                 {
                                     Anchor = Anchor.TopCentre,
                                     Origin = Anchor.TopRight,
@@ -224,7 +215,7 @@ namespace RefereeAssistant3.Visual
                                     Size = new Vector2(0.5f, 1),
                                     X = -0.5f
                                 },
-                                team2Button = new TeamButton
+                                team2Button = new TeamButton(false, proceed_button_width / 2)
                                 {
                                     BackgroundColour = Style.Blue.Darken(0.8f),
                                     RelativeSizeAxes = Axes.Both,
@@ -232,6 +223,44 @@ namespace RefereeAssistant3.Visual
                                     Anchor = Anchor.TopCentre,
                                     X = 0.5f
                                 },
+                            }
+                        },
+                        new FillFlowContainer
+                        {
+                            RelativeSizeAxes = Axes.X,
+                            Y = proceed_button_width / 2,
+                            AutoSizeAxes = Axes.Y,
+                            Direction = FillDirection.Horizontal,
+                            Children = new Drawable[]
+                            {
+                                new RA3Button
+                                {
+                                    RelativeSizeAxes = Axes.X,
+                                    Size = new Vector2(1/4f, Style.COMPONENTS_HEIGHT),
+                                    BackgroundColour = FrameworkColour.Green,
+                                    Text = "History"
+                                },
+                                new RA3Button
+                                {
+                                    RelativeSizeAxes = Axes.X,
+                                    Size = new Vector2(1/4f, Style.COMPONENTS_HEIGHT),
+                                    BackgroundColour = FrameworkColour.Green,
+                                    Text = "Undo last action"
+                                },
+                                mapPickerButton = new RA3Button
+                                {
+                                    RelativeSizeAxes = Axes.X,
+                                    Size = new Vector2(1/4f, Style.COMPONENTS_HEIGHT),
+                                    BackgroundColour = FrameworkColour.Green,
+                                    Text = "Pick map"
+                                },
+                                new RA3Button
+                                {
+                                    RelativeSizeAxes = Axes.X,
+                                    Size = new Vector2(1/4f, Style.COMPONENTS_HEIGHT),
+                                    BackgroundColour = FrameworkColour.Green,
+                                    Text = "Preset messages"
+                                }
                             }
                         }
                     }
@@ -262,32 +291,98 @@ namespace RefereeAssistant3.Visual
             team1Button.Action = team2Button.Action = null;
             team1Button.Text.Text = team2Button.Text.Text = null;
 
-            proceedButton.Text = "Proceed";
+            proceedButton.Text = null;
+            proceedButton.Action = null;
 
-            if (Match.CurrentProcedure == MatchProcedure.Rolling)
+            switch (Match.CurrentProcedure)
             {
-                team1Button.Action = () =>
-                {
-                    Match.RollWinner = Match.Team1;
-                    GenerateLayout();
-                };
-                team1Button.Text.Text = $"{Match.Team1} won roll";
-                team2Button.Action = () =>
-                {
-                    Match.RollWinner = Match.Team2;
-                    GenerateLayout();
-                };
-                team2Button.Text.Text = $"{Match.Team2} won roll";
-                if (Match.RollWinner != null)
-                {
-                    proceedButton.Text = $"Set {Match.RollWinner} as roll winner";
-                    if (Match.Team1 == Match.RollWinner)
-                        team1Button.IsSelected = true;
-                    if (Match.Team2 == Match.RollWinner)
-                        team2Button.IsSelected = true;
-                }
+                case MatchProcedure.SettingUp:
+                    OnSettingUpProcedure();
+                    break;
+                case MatchProcedure.WarmUp1:
+                    break;
+                case MatchProcedure.WarmUp2:
+                    break;
+                case MatchProcedure.WarmUpRollWinner:
+                    break;
+                case MatchProcedure.WarmUpRollLoser:
+                    break;
+                case MatchProcedure.Rolling:
+                    OnRollingProcedure();
+                    break;
+                case MatchProcedure.Banning1:
+                case MatchProcedure.Banning2:
+                case MatchProcedure.BanningRollWinner:
+                case MatchProcedure.BanningRollLoser:
+                case MatchProcedure.Picking1:
+                case MatchProcedure.Picking2:
+                case MatchProcedure.PickingRollWinner:
+                case MatchProcedure.PickingRollLoser:
+                    OnBanningOrPickingProcedure();
+                    break;
+                case MatchProcedure.GettingReady:
+                    OnGettingReadyProcedure();
+                    break;
+                case MatchProcedure.TieBreaker:
+                    break;
+                case MatchProcedure.Playing:
+                    break;
+                case MatchProcedure.FreePoint1:
+                    break;
+                case MatchProcedure.FreePoint2:
+                    break;
+                case MatchProcedure.FreePointRollWinner:
+                    break;
+                case MatchProcedure.FreePointRollLoser:
+                    break;
+                default:
+                    break;
             }
         }
+
+        private void EnableProceedButton(string text = null)
+        {
+            proceedButton.Action = () => Match.Proceed();
+            if (text != null)
+                proceedButton.Text = text;
+        }
+
+        private void OnSettingUpProcedure() => EnableProceedButton("Finish setting up");
+
+        private void OnRollingProcedure()
+        {
+            team1Button.Action = () =>
+            {
+                Match.RollWinner = Match.Team1;
+                GenerateLayout();
+            };
+            team1Button.Text.Text = $"{Match.Team1} won roll";
+            team2Button.Action = () =>
+            {
+                Match.RollWinner = Match.Team2;
+                GenerateLayout();
+            };
+            team2Button.Text.Text = $"{Match.Team2} won roll";
+            if (Match.RollWinner != null)
+            {
+                EnableProceedButton($"Set {Match.RollWinner}\nas roll winner");
+                if (Match.Team1 == Match.RollWinner)
+                    team1Button.IsSelected = true;
+                if (Match.Team2 == Match.RollWinner)
+                    team2Button.IsSelected = true;
+            }
+        }
+
+        private void OnBanningOrPickingProcedure()
+        {
+            if (Match.SelectedMap != null)
+            {
+                EnableProceedButton("Proceed");
+                matchStateLabel.Text = $"{Match.ReadableCurrentState}: {Match.SelectedMap}";
+            }
+        }
+
+        private void OnGettingReadyProcedure() => EnableProceedButton("Start match");
 
         protected override void Update()
         {
