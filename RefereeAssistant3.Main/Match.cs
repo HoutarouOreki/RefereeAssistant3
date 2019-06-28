@@ -34,6 +34,9 @@ namespace RefereeAssistant3.Main
         public Team RollLoser => RollWinner == null ? null :
             Team1 == RollWinner ? Team2 : Team1;
 
+        public Team Winner => Scores[Team1] == TournamentStage.ScoreRequiredToWin ? Team1 :
+            Scores[Team2] == TournamentStage.ScoreRequiredToWin ? Team2 : null;
+
         private Map selectedMap;
         public Map SelectedMap
         {

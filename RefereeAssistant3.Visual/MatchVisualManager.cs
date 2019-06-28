@@ -46,11 +46,15 @@ namespace RefereeAssistant3.Visual
         private readonly TeamButton team1Button;
         private readonly TeamButton team2Button;
         private readonly RA3Button proceedButton;
+        private readonly Container matchStateContainer;
+        private readonly Container selectedMapDisplayContainer;
+        private readonly TextFlowContainer currentMapLabel;
 
         public MatchVisualManager(MapPickerOverlay mapPicker)
         {
             this.mapPicker = mapPicker;
             RelativeSizeAxes = Axes.Both;
+            Masking = true;
             Children = new Drawable[]
             {
                 new Container
@@ -105,16 +109,44 @@ namespace RefereeAssistant3.Visual
                     Y = 2 * team_name_score_height,
                     Children = new Drawable[]
                     {
-                        new Box
+                        matchStateContainer = new Container
                         {
                             RelativeSizeAxes = Axes.Both,
-                            Colour = FrameworkColour.Yellow.Darken(1),
+                            Children = new Drawable[]
+                            {
+                                new Box
+                                {
+                                    RelativeSizeAxes = Axes.Both,
+                                    Colour = FrameworkColour.Yellow.Darken(1)
+                                },
+                                matchStateLabel = new TextFlowContainer
+                                {
+                                    AutoSizeAxes = Axes.Both,
+                                    Anchor = Anchor.Centre,
+                                    Origin = Anchor.Centre
+                                }
+                            }
                         },
-                        matchStateLabel = new TextFlowContainer
+                        selectedMapDisplayContainer = new Container
                         {
-                            AutoSizeAxes = Axes.Both,
-                            Anchor = Anchor.Centre,
-                            Origin = Anchor.Centre
+                            RelativeSizeAxes = Axes.Both,
+                            Width = 0.5f,
+                            Anchor = Anchor.TopRight,
+                            RelativePositionAxes = Axes.X,
+                            Children = new Drawable[]
+                            {
+                                new Box
+                                {
+                                    RelativeSizeAxes = Axes.Both,
+                                    Colour = FrameworkColour.Blue.Darken(1)
+                                },
+                                currentMapLabel = new TextFlowContainer
+                                {
+                                    AutoSizeAxes = Axes.Both,
+                                    Anchor = Anchor.Centre,
+                                    Origin = Anchor.Centre
+                                }
+                            }
                         }
                     }
                 },
@@ -281,18 +313,32 @@ namespace RefereeAssistant3.Visual
             matchStateLabel.Text = "";
             matchStateLabel.AddText(match.ReadableCurrentState);
 
-            if (new[] { MatchProcedure.Banning1, MatchProcedure.Banning2, MatchProcedure.BanningRollWinner, MatchProcedure.BanningRollLoser, MatchProcedure.Picking1, MatchProcedure.Picking2, MatchProcedure.PickingRollWinner, MatchProcedure.PickingRollLoser, MatchProcedure.WarmUp1, MatchProcedure.WarmUp2, MatchProcedure.WarmUpRollWinner, MatchProcedure.WarmUpRollLoser }.Contains(Match.CurrentProcedure))
-            {
-                mapPickerButton.Action = mapPicker.Show;
-            }
-            else
-                mapPickerButton.Action = null;
+            const Easing easing = Easing.OutCubic;
+            const float duration = 200;
+            var mapLabelWidth = 0.5f;
+            selectedMapDisplayContainer.MoveToX(Match.SelectedMap == null ? 0 : -mapLabelWidth, duration, easing);
+            matchStateContainer.ResizeWidthTo(Match.SelectedMap == null ? 1 : 1 - mapLabelWidth, duration, easing);
+            currentMapLabel.Text = Match.SelectedMap != null ?
+                $"({Match.SelectedMap.MapCode}) {Match.SelectedMap}" : "";
 
             team1Button.Action = team2Button.Action = null;
             team1Button.Text.Text = team2Button.Text.Text = null;
 
             proceedButton.Text = null;
             proceedButton.Action = null;
+
+            mapPickerButton.Action = null;
+
+            if (Match.IsFinished)
+            {
+                matchStateLabel.Text = $"{Match.Winner} won the match";
+                return;
+            }
+
+            if (new[] { MatchProcedure.Banning1, MatchProcedure.Banning2, MatchProcedure.BanningRollWinner, MatchProcedure.BanningRollLoser, MatchProcedure.Picking1, MatchProcedure.Picking2, MatchProcedure.PickingRollWinner, MatchProcedure.PickingRollLoser, MatchProcedure.WarmUp1, MatchProcedure.WarmUp2, MatchProcedure.WarmUpRollWinner, MatchProcedure.WarmUpRollLoser }.Contains(Match.CurrentProcedure))
+            {
+                mapPickerButton.Action = mapPicker.Show;
+            }
 
             switch (Match.CurrentProcedure)
             {
@@ -326,6 +372,7 @@ namespace RefereeAssistant3.Visual
                 case MatchProcedure.TieBreaker:
                     break;
                 case MatchProcedure.Playing:
+                    OnPlayingProcedure();
                     break;
                 case MatchProcedure.FreePoint1:
                     break;
@@ -376,13 +423,26 @@ namespace RefereeAssistant3.Visual
         private void OnBanningOrPickingProcedure()
         {
             if (Match.SelectedMap != null)
-            {
                 EnableProceedButton("Proceed");
-                matchStateLabel.Text = $"{Match.ReadableCurrentState}: {Match.SelectedMap}";
-            }
         }
 
         private void OnGettingReadyProcedure() => EnableProceedButton("Start match");
+
+        private void OnPlayingProcedure()
+        {
+            team1Button.Text.Text = $"{Match.Team1} won";
+            team2Button.Text.Text = $"{Match.Team2} won";
+            team1Button.Action = () =>
+            {
+                proceedButton.Action = () => Match.FinishMap(Match.Team1);
+                proceedButton.Text = $"Confirm: {Match.Team1} won";
+            };
+            team2Button.Action = () =>
+            {
+                proceedButton.Action = () => Match.FinishMap(Match.Team2);
+                proceedButton.Text = $"Confirm: {Match.Team2} won";
+            };
+        }
 
         protected override void Update()
         {
