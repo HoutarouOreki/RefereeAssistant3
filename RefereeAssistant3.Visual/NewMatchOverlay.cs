@@ -7,6 +7,7 @@ using osu.Framework.Graphics.Textures;
 using osuTK;
 using RefereeAssistant3.Main;
 using System;
+using System.Collections.Generic;
 
 namespace RefereeAssistant3.Visual
 {
@@ -283,14 +284,22 @@ namespace RefereeAssistant3.Visual
 
             if (team1 != null)
             {
+                team1MembersDisplay.Child = new SpriteText
+                { Text = "Loading team members..", Anchor = Anchor.TopLeft, Origin = Anchor.TopLeft };
+                var componentsToLoad = new List<AvatarUsernameLine>();
                 foreach (var member in team1.Members)
-                    team1MembersDisplay.Add(new AvatarUsernameLine(member, false, core));
+                    componentsToLoad.Add(new AvatarUsernameLine(member, false, core));
+                LoadComponentsAsync(componentsToLoad, ds => team1MembersDisplay.ChildrenEnumerable = ds);
             }
 
             if (team2 != null)
             {
+                team2MembersDisplay.Child = new SpriteText
+                { Text = "Loading team members..", Anchor = Anchor.TopRight, Origin = Anchor.TopRight };
+                var componentsToLoad = new List<AvatarUsernameLine>();
                 foreach (var member in team2.Members)
-                    team2MembersDisplay.Add(new AvatarUsernameLine(member, true, core));
+                    componentsToLoad.Add(new AvatarUsernameLine(member, true, core));
+                LoadComponentsAsync(componentsToLoad, ds => team2MembersDisplay.ChildrenEnumerable = ds);
             }
 
             teamMembersDisplay.Width = vsLabel.DrawWidth + (Style.SPACING * 2) + 5;
