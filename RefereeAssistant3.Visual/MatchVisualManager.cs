@@ -119,7 +119,7 @@ namespace RefereeAssistant3.Visual
                                     RelativeSizeAxes = Axes.Both,
                                     Colour = FrameworkColour.Yellow.Darken(1)
                                 },
-                                matchStateLabel = new TextFlowContainer
+                                matchStateLabel = new TextFlowContainer(t => t.Font = new FontUsage("OpenSans-Bold", 18))
                                 {
                                     AutoSizeAxes = Axes.Both,
                                     Anchor = Anchor.Centre,
@@ -335,11 +335,6 @@ namespace RefereeAssistant3.Visual
                 return;
             }
 
-            if (new[] { MatchProcedure.Banning1, MatchProcedure.Banning2, MatchProcedure.BanningRollWinner, MatchProcedure.BanningRollLoser, MatchProcedure.Picking1, MatchProcedure.Picking2, MatchProcedure.PickingRollWinner, MatchProcedure.PickingRollLoser, MatchProcedure.WarmUp1, MatchProcedure.WarmUp2, MatchProcedure.WarmUpRollWinner, MatchProcedure.WarmUpRollLoser }.Contains(Match.CurrentProcedure))
-            {
-                mapPickerButton.Action = mapPicker.Show;
-            }
-
             switch (Match.CurrentProcedure)
             {
                 case MatchProcedure.SettingUp:
@@ -375,12 +370,10 @@ namespace RefereeAssistant3.Visual
                     OnPlayingProcedure();
                     break;
                 case MatchProcedure.FreePoint1:
-                    break;
                 case MatchProcedure.FreePoint2:
-                    break;
                 case MatchProcedure.FreePointRollWinner:
-                    break;
                 case MatchProcedure.FreePointRollLoser:
+                    OnFreePointProcedure();
                     break;
                 default:
                     break;
@@ -422,6 +415,7 @@ namespace RefereeAssistant3.Visual
 
         private void OnBanningOrPickingProcedure()
         {
+            mapPickerButton.Action = mapPicker.Show;
             if (Match.SelectedMap != null)
                 EnableProceedButton("Proceed");
         }
@@ -443,6 +437,8 @@ namespace RefereeAssistant3.Visual
                 proceedButton.Text = $"Confirm: {Match.Team2} won";
             };
         }
+
+        private void OnFreePointProcedure() => EnableProceedButton("Confirm point");
 
         protected override void Update()
         {
