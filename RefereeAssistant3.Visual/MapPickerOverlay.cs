@@ -3,6 +3,8 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using RefereeAssistant3.Main;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace RefereeAssistant3.Visual
 {
@@ -12,6 +14,11 @@ namespace RefereeAssistant3.Visual
         private readonly FillFlowContainer mapFlowContainer;
 
         private Mappool mappool => core.SelectedMatch.TournamentStage.Mappool;
+        private IEnumerable<Map> noMod => mappool.NoMod.Except(core.SelectedMatch.PlayedMaps);
+        private IEnumerable<Map> hidden => mappool.Hidden.Except(core.SelectedMatch.PlayedMaps);
+        private IEnumerable<Map> hardRock => mappool.HardRock.Except(core.SelectedMatch.PlayedMaps);
+        private IEnumerable<Map> doubleTime => mappool.DoubleTime.Except(core.SelectedMatch.PlayedMaps);
+        private IEnumerable<Map> freeMod => mappool.FreeMod.Except(core.SelectedMatch.PlayedMaps);
 
         public MapPickerOverlay(Core core)
         {
@@ -36,7 +43,8 @@ namespace RefereeAssistant3.Visual
                         AutoSizeAxes = Axes.Both,
                         Direction = FillDirection.Vertical,
                         Anchor = Anchor.TopCentre,
-                        Origin = Anchor.TopCentre
+                        Origin = Anchor.TopCentre,
+                        Spacing = new osuTK.Vector2(4)
                     }
                 }
             };
@@ -52,21 +60,57 @@ namespace RefereeAssistant3.Visual
         {
             mapFlowContainer.Clear();
             var font = new FontUsage(null, 28);
-            mapFlowContainer.Add(new SpriteText { Text = "No mod", Font = font });
-            foreach (var map in mappool.NoMod)
-                mapFlowContainer.Add(new SpriteText { Text = map.ToString() });
-            mapFlowContainer.Add(new SpriteText { Text = "Hidden", Font = font });
-            foreach (var map in mappool.Hidden)
-                mapFlowContainer.Add(new SpriteText { Text = map.ToString() });
-            mapFlowContainer.Add(new SpriteText { Text = "Hard rock", Font = font });
-            foreach (var map in mappool.HardRock)
-                mapFlowContainer.Add(new SpriteText { Text = map.ToString() });
-            mapFlowContainer.Add(new SpriteText { Text = "Double time", Font = font });
-            foreach (var map in mappool.DoubleTime)
-                mapFlowContainer.Add(new SpriteText { Text = map.ToString() });
-            mapFlowContainer.Add(new SpriteText { Text = "Free mod", Font = font });
-            foreach (var map in mappool.FreeMod)
-                mapFlowContainer.Add(new SpriteText { Text = map.ToString() });
+
+            if (noMod.Any())
+            {
+                mapFlowContainer.Add(new SpriteText
+                    { Text = "No mod", Font = font, Margin = new MarginPadding { Top = 8 } });
+                AddMap(mappool.NoMod);
+            }
+
+            if (hidden.Any())
+            {
+                mapFlowContainer.Add(new SpriteText
+                    { Text = "Hidden", Font = font, Margin = new MarginPadding { Top = 8 } });
+                AddMap(mappool.Hidden);
+            }
+
+            if (hardRock.Any())
+            {
+                mapFlowContainer.Add(new SpriteText
+                    { Text = "Hard rock", Font = font, Margin = new MarginPadding { Top = 8 } });
+                AddMap(mappool.HardRock);
+            }
+
+            if (doubleTime.Any())
+            {
+                mapFlowContainer.Add(new SpriteText
+                    { Text = "Double time", Font = font, Margin = new MarginPadding { Top = 8 } });
+                AddMap(mappool.DoubleTime);
+            }
+
+            if (freeMod.Any())
+            {
+                mapFlowContainer.Add(new SpriteText
+                    { Text = "Free mod", Font = font, Margin = new MarginPadding { Top = 8 } });
+                AddMap(mappool.FreeMod);
+            }
+        }
+
+        private void AddMap(IEnumerable<Map> maps)
+        {
+            foreach (var map in maps)
+            {
+                var panel = new MapPanel(map);
+                mapFlowContainer.Add(panel);
+                panel.Action = PanelClicked;
+            }
+        }
+
+        private void PanelClicked(Map map)
+        {
+            Hide();
+            core.SelectedMatch.SelectedMap = map;
         }
     }
 }

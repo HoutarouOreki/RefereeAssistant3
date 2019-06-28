@@ -43,8 +43,9 @@ namespace RefereeAssistant3.Visual
         private readonly SpriteText stageLabel;
         private readonly RA3Button mapPickerButton;
         private readonly MapPickerOverlay mapPicker;
-        private readonly RA3Button team1Button;
-        private readonly RA3Button team2Button;
+        private readonly TeamButton team1Button;
+        private readonly TeamButton team2Button;
+        private readonly RA3Button proceedButton;
 
         public MatchVisualManager(MapPickerOverlay mapPicker)
         {
@@ -188,7 +189,7 @@ namespace RefereeAssistant3.Visual
                             Anchor = Anchor.TopCentre,
                             Origin = Anchor.Centre,
                             Masking = true,
-                            Child = new RA3Button
+                            Child = proceedButton = new RA3Button
                             {
                                 RelativeSizeAxes = Axes.Both,
                                 Anchor = Anchor.BottomCentre,
@@ -214,14 +215,16 @@ namespace RefereeAssistant3.Visual
                             Depth = 3,
                             Children = new Drawable[]
                             {
-                                team1Button = new RA3Button
+                                team1Button = new TeamButton
                                 {
+                                    Anchor = Anchor.TopCentre,
+                                    Origin = Anchor.TopRight,
                                     BackgroundColour = Style.Red.Darken(0.8f),
                                     RelativeSizeAxes = Axes.Both,
                                     Size = new Vector2(0.5f, 1),
                                     X = -0.5f
                                 },
-                                team2Button = new RA3Button
+                                team2Button = new TeamButton
                                 {
                                     BackgroundColour = Style.Blue.Darken(0.8f),
                                     RelativeSizeAxes = Axes.Both,
@@ -256,10 +259,33 @@ namespace RefereeAssistant3.Visual
             else
                 mapPickerButton.Action = null;
 
+            team1Button.Action = team2Button.Action = null;
+            team1Button.Text.Text = team2Button.Text.Text = null;
+
+            proceedButton.Text = "Proceed";
+
             if (Match.CurrentProcedure == MatchProcedure.Rolling)
             {
-                team1Button.Action = () => Match.RollWinner = Match.Team1;
-                team2Button.Action = () => Match.RollWinner = Match.Team2;
+                team1Button.Action = () =>
+                {
+                    Match.RollWinner = Match.Team1;
+                    GenerateLayout();
+                };
+                team1Button.Text.Text = $"{Match.Team1} won roll";
+                team2Button.Action = () =>
+                {
+                    Match.RollWinner = Match.Team2;
+                    GenerateLayout();
+                };
+                team2Button.Text.Text = $"{Match.Team2} won roll";
+                if (Match.RollWinner != null)
+                {
+                    proceedButton.Text = $"Set {Match.RollWinner} as roll winner";
+                    if (Match.Team1 == Match.RollWinner)
+                        team1Button.IsSelected = true;
+                    if (Match.Team2 == Match.RollWinner)
+                        team2Button.IsSelected = true;
+                }
             }
         }
 

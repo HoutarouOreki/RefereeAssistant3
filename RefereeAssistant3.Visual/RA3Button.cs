@@ -29,7 +29,7 @@ namespace RefereeAssistant3.Visual
         {
             if (Enabled.Value)
                 hoverOverlay.FadeTo(0.2f, 120, Easing.OutCubic);
-            return base.OnHover(e);
+            return true;
         }
 
         protected override void OnHoverLost(HoverLostEvent e)

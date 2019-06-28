@@ -34,7 +34,16 @@ namespace RefereeAssistant3.Main
         public Team RollLoser => RollWinner == null ? null :
             Team1 == RollWinner ? Team2 : Team1;
 
-        public Map SelectedMap;
+        private Map selectedMap;
+        public Map SelectedMap
+        {
+            get => selectedMap;
+            set
+            {
+                selectedMap = value;
+                Updated();
+            }
+        }
 
         public Dictionary<Team, int> Scores = new Dictionary<Team, int>();
 
@@ -188,7 +197,7 @@ namespace RefereeAssistant3.Main
 
         public bool Proceed()
         {
-            if (procedureUtilities.CurrentProcedureRequireSelectedMap())
+            if (procedureUtilities.CurrentProcedureRequireSelectedMap() && SelectedMap == null)
             {
                 SendAlert($"Current operation ({procedureUtilities.GetProcedureDescription(CurrentProcedure)} -> {procedureUtilities.GetProcedureDescription(Procedures[CurrentProcedureIndex + 1])}) requires a map to be specified.");
                 return false;
