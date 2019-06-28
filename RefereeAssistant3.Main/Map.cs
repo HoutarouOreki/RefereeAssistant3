@@ -13,7 +13,7 @@
             var mapData = mapText.Split("|||");
             MapCode = mapData[0];
             DifficultyId = int.Parse(mapData[1]);
-            switch (mapData[3])
+            switch (mapData[0])
             {
                 case "NM":
                     AppliedMods = Mods.None;

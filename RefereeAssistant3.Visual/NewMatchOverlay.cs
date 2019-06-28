@@ -19,6 +19,9 @@ namespace RefereeAssistant3.Visual
         private readonly SelectionOverlay<Tournament> tournamentSelectionOverlay;
         private readonly SpriteText vsLabel;
         private readonly RA3Button addNewMatchButton;
+        private readonly FillFlowContainer team1MembersDisplay;
+        private readonly FillFlowContainer team2MembersDisplay;
+        private readonly Container teamMembersDisplay;
         private SelectionOverlay<TournamentStage> stageSelectionOverlay;
         private SelectionOverlay<Team> teamSelectionOverlay;
 
@@ -123,6 +126,34 @@ namespace RefereeAssistant3.Visual
                                         AlwaysPresent = true
                                     }
                                 }
+                            }
+                        },
+                        teamMembersDisplay = new Container
+                        {
+                            Width = Style.COMPONENTS_WIDTH,
+                            AutoSizeAxes = Axes.Y,
+                            AutoSizeDuration = 200,
+                            AutoSizeEasing = Easing.InOutCubic,
+                            Anchor = Anchor.TopCentre,
+                            Origin = Anchor.TopCentre,
+                            Children = new Drawable[]
+                            {
+                                team1MembersDisplay = new FillFlowContainer
+                                {
+                                    Anchor = Anchor.TopLeft,
+                                    Origin = Anchor.TopCentre,
+                                    AutoSizeAxes = Axes.Both,
+                                    Spacing = new Vector2(6),
+                                    Direction = FillDirection.Vertical
+                                },
+                                team2MembersDisplay = new FillFlowContainer
+                                {
+                                    Anchor = Anchor.TopRight,
+                                    Origin = Anchor.TopCentre,
+                                    AutoSizeAxes = Axes.Both,
+                                    Spacing = new Vector2(6),
+                                    Direction = FillDirection.Vertical
+                                },
                             }
                         },
                         addNewMatchButton = new RA3Button
@@ -244,6 +275,29 @@ namespace RefereeAssistant3.Visual
             addNewMatchButton.Action = AreOptionsValid() ? AddNewMatch : (Action)null;
 
             vsLabel.FadeTo(stage != null ? 1 : 0.5f);
+
+            team1MembersDisplay.Clear();
+            team2MembersDisplay.Clear();
+
+            if (team1 != null)
+            {
+                foreach (var member in team1.Members)
+                {
+                    team1MembersDisplay.Add(new SpriteText
+                    { Text = member.Username, Anchor = Anchor.Centre, Origin = Anchor.Centre });
+                }
+            }
+
+            if (team2 != null)
+            {
+                foreach (var member in team2.Members)
+                {
+                    team2MembersDisplay.Add(new SpriteText
+                    { Text = member.Username, Anchor = Anchor.Centre, Origin = Anchor.Centre });
+                }
+            }
+
+            teamMembersDisplay.Width = Style.COMPONENTS_WIDTH + (2 * Style.SPACING) + vsLabel.DrawWidth;
         }
     }
 }
