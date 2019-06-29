@@ -13,7 +13,6 @@ namespace RefereeAssistant3.Main
         public string Artist;
         public string Title;
         public string DifficultyName;
-        public Mods AppliedMods;
 
         private bool downloaded;
 
@@ -22,27 +21,13 @@ namespace RefereeAssistant3.Main
             var mapData = mapText.Split("|||");
             MapCode = mapData[0];
             DifficultyId = int.Parse(mapData[1]);
-            switch (mapData[0])
-            {
-                case "NM":
-                    AppliedMods = Mods.None;
-                    break;
-                case "FM":
-                    AppliedMods = Mods.FreeMod;
-                    break;
-                case "HR":
-                    AppliedMods = Mods.HardRock;
-                    break;
-                case "HD":
-                    AppliedMods = Mods.Hidden;
-                    break;
-                case "DT":
-                    AppliedMods = Mods.DoubleTime;
-                    break;
-            }
         }
 
         public Map(APIMap apiMap) => SetPropertiesFromAPIMap(apiMap);
+
+        public Map(int difficultyId) => DifficultyId = difficultyId;
+
+        public Map() { }
 
         public async Task DownloadDataAsync(Core core, Action<Map> OnLoaded = null, Scheduler scheduler = null)
         {

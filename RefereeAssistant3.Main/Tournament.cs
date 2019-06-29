@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace RefereeAssistant3.Main
@@ -9,9 +10,9 @@ namespace RefereeAssistant3.Main
 
         public bool DoFailedScoresCount { get; }
 
-        public List<TournamentStage> Stages { get; } = new List<TournamentStage>();
+        public IEnumerable<TournamentStage> Stages { get; } = new List<TournamentStage>();
 
-        public List<Team> Teams { get; } = new List<Team>();
+        public IEnumerable<Team> Teams { get; } = new List<Team>();
 
         public Tournament(string configuration, string stagesFile, string teamsFile)
         {
@@ -23,14 +24,25 @@ namespace RefereeAssistant3.Main
             DoFailedScoresCount = configuration.Split('\n')[1] == "yes";
 
             var stageTexts = stagesFile.Split("\n###\n");
+            var stages = new List<TournamentStage>();
             foreach (var stageText in stageTexts)
-                Stages.Add(new TournamentStage(stageText));
+                stages.Add(new TournamentStage(stageText));
+            Stages = stages;
 
+            var teams = new List<Team>();
             foreach (var teamText in teamsFile.Split('\n'))
             {
                 var membersText = teamText.Split(':')[1].Split(',');
-                Teams.Add(new Team(teamText.Split(':')[0], membersText.Select(m => new Player(m))));
+                teams.Add(new Team(teamText.Split(':')[0], membersText.Select(m => new Player(m))));
             }
+            Teams = teams;
+        }
+
+        public Tournament(TournamentConfiguration configuration, IEnumerable<TournamentStage> stages, IEnumerable<Team> teams)
+        {
+            TournamentName = configuration.Name;
+            Stages = stages;
+            Teams = teams;
         }
 
         public override string ToString() => TournamentName;

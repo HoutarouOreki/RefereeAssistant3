@@ -1,14 +1,22 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace RefereeAssistant3.Main
 {
     public class TournamentStage
     {
+        [JsonRequired]
         public string TournamentStageName;
+
         public string RoomName;
+
+        [JsonRequired]
         public List<string> MatchProceedings;
+
+        [JsonRequired]
         public int ScoreRequiredToWin;
+
         public Mappool Mappool = new Mappool();
 
         public TournamentStage(string stageText)
@@ -22,26 +30,10 @@ namespace RefereeAssistant3.Main
             foreach (var mapText in mapTexts)
             {
                 var map = new Map(mapText);
-                switch (map.AppliedMods)
-                {
-                    case Mods.None:
-                        Mappool.NoMod.Add(map);
-                        break;
-                    case Mods.FreeMod:
-                        Mappool.FreeMod.Add(map);
-                        break;
-                    case Mods.HardRock:
-                        Mappool.HardRock.Add(map);
-                        break;
-                    case Mods.Hidden:
-                        Mappool.Hidden.Add(map);
-                        break;
-                    case Mods.DoubleTime:
-                        Mappool.DoubleTime.Add(map);
-                        break;
-                }
             }
         }
+
+        public TournamentStage() { }
 
         public override string ToString() => TournamentStageName;
     }

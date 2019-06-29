@@ -15,6 +15,8 @@ namespace RefereeAssistant3.Main
 
         public Player(int id) => Id = id;
 
+        public Player() { }
+
         public async void DownloadDataAsync(TextureStore textures, Core core, Action<Player> OnLoaded, Scheduler scheduler)
         {
             if (!Id.HasValue || string.IsNullOrEmpty(Username))
