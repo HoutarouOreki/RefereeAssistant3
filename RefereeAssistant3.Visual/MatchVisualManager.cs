@@ -19,7 +19,7 @@ namespace RefereeAssistant3.Visual
         private const float team_name_score_padding = 18;
         private const float team_name_score_font_size = team_name_score_height - (2 * team_name_score_padding);
         private const float match_state_height = 42;
-        private static readonly Color4 proceed_button_default_colour = FrameworkColour.Blue;
+        private static readonly Color4 proceed_button_default_colour = FrameworkColour.Green.Darken(0.5f);
 
         public Match Match
         {
@@ -340,14 +340,12 @@ namespace RefereeAssistant3.Visual
             currentMapLabel.Text = Match.SelectedMap != null ?
                 $"({Match.SelectedMap.MapCode}) {Match.SelectedMap}" : "";
 
-            if (Match?.SelectedMap != null)
+            Task.Run(() =>
             {
-                Task.Run(() =>
-                {
+                if (Match?.SelectedMap != null)
                     currentMapCover.Texture = Match.SelectedMap.DownloadCover(textures);
-                    currentMapCover.FadeTo(0.5f, 100);
-                });
-            }
+                currentMapCover.FadeTo(0.5f, 100);
+            });
 
             team1Button.Action = team2Button.Action = null;
             team1Button.Text.Text = team2Button.Text.Text = null;

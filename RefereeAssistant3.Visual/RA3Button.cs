@@ -23,7 +23,7 @@ namespace RefereeAssistant3.Visual
             set
             {
                 background.Colour = value;
-                hoverOverlay.Colour = value.Lighten(0.5f);
+                hoverOverlay.Colour = value.Lighten(0.3f);
             }
         }
 
