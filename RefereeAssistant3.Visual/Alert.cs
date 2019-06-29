@@ -1,8 +1,6 @@
 ﻿using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
-using osu.Framework.Graphics.Shapes;
 using osuTK;
-using RefereeAssistant3.Main;
 
 namespace RefereeAssistant3.Visual
 {
@@ -12,45 +10,35 @@ namespace RefereeAssistant3.Visual
 
         public Alert(string message)
         {
-            RelativeSizeAxes = Axes.Both;
-            Children = new Drawable[]
+            Child = new FillFlowContainer
             {
-                new Box
+                Anchor = Anchor.Centre,
+                Origin = Anchor.Centre,
+                RelativeSizeAxes = Axes.X,
+                AutoSizeAxes = Axes.Y,
+                Direction = FillDirection.Vertical,
+                Spacing = new Vector2(Style.SPACING),
+                Children = new Drawable[]
                 {
-                    RelativeSizeAxes = Axes.Both,
-                    Colour = FrameworkColour.GreenDarker,
-                    Alpha = 0.9f
-                },
-                new FillFlowContainer
-                {
-                    Anchor = Anchor.Centre,
-                    Origin = Anchor.Centre,
-                    RelativeSizeAxes = Axes.X,
-                    AutoSizeAxes = Axes.Y,
-                    Direction = FillDirection.Vertical,
-                    Spacing = new Vector2(Style.SPACING),
-                    Children = new Drawable[]
+                    new TextFlowContainer
                     {
-                        new TextFlowContainer
-                        {
-                            Text = message,
-                            Anchor = Anchor.Centre,
-                            Origin = Anchor.Centre,
-                            RelativeSizeAxes = Axes.X,
-                            AutoSizeAxes = Axes.Y,
-                            TextAnchor = Anchor.TopCentre
-                            //MaximumSize = new Vector2(500, 0)
-                        },
-                        new RA3Button
-                        {
-                            Text = "Ok",
-                            BackgroundColour = FrameworkColour.Green,
-                            Width = Style.COMPONENTS_WIDTH,
-                            Height = Style.COMPONENTS_HEIGHT,
-                            Anchor = Anchor.Centre,
-                            Origin = Anchor.Centre,
-                            Action = PopOut
-                        }
+                        Text = message,
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        RelativeSizeAxes = Axes.X,
+                        AutoSizeAxes = Axes.Y,
+                        TextAnchor = Anchor.TopCentre
+                        //MaximumSize = new Vector2(500, 0)
+                    },
+                    new RA3Button
+                    {
+                        Text = "Ok",
+                        BackgroundColour = FrameworkColour.Green,
+                        Width = Style.COMPONENTS_WIDTH,
+                        Height = Style.COMPONENTS_HEIGHT,
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        Action = PopOut
                     }
                 }
             };

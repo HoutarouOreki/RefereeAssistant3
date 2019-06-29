@@ -1,6 +1,5 @@
 ﻿using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
-using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.UserInterface;
 using osuTK;
@@ -19,52 +18,41 @@ namespace RefereeAssistant3.Visual
         public MapFinderOverlay(Core core)
         {
             this.core = core;
-            RelativeSizeAxes = Axes.Both;
-            Children = new Drawable[]
+            Child = new FillFlowContainer
             {
-                new Box
+                Spacing = new Vector2(Style.SPACING),
+                RelativeSizeAxes = Axes.Both,
+                Direction = FillDirection.Vertical,
+                Children = new Drawable[]
                 {
-                    RelativeSizeAxes = Axes.Both,
-                    Colour = FrameworkColour.GreenDarker,
-                    Alpha = 0.9f
-                },
-                new FillFlowContainer
-                {
-                    Padding = new MarginPadding(Style.SPACING),
-                    Spacing = new Vector2(Style.SPACING),
-                    RelativeSizeAxes = Axes.Both,
-                    Direction = FillDirection.Vertical,
-                    Children = new Drawable[]
+                    textBox = new BasicTextBox
                     {
-                        textBox = new BasicTextBox
-                        {
-                            Size = new Vector2(Style.COMPONENTS_WIDTH, Style.COMPONENTS_HEIGHT),
-                            PlaceholderText = "Beatmap difficulty ID",
-                            Anchor = Anchor.TopCentre,
-                            Origin = Anchor.TopCentre
-                        },
-                        new RA3Button
-                        {
-                            Size = new Vector2(Style.COMPONENTS_WIDTH, Style.COMPONENTS_HEIGHT),
-                            Text = "Find",
-                            Anchor = Anchor.TopCentre,
-                            Origin = Anchor.TopCentre,
-                            Action = Find
-                        },
-                        mapFlow = new FillFlowContainer
-                        {
-                            AutoSizeAxes = Axes.Both,
-                            Anchor = Anchor.TopCentre,
-                            Origin = Anchor.TopCentre
-                        },
-                        textFlow = new TextFlowContainer
-                        {
-                            RelativeSizeAxes = Axes.X,
-                            AutoSizeAxes = Axes.Y,
-                            Anchor = Anchor.TopCentre,
-                            Origin = Anchor.TopCentre,
-                            TextAnchor = Anchor.TopCentre
-                        }
+                        Size = new Vector2(Style.COMPONENTS_WIDTH, Style.COMPONENTS_HEIGHT),
+                        PlaceholderText = "Beatmap difficulty ID",
+                        Anchor = Anchor.TopCentre,
+                        Origin = Anchor.TopCentre
+                    },
+                    new RA3Button
+                    {
+                        Size = new Vector2(Style.COMPONENTS_WIDTH, Style.COMPONENTS_HEIGHT),
+                        Text = "Find",
+                        Anchor = Anchor.TopCentre,
+                        Origin = Anchor.TopCentre,
+                        Action = Find
+                    },
+                    mapFlow = new FillFlowContainer
+                    {
+                        AutoSizeAxes = Axes.Both,
+                        Anchor = Anchor.TopCentre,
+                        Origin = Anchor.TopCentre
+                    },
+                    textFlow = new TextFlowContainer
+                    {
+                        RelativeSizeAxes = Axes.X,
+                        AutoSizeAxes = Axes.Y,
+                        Anchor = Anchor.TopCentre,
+                        Origin = Anchor.TopCentre,
+                        TextAnchor = Anchor.TopCentre
                     }
                 }
             };
@@ -96,7 +84,7 @@ namespace RefereeAssistant3.Visual
         {
             if (maps.Length == 0)
             {
-                textFlow.Text =  "No maps found. Make sure you entered the correct ";
+                textFlow.Text = "No maps found. Make sure you entered the correct ";
                 textFlow.AddText("difficulty", t => t.Font = new FontUsage("OpenSans-Bold"));
                 textFlow.AddText(" ID.");
                 return;

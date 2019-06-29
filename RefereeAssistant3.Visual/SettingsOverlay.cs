@@ -14,11 +14,7 @@ namespace RefereeAssistant3.Visual
         private BasicTextBox apiKeyTextBox;
         private readonly Core core;
 
-        public SettingsOverlay(Core core)
-        {
-            this.core = core;
-            RelativeSizeAxes = Axes.Both;
-        }
+        public SettingsOverlay(Core core) => this.core = core;
 
         [BackgroundDependencyLoader]
         private void Load(RefereeAssistant3Visual app)
@@ -34,7 +30,6 @@ namespace RefereeAssistant3.Visual
                 new BasicScrollContainer
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Padding = new MarginPadding(Style.SPACING),
                     Child = new FillFlowContainer
                     {
                         RelativeSizeAxes = Axes.X,

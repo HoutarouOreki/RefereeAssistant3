@@ -1,6 +1,5 @@
 ﻿using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
-using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using RefereeAssistant3.Main;
 using System.Collections.Generic;
@@ -23,21 +22,13 @@ namespace RefereeAssistant3.Visual
         public MapPickerOverlay(Core core)
         {
             this.core = core;
-            RelativeSizeAxes = Axes.Both;
             Children = new Drawable[]
             {
-                new Box
-                {
-                    RelativeSizeAxes = Axes.Both,
-                    Colour = FrameworkColour.GreenDarker,
-                    Alpha = 0.9f
-                },
                 new BasicScrollContainer
                 {
                     RelativeSizeAxes = Axes.Both,
                     Anchor = Anchor.TopCentre,
                     Origin = Anchor.TopCentre,
-                    Padding = new MarginPadding(Style.SPACING),
                     Child = mapFlowContainer = new FillFlowContainer
                     {
                         AutoSizeAxes = Axes.Both,
@@ -64,35 +55,35 @@ namespace RefereeAssistant3.Visual
             if (noMod.Any())
             {
                 mapFlowContainer.Add(new SpriteText
-                    { Text = "No mod", Font = font, Margin = new MarginPadding { Top = 8 } });
+                { Text = "No mod", Font = font, Margin = new MarginPadding { Top = 8 } });
                 AddMap(noMod);
             }
 
             if (hidden.Any())
             {
                 mapFlowContainer.Add(new SpriteText
-                    { Text = "Hidden", Font = font, Margin = new MarginPadding { Top = 8 } });
+                { Text = "Hidden", Font = font, Margin = new MarginPadding { Top = 8 } });
                 AddMap(hidden);
             }
 
             if (hardRock.Any())
             {
                 mapFlowContainer.Add(new SpriteText
-                    { Text = "Hard rock", Font = font, Margin = new MarginPadding { Top = 8 } });
+                { Text = "Hard rock", Font = font, Margin = new MarginPadding { Top = 8 } });
                 AddMap(hardRock);
             }
 
             if (doubleTime.Any())
             {
                 mapFlowContainer.Add(new SpriteText
-                    { Text = "Double time", Font = font, Margin = new MarginPadding { Top = 8 } });
+                { Text = "Double time", Font = font, Margin = new MarginPadding { Top = 8 } });
                 AddMap(doubleTime);
             }
 
             if (freeMod.Any())
             {
                 mapFlowContainer.Add(new SpriteText
-                    { Text = "Free mod", Font = font, Margin = new MarginPadding { Top = 8 } });
+                { Text = "Free mod", Font = font, Margin = new MarginPadding { Top = 8 } });
                 AddMap(freeMod);
             }
         }

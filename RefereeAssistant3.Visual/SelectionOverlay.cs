@@ -15,21 +15,13 @@ namespace RefereeAssistant3.Visual
 
         public SelectionOverlay(IEnumerable<T> items)
         {
-            RelativeSizeAxes = Axes.Both;
             Children = new Drawable[]
             {
-                new Box
-                {
-                    RelativeSizeAxes = Axes.Both,
-                    Colour = FrameworkColour.GreenDarker,
-                    Alpha = 0.9f
-                },
                 new BasicScrollContainer
                 {
                     RelativeSizeAxes = Axes.Y,
                     Anchor = Anchor.TopCentre,
                     Origin = Anchor.TopCentre,
-                    Padding = new MarginPadding { Vertical = Style.SPACING },
                     Width = Style.COMPONENTS_WIDTH,
                     Child = selectionButtons = new FillFlowContainer<SelectionOverlayButton>
                     {
