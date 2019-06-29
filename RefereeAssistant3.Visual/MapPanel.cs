@@ -1,8 +1,10 @@
-﻿using osu.Framework.Extensions.Color4Extensions;
+﻿using osu.Framework.Allocation;
+using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
+using osu.Framework.Graphics.Textures;
 using osu.Framework.Input.Events;
 using osuTK.Graphics;
 using RefereeAssistant3.Main;
@@ -13,10 +15,13 @@ namespace RefereeAssistant3.Visual
     public class MapPanel : ClickableContainer
     {
         private readonly Box background;
+        private readonly Sprite coverImage;
 
         public Map Map { get; }
 
         new public Action<Map> Action { get; set; }
+
+        private Color4 backgroundColour => Color4.Black;
 
         public MapPanel(Map map)
         {
@@ -28,7 +33,24 @@ namespace RefereeAssistant3.Visual
                 background = new Box
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Colour = FrameworkColour.Green,
+                    Colour = backgroundColour
+                },
+                new Container
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Masking = true,
+                    Colour = Color4.DarkGray,
+                    Alpha = 0.5f,
+                    Children = new Drawable[]
+                    {
+                        coverImage = new Sprite
+                        {
+                            RelativeSizeAxes = Axes.Both,
+                            FillMode = FillMode.Fill,
+                            Anchor = Anchor.Centre,
+                            Origin = Anchor.Centre
+                        }
+                    }
                 },
                 new FillFlowContainer
                 {
@@ -71,11 +93,11 @@ namespace RefereeAssistant3.Visual
 
         protected override bool OnHover(HoverEvent e)
         {
-            background.FadeColour(FrameworkColour.Green.Lighten(0.5f), 100, Easing.OutCubic);
+            background.FadeColour(new Color4(100, 100, 100, 255), 100, Easing.OutCubic);
             return true;
         }
 
-        protected override void OnHoverLost(HoverLostEvent e) => background.FadeColour(FrameworkColour.Green, 100);
+        protected override void OnHoverLost(HoverLostEvent e) => background.FadeColour(backgroundColour, 100);
 
         protected override bool OnClick(ClickEvent e)
         {
@@ -83,5 +105,8 @@ namespace RefereeAssistant3.Visual
             Action(Map);
             return true;
         }
+
+        [BackgroundDependencyLoader]
+        private void Load(TextureStore textures) => Map.DownloadCoverAsync(textures).ContinueWith(t => coverImage.Texture = Map.Cover);
     }
 }

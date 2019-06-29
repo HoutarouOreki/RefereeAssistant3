@@ -1,11 +1,14 @@
-﻿using osu.Framework.Extensions.Color4Extensions;
+﻿using osu.Framework.Allocation;
+using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
+using osu.Framework.Graphics.Textures;
 using osuTK;
 using osuTK.Graphics;
 using RefereeAssistant3.Main;
+using System.Threading.Tasks;
 
 namespace RefereeAssistant3.Visual
 {
@@ -31,6 +34,7 @@ namespace RefereeAssistant3.Visual
         }
 
         private Match match;
+        private TextureStore textures;
         private readonly ScoreNumberBox team1ScoreBox;
         private readonly ScoreNumberBox team2ScoreBox;
         private readonly SpriteText team1NameLabel;
@@ -48,6 +52,7 @@ namespace RefereeAssistant3.Visual
         private readonly Container matchStateContainer;
         private readonly Container selectedMapDisplayContainer;
         private readonly TextFlowContainer currentMapLabel;
+        private readonly Sprite currentMapCover;
 
         public MatchVisualManager(MapPickerOverlay mapPicker, MapFinderOverlay mapFinder)
         {
@@ -139,6 +144,12 @@ namespace RefereeAssistant3.Visual
                                 {
                                     RelativeSizeAxes = Axes.Both,
                                     Colour = FrameworkColour.Blue.Darken(1)
+                                },
+                                currentMapCover = new Sprite
+                                {
+                                    RelativeSizeAxes = Axes.Both,
+                                    FillMode = FillMode.Fill,
+                                    Alpha = 0.5f
                                 },
                                 currentMapLabel = new TextFlowContainer
                                 {
@@ -316,10 +327,24 @@ namespace RefereeAssistant3.Visual
             const Easing easing = Easing.OutCubic;
             const float duration = 200;
             var mapLabelWidth = 0.5f;
-            selectedMapDisplayContainer.MoveToX(Match.SelectedMap == null ? 0 : -mapLabelWidth, duration, easing);
+            selectedMapDisplayContainer.MoveToX(Match.SelectedMap == null ? 0 : -mapLabelWidth, duration, easing)
+                .OnComplete(d =>
+                {
+                    if (Match.SelectedMap == null)
+                        currentMapCover.Texture = null;
+                });
             matchStateContainer.ResizeWidthTo(Match.SelectedMap == null ? 1 : 1 - mapLabelWidth, duration, easing);
             currentMapLabel.Text = Match.SelectedMap != null ?
                 $"({Match.SelectedMap.MapCode}) {Match.SelectedMap}" : "";
+
+            if (Match?.SelectedMap != null)
+            {
+                Task.Run(() =>
+                {
+                    currentMapCover.Texture = Match.SelectedMap.DownloadCover(textures);
+                    currentMapCover.FadeTo(0.5f, 100);
+                });
+            }
 
             team1Button.Action = team2Button.Action = null;
             team1Button.Text.Text = team2Button.Text.Text = null;
@@ -482,5 +507,8 @@ namespace RefereeAssistant3.Visual
                 };
             }
         }
+
+        [BackgroundDependencyLoader]
+        private void Load(TextureStore textures) => this.textures = textures;
     }
 }
