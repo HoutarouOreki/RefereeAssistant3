@@ -14,7 +14,7 @@ namespace RefereeAssistant3.Main.Online.APIRequests
 
         public GetMap(int id, Core core)
         {
-            AddParameter("k", core.Config.ApiKey);
+            AddParameter("k", core.Config.APIKey);
             AddParameter("b", id.ToString());
         }
     }

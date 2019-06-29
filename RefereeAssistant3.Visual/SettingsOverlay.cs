@@ -1,7 +1,6 @@
 ﻿using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
-using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.UserInterface;
 using osuTK;
@@ -12,6 +11,10 @@ namespace RefereeAssistant3.Visual
     public class SettingsOverlay : RA3OverlayContainer
     {
         private BasicTextBox apiKeyTextBox;
+        private BasicScrollContainer scroll;
+        private FillFlowContainer warningContainer;
+        private BasicTextBox ircUsernameTextBox;
+        private BasicTextBox ircPasswordTextBox;
         private readonly Core core;
 
         public SettingsOverlay(Core core) => this.core = core;
@@ -21,55 +24,149 @@ namespace RefereeAssistant3.Visual
         {
             Children = new Drawable[]
             {
-                new Box
+                warningContainer = new FillFlowContainer
                 {
-                    RelativeSizeAxes = Axes.Both,
-                    Colour = FrameworkColour.GreenDarker,
-                    Alpha = 0.9f
+                    AutoSizeAxes = Axes.Both,
+                    Anchor = Anchor.Centre,
+                    Origin = Anchor.Centre,
+                    Direction = FillDirection.Vertical,
+                    Spacing = new Vector2(Style.SPACING),
+                    Children = new Drawable[]
+                    {
+                        new SpriteText
+                        {
+                            Anchor = Anchor.TopCentre,
+                            Origin = Anchor.TopCentre,
+                            Text = "WARNING",
+                            Font = new FontUsage(null, 30)
+                        },
+                        new TextFlowContainer
+                        {
+                            AutoSizeAxes = Axes.Y,
+                            Anchor = Anchor.TopCentre,
+                            Origin = Anchor.TopCentre,
+                            TextAnchor = Anchor.TopCentre,
+                            Width = 500,
+                            Text = "This screen contains sensitive data, like your IRC password and API Key.\n" +
+                            "Don't show it to anyone."
+                        },
+                        new RA3Button
+                        {
+                            Anchor = Anchor.TopCentre,
+                            Origin = Anchor.TopCentre,
+                            Size = new Vector2(Style.COMPONENTS_WIDTH, Style.COMPONENTS_HEIGHT),
+                            Text = "Proceed",
+                            Action = () =>
+                            {
+                                scroll.Show();
+                                warningContainer.Hide();
+                            }
+                        },
+                        new RA3Button
+                        {
+                            Anchor = Anchor.TopCentre,
+                            Origin = Anchor.TopCentre,
+                            Size = new Vector2(Style.COMPONENTS_WIDTH, Style.COMPONENTS_HEIGHT),
+                            Text = "Go back",
+                            BackgroundColour = FrameworkColour.YellowDark,
+                            Action = () => Hide()
+                        }
+                    }
                 },
-                new BasicScrollContainer
+                scroll = new BasicScrollContainer
                 {
-                    RelativeSizeAxes = Axes.Both,
+                    RelativeSizeAxes = Axes.Y,
+                    Anchor = Anchor.TopCentre,
+                    Origin = Anchor.TopCentre,
+                    Width = (Style.COMPONENTS_WIDTH * 2) + Style.SPACING,
+                    Alpha = 0,
                     Child = new FillFlowContainer
                     {
-                        RelativeSizeAxes = Axes.X,
-                        AutoSizeAxes = Axes.Y,
+                        AutoSizeAxes = Axes.Both,
                         Spacing = new Vector2(Style.SPACING),
-                        Direction = FillDirection.Vertical,
+                        Direction = FillDirection.Horizontal,
                         Children = new Drawable[]
                         {
-                            new SpriteText
+                            new FillFlowContainer
                             {
-                                Anchor = Anchor.TopCentre,
-                                Origin = Anchor.TopCentre,
-                                Text = "Api Key:"
-                            },
-                            apiKeyTextBox = new BasicTextBox
-                            {
+                                AutoSizeAxes = Axes.Y,
                                 Width = Style.COMPONENTS_WIDTH,
-                                Height = Style.COMPONENTS_HEIGHT,
-                                Anchor = Anchor.TopCentre,
-                                Origin = Anchor.TopCentre,
-                                PlaceholderText = "API Key",
-                                Text = core.Config.ApiKey
+                                Direction = FillDirection.Vertical,
+                                Spacing = new Vector2(Style.SPACING),
+                                Children = new Drawable[]
+                                {
+                                    new Label("API Key:"),
+                                    apiKeyTextBox = new BasicTextBox
+                                    {
+                                        Width = Style.COMPONENTS_WIDTH,
+                                        Height = Style.COMPONENTS_HEIGHT,
+                                        Anchor = Anchor.TopCentre,
+                                        Origin = Anchor.TopCentre,
+                                        PlaceholderText = "API Key"
+                                    },
+                                    new Label("IRC Username:"),
+                                    ircUsernameTextBox = new BasicTextBox
+                                    {
+                                        Width = Style.COMPONENTS_WIDTH,
+                                        Height = Style.COMPONENTS_HEIGHT,
+                                        Anchor = Anchor.TopCentre,
+                                        Origin = Anchor.TopCentre,
+                                        PlaceholderText = "IRC Username"
+                                    },
+                                    new Label("IRC Password:"),
+                                    ircPasswordTextBox = new BasicTextBox
+                                    {
+                                        Width = Style.COMPONENTS_WIDTH,
+                                        Height = Style.COMPONENTS_HEIGHT,
+                                        Anchor = Anchor.TopCentre,
+                                        Origin = Anchor.TopCentre,
+                                        PlaceholderText = "IRC Password"
+                                    }
+                                }
                             },
-                            new RA3Button
+                            new FillFlowContainer
                             {
-                                Anchor = Anchor.TopCentre,
-                                Origin = Anchor.TopCentre,
+                                AutoSizeAxes = Axes.Y,
                                 Width = Style.COMPONENTS_WIDTH,
-                                BackgroundColour = FrameworkColour.Blue,
-                                Action = () => app.Host.OpenUrlExternally("https://osu.ppy.sh/p/api"),
-                                Text = "Get your API Key here"
-                            },
-                            new RA3Button
-                            {
-                                Anchor = Anchor.TopCentre,
-                                Origin = Anchor.TopCentre,
-                                Width = Style.COMPONENTS_WIDTH,
-                                BackgroundColour = FrameworkColour.Green,
-                                Action = ApplySettings,
-                                Text = "Apply settings"
+                                Direction = FillDirection.Vertical,
+                                Spacing = new Vector2(Style.SPACING),
+                                Children = new Drawable[]
+                                {
+                                    new RA3Button
+                                    {
+                                        Anchor = Anchor.TopCentre,
+                                        Origin = Anchor.TopCentre,
+                                        Width = Style.COMPONENTS_WIDTH,
+                                        BackgroundColour = FrameworkColour.Blue,
+                                        Action = () => app.Host.OpenUrlExternally("https://osu.ppy.sh/p/api"),
+                                        Text = "Get your API Key here"
+                                    },
+                                    new RA3Button
+                                    {
+                                        Anchor = Anchor.TopCentre,
+                                        Origin = Anchor.TopCentre,
+                                        Width = Style.COMPONENTS_WIDTH,
+                                        BackgroundColour = FrameworkColour.Blue,
+                                        Action = () => app.Host.OpenUrlExternally("https://osu.ppy.sh/p/irc"),
+                                        Text = "Get your IRC details here"
+                                    },
+                                    new TextFlowContainer
+                                    {
+                                        RelativeSizeAxes = Axes.X,
+                                        AutoSizeAxes = Axes.Y,
+                                        Text = "Note: if the link to the API Key redirects you " +
+                                        "to the forums, wait for a minute and try accessing it again."
+                                    },
+                                    new RA3Button
+                                    {
+                                        Anchor = Anchor.TopCentre,
+                                        Origin = Anchor.TopCentre,
+                                        Width = Style.COMPONENTS_WIDTH,
+                                        BackgroundColour = FrameworkColour.Green,
+                                        Action = ApplySettings,
+                                        Text = "Apply settings"
+                                    }
+                                }
                             }
                         }
                     }
@@ -79,9 +176,32 @@ namespace RefereeAssistant3.Visual
 
         private void ApplySettings()
         {
-            core.Config.ApiKey = apiKeyTextBox.Text;
+            core.Config.APIKey = apiKeyTextBox.Text;
+            core.Config.IRCUsername = ircUsernameTextBox.Text;
+            core.Config.IRCPassword = ircPasswordTextBox.Text;
             core.SaveConfig();
             Hide();
+        }
+
+        protected override void PopIn()
+        {
+            scroll.Hide();
+            warningContainer.Show();
+            apiKeyTextBox.Text = core.Config.APIKey;
+            ircUsernameTextBox.Text = core.Config.IRCUsername;
+            ircPasswordTextBox.Text = core.Config.IRCPassword;
+            base.PopIn();
+        }
+
+        private class Label : SpriteText
+        {
+            public Label(string text)
+            {
+                Anchor = Anchor.TopCentre;
+                Origin = Anchor.TopCentre;
+                Text = text;
+                Margin = new MarginPadding { Bottom = -Style.SPACING };
+            }
         }
     }
 }

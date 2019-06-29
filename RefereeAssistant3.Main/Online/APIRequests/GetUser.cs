@@ -14,7 +14,7 @@ namespace RefereeAssistant3.Main.Online.APIRequests
 
         public GetUsers(int? userId, string username, Core core)
         {
-            AddParameter("k", core.Config.ApiKey);
+            AddParameter("k", core.Config.APIKey);
             AddParameter("u", userId.HasValue ? userId.Value.ToString() : username);
         }
     }

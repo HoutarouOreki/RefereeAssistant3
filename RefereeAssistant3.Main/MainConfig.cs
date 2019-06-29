@@ -2,6 +2,8 @@
 {
     public class MainConfig
     {
-        public string ApiKey;
+        public string APIKey;
+        public string IRCUsername;
+        public string IRCPassword;
     }
 }
