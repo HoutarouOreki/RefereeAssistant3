@@ -8,7 +8,6 @@ using osu.Framework.Graphics.Textures;
 using osuTK;
 using osuTK.Graphics;
 using RefereeAssistant3.Main;
-using System;
 using System.Threading.Tasks;
 
 namespace RefereeAssistant3.Visual
@@ -345,9 +344,10 @@ namespace RefereeAssistant3.Visual
             Task.Run(() =>
             {
                 if (Match?.SelectedMap != null)
-                    currentMapCover.Texture = Match.SelectedMap.DownloadCover(textures);
-                currentMapCover.FadeTo(0.5f, 100);
+                    currentMapCover.Texture = Match?.SelectedMap?.DownloadCover(textures);
             });
+            if (Match?.SelectedMap != null)
+                currentMapCover.FadeTo(0.5f, 200);
 
             team1Button.Action = team2Button.Action = null;
             team1Button.Text.Text = team2Button.Text.Text = null;

@@ -58,10 +58,14 @@ namespace RefereeAssistant3.Main
         }
 
         public DateTime MapStartTime { get; private set; }
-        public double? MapProgress => SelectedMap == null || !(CurrentProcedure == MatchProcedure.Playing || CurrentProcedure == MatchProcedure.PlayingWarmUp) ? (double?)null :
-            SelectedMap.Length > 0 ? (DateTime.UtcNow - MapStartTime).TotalSeconds / SelectedMap.Length : 1;
+        public double? MapProgress => SelectedMap == null || !(CurrentProcedure == MatchProcedure.Playing || CurrentProcedure == MatchProcedure.PlayingWarmUp) ? null :
+            SelectedMap.Length > 0 ? mapPlayTime / mapLength : 1;
         public string MapProgressText => SelectedMap == null ? null :
-            $@"{DateTime.UtcNow - MapStartTime:m\:ss}/{TimeSpan.FromSeconds(SelectedMap.Length):m\:ss}";
+            $@"{TimeSpan.FromSeconds(mapPlayTime.Value):m\:ss}/{TimeSpan.FromSeconds(mapLength.Value):m\:ss}";
+
+        private bool isDoubleTime => TournamentStage.Mappool.DoubleTime.Contains(SelectedMap);
+        private double? mapPlayTime => (DateTime.UtcNow - MapStartTime).TotalSeconds * (isDoubleTime ? 3 / 2d : 1);
+        private double? mapLength => SelectedMap != null ? SelectedMap.Length * (isDoubleTime ? 2 / 3d : 1d) : (double?)null;
 
         private Team selectedWinner;
         public Team SelectedWinner
