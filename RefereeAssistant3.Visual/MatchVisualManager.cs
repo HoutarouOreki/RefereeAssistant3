@@ -379,11 +379,13 @@ namespace RefereeAssistant3.Visual
                 case MatchProcedure.Banning2:
                 case MatchProcedure.BanningRollWinner:
                 case MatchProcedure.BanningRollLoser:
+                    OnBanningProcedure();
+                    break;
                 case MatchProcedure.Picking1:
                 case MatchProcedure.Picking2:
                 case MatchProcedure.PickingRollWinner:
                 case MatchProcedure.PickingRollLoser:
-                    OnBanningOrPickingProcedure();
+                    OnPickingProcedure();
                     break;
                 case MatchProcedure.GettingReady:
                     OnGettingReadyProcedure();
@@ -445,14 +447,21 @@ namespace RefereeAssistant3.Visual
         {
             mapPickerButton.Action = mapFinder.Show;
             if (Match.SelectedMap != null)
-                EnableProceedButton("Proceed");
+                EnableProceedButton($"Confirm warmup pick");
         }
 
-        private void OnBanningOrPickingProcedure()
+        private void OnBanningProcedure()
         {
             mapPickerButton.Action = mapPicker.Show;
             if (Match.SelectedMap != null)
-                EnableProceedButton("Proceed");
+                EnableProceedButton($"Confirm ban");
+        }
+
+        private void OnPickingProcedure()
+        {
+            mapPickerButton.Action = mapPicker.Show;
+            if (Match.SelectedMap != null)
+                EnableProceedButton($"Confirm pick");
         }
 
         private void OnGettingReadyProcedure() => EnableProceedButton("Start match");
@@ -485,7 +494,7 @@ namespace RefereeAssistant3.Visual
 
         private void ColourProceedButton(Team team)
         {
-            const float darken_amount = 1.5f;
+            const float darken_amount = 1f;
             if (team == Match.Team1)
                 proceedButton.BackgroundColour = Style.Red.Darken(darken_amount);
             else if (team == Match.Team2)
