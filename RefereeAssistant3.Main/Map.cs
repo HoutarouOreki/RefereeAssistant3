@@ -1,4 +1,5 @@
-﻿using osu.Framework.Graphics.Textures;
+﻿using Newtonsoft.Json;
+using osu.Framework.Graphics.Textures;
 using osu.Framework.Threading;
 using RefereeAssistant3.Main.Online.APIRequests;
 using System;
@@ -10,7 +11,10 @@ namespace RefereeAssistant3.Main
     {
         public string MapCode;
         public int? MapsetId;
+
+        [JsonRequired]
         public int? DifficultyId;
+
         public string Artist;
         public string Title;
         public string DifficultyName;
