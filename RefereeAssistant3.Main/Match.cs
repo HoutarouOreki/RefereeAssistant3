@@ -57,6 +57,12 @@ namespace RefereeAssistant3.Main
             }
         }
 
+        public DateTime MapStartTime { get; private set; }
+        public double? MapProgress => SelectedMap == null || !(CurrentProcedure == MatchProcedure.Playing || CurrentProcedure == MatchProcedure.PlayingWarmUp) ? (double?)null :
+            SelectedMap.Length > 0 ? (DateTime.UtcNow - MapStartTime).TotalSeconds / SelectedMap.Length : 1;
+        public string MapProgressText => SelectedMap == null ? null :
+            $@"{DateTime.UtcNow - MapStartTime:m\:ss}/{TimeSpan.FromSeconds(SelectedMap.Length):m\:ss}";
+
         private Team selectedWinner;
         public Team SelectedWinner
         {
@@ -323,8 +329,8 @@ namespace RefereeAssistant3.Main
         {
             if (CurrentProcedure == MatchProcedure.Rolling)
                 RollWinner = null;
-            if (CurrentProcedure == MatchProcedure.Banning1 || CurrentProcedure == MatchProcedure.Banning2)
-                SelectedMap = null;
+            if (CurrentProcedure == MatchProcedure.Playing || CurrentProcedure == MatchProcedure.PlayingWarmUp)
+                MapStartTime = DateTime.UtcNow;
         }
 
         public void ReverseLastOperation() => Updated?.Invoke();

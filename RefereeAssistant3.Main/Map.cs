@@ -19,6 +19,7 @@ namespace RefereeAssistant3.Main
         public string Title;
         public string DifficultyName;
         public Texture Cover;
+        public int Length;
 
         private bool downloaded;
 
@@ -83,6 +84,7 @@ namespace RefereeAssistant3.Main
             Artist = apiMap.Artist;
             Title = apiMap.Title;
             DifficultyName = apiMap.DifficultyName;
+            Length = apiMap.Length;
         }
 
         public override string ToString() => $"{Artist} - {Title} [{DifficultyName}]";

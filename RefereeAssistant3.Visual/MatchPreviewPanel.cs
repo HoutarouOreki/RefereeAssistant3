@@ -3,6 +3,7 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input.Events;
+using osu.Framework.Logging;
 using osuTK.Graphics;
 using RefereeAssistant3.Main;
 
@@ -18,6 +19,7 @@ namespace RefereeAssistant3.Visual
         private readonly SpriteText scoreText;
         private readonly SpriteText team1Label;
         private readonly SpriteText team2Label;
+        private readonly Box backgroundFill;
 
         public MatchPreviewPanel(Match match)
         {
@@ -30,6 +32,12 @@ namespace RefereeAssistant3.Visual
                 {
                     RelativeSizeAxes = Axes.Both,
                     Colour = FrameworkColour.Blue
+                },
+                backgroundFill = new Box
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Colour = FrameworkColour.YellowGreen,
+                    EdgeSmoothness = new osuTK.Vector2(1, 0)
                 },
                 hoverOverlay = new Box { RelativeSizeAxes = Axes.Both, Alpha = 0, Colour = Color4.Gray },
                 new FillFlowContainer
@@ -86,6 +94,14 @@ namespace RefereeAssistant3.Visual
         {
             team1Label.X = -scoreText.DrawWidth;
             team2Label.X = scoreText.DrawWidth;
+            if (Match.MapProgress.HasValue)
+            {
+                backgroundFill.Width = (float)Match.MapProgress.Value;
+                Logger.Log($"{Match.MapProgress.Value} | {backgroundFill.DrawWidth}");
+                stateLabel.Text = $"{Match.ReadableCurrentState} ({Match.MapProgressText})";
+            }
+            else
+                backgroundFill.Width = 0;
             base.Update();
         }
 

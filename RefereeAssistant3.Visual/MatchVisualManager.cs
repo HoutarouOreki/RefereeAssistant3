@@ -8,6 +8,7 @@ using osu.Framework.Graphics.Textures;
 using osuTK;
 using osuTK.Graphics;
 using RefereeAssistant3.Main;
+using System;
 using System.Threading.Tasks;
 
 namespace RefereeAssistant3.Visual
@@ -502,6 +503,8 @@ namespace RefereeAssistant3.Visual
         protected override void Update()
         {
             matchControls.Height = DrawHeight - (2 * team_name_score_height) - match_state_height;
+            if ((Match?.CurrentProcedure == MatchProcedure.Playing || Match?.CurrentProcedure == MatchProcedure.PlayingWarmUp) && Match.SelectedMap.Length > 0)
+                matchStateLabel.Text = $@"{Match.ReadableCurrentState} ({Match.MapProgressText})";
             base.Update();
         }
 
