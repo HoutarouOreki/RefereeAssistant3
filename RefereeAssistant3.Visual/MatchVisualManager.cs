@@ -421,17 +421,9 @@ namespace RefereeAssistant3.Visual
 
         private void OnRollingProcedure()
         {
-            team1Button.Action = () =>
-            {
-                Match.RollWinner = Match.Team1;
-                GenerateLayout();
-            };
+            team1Button.Action = () => Match.RollWinner = Match.Team1;
             team1Button.Text.Text = $"{Match.Team1} won roll";
-            team2Button.Action = () =>
-            {
-                Match.RollWinner = Match.Team2;
-                GenerateLayout();
-            };
+            team2Button.Action = () => Match.RollWinner = Match.Team2;
             team2Button.Text.Text = $"{Match.Team2} won roll";
             if (Match.RollWinner != null)
             {
@@ -473,20 +465,23 @@ namespace RefereeAssistant3.Visual
             team2Button.Text.Text = $"{Match.Team2} won";
             team1Button.Action = () =>
             {
-                proceedButton.Action = () => Match.FinishPlaying(Match.Team1);
-                proceedButton.Text = "Proceed";
-                team1Button.IsSelected = true;
-                team2Button.IsSelected = false;
+                Match.SelectedWinner = Match.Team1;
                 ColourProceedButton(Match.Team1);
             };
             team2Button.Action = () =>
             {
-                proceedButton.Action = () => Match.FinishPlaying(Match.Team2);
-                proceedButton.Text = "Proceed";
-                team1Button.IsSelected = false;
-                team2Button.IsSelected = true;
+                Match.SelectedWinner = Match.Team2;
                 ColourProceedButton(Match.Team2);
             };
+            if (Match.SelectedWinner != null)
+            {
+                EnableProceedButton($"Proceed");
+                ColourProceedButton(Match.SelectedWinner);
+                if (Match.Team1 == Match.SelectedWinner)
+                    team1Button.IsSelected = true;
+                if (Match.Team2 == Match.SelectedWinner)
+                    team2Button.IsSelected = true;
+            }
         }
 
         private void OnPlayingWarmUpProcedure() => EnableProceedButton("Finish warmup");

@@ -30,7 +30,16 @@ namespace RefereeAssistant3.Main
         public MatchProcedure CurrentProcedure => Procedures[CurrentProcedureIndex];
         public int CurrentProcedureIndex { get; private set; }
 
-        public Team RollWinner;
+        private Team rollWinner;
+        public Team RollWinner
+        {
+            get => rollWinner;
+            set
+            {
+                rollWinner = value;
+                Updated();
+            }
+        }
         public Team RollLoser => RollWinner == null ? null :
             Team1 == RollWinner ? Team2 : Team1;
 
@@ -44,6 +53,17 @@ namespace RefereeAssistant3.Main
             set
             {
                 selectedMap = value;
+                Updated();
+            }
+        }
+
+        private Team selectedWinner;
+        public Team SelectedWinner
+        {
+            get => selectedWinner;
+            set
+            {
+                selectedWinner = value;
                 Updated();
             }
         }
@@ -267,7 +287,7 @@ namespace RefereeAssistant3.Main
                     snapshotName = $"Set up the tiebreaker";
                     break;
                 case MatchProcedure.Playing:
-                    return false;
+                    return FinishPlaying();
                 case MatchProcedure.PlayingWarmUp:
                     return FinishWarmUp();
                 case MatchProcedure.FreePoint1:
@@ -324,13 +344,14 @@ namespace RefereeAssistant3.Main
             team.PickedMaps.Add(SelectedMap);
         }
 
-        public bool FinishPlaying(Team winner)
+        private bool FinishPlaying()
         {
             if (CurrentProcedure != MatchProcedure.Playing)
                 return false;
-            Scores[winner]++;
-            var snapshotName = $"{winner} won {SelectedMap}";
+            Scores[SelectedWinner]++;
+            var snapshotName = $"{SelectedWinner} won {SelectedMap}";
             SelectedMap = null;
+            SelectedWinner = null;
             return GoToNextProcedure(snapshotName);
         }
 
