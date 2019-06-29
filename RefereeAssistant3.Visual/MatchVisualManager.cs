@@ -220,11 +220,11 @@ namespace RefereeAssistant3.Visual
                         },
                         new CircularContainer
                         {
-                            Size = new Vector2(proceed_button_width + 2),
+                            Size = new Vector2(proceed_button_width + 1),
                             Anchor = Anchor.TopCentre,
                             Origin = Anchor.Centre,
                             Masking = true,
-                            MaskingSmoothness = 3,
+                            MaskingSmoothness = 1,
                             Child = new Box { RelativeSizeAxes = Axes.Both, Colour = Color4.Black }
                         },
                         new CircularContainer
@@ -275,6 +275,7 @@ namespace RefereeAssistant3.Visual
                             Y = proceed_button_width / 2,
                             AutoSizeAxes = Axes.Y,
                             Direction = FillDirection.Horizontal,
+                            Depth = 2,
                             Children = new Drawable[]
                             {
                                 new RA3Button
@@ -473,7 +474,7 @@ namespace RefereeAssistant3.Visual
             team1Button.Action = () =>
             {
                 proceedButton.Action = () => Match.FinishPlaying(Match.Team1);
-                proceedButton.Text = $"Confirm: {Match.Team1} won";
+                proceedButton.Text = "Proceed";
                 team1Button.IsSelected = true;
                 team2Button.IsSelected = false;
                 ColourProceedButton(Match.Team1);
@@ -481,7 +482,7 @@ namespace RefereeAssistant3.Visual
             team2Button.Action = () =>
             {
                 proceedButton.Action = () => Match.FinishPlaying(Match.Team2);
-                proceedButton.Text = $"Confirm: {Match.Team2} won";
+                proceedButton.Text = "Proceed";
                 team1Button.IsSelected = false;
                 team2Button.IsSelected = true;
                 ColourProceedButton(Match.Team2);
