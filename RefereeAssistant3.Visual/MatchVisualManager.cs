@@ -15,10 +15,11 @@ namespace RefereeAssistant3.Visual
     public class MatchVisualManager : Container
     {
         private const int proceed_button_width = 240;
-        private static readonly float team_name_score_height = 84;
-        private static readonly float team_name_score_padding = 18;
-        private static readonly float team_name_score_font_size = team_name_score_height - (2 * team_name_score_padding);
-        private static readonly float match_state_height = 42;
+        private const float team_name_score_height = 84;
+        private const float team_name_score_padding = 18;
+        private const float team_name_score_font_size = team_name_score_height - (2 * team_name_score_padding);
+        private const float match_state_height = 42;
+        private static readonly Color4 proceed_button_default_colour = FrameworkColour.Blue;
 
         public Match Match
         {
@@ -238,7 +239,7 @@ namespace RefereeAssistant3.Visual
                                 Anchor = Anchor.BottomCentre,
                                 Origin = Anchor.BottomCentre,
                                 Size = new Vector2(1, 0.6f),
-                                BackgroundColour = FrameworkColour.Blue,
+                                BackgroundColour = proceed_button_default_colour,
                                 Text = "Proceed"
                             }
                         },
@@ -323,6 +324,8 @@ namespace RefereeAssistant3.Visual
 
             matchStateLabel.Text = "";
             matchStateLabel.AddText(match.ReadableCurrentState);
+
+            ColourProceedButton(null);
 
             const Easing easing = Easing.OutCubic;
             const float duration = 200;
@@ -432,6 +435,7 @@ namespace RefereeAssistant3.Visual
             if (Match.RollWinner != null)
             {
                 EnableProceedButton($"Set {Match.RollWinner}\nas roll winner");
+                ColourProceedButton(Match.RollWinner);
                 if (Match.Team1 == Match.RollWinner)
                     team1Button.IsSelected = true;
                 if (Match.Team2 == Match.RollWinner)
@@ -463,17 +467,34 @@ namespace RefereeAssistant3.Visual
             {
                 proceedButton.Action = () => Match.FinishPlaying(Match.Team1);
                 proceedButton.Text = $"Confirm: {Match.Team1} won";
+                team1Button.IsSelected = true;
+                team2Button.IsSelected = false;
+                ColourProceedButton(Match.Team1);
             };
             team2Button.Action = () =>
             {
                 proceedButton.Action = () => Match.FinishPlaying(Match.Team2);
                 proceedButton.Text = $"Confirm: {Match.Team2} won";
+                team1Button.IsSelected = false;
+                team2Button.IsSelected = true;
+                ColourProceedButton(Match.Team2);
             };
         }
 
         private void OnPlayingWarmUpProcedure() => EnableProceedButton("Finish warmup");
 
         private void OnFreePointProcedure() => EnableProceedButton("Confirm point");
+
+        private void ColourProceedButton(Team team)
+        {
+            const float darken_amount = 1.5f;
+            if (team == Match.Team1)
+                proceedButton.BackgroundColour = Style.Red.Darken(darken_amount);
+            else if (team == Match.Team2)
+                proceedButton.BackgroundColour = Style.Blue.Darken(darken_amount);
+            else
+                proceedButton.BackgroundColour = proceed_button_default_colour;
+        }
 
         protected override void Update()
         {
