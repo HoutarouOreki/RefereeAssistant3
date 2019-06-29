@@ -40,6 +40,23 @@ namespace RefereeAssistant3.Visual
                         Origin = Anchor.TopCentre,
                         Action = Find
                     },
+                    new RA3Button
+                    {
+                        Size = new Vector2(Style.COMPONENTS_WIDTH, Style.COMPONENTS_HEIGHT),
+                        Text = "Use placeholder map",
+                        Anchor = Anchor.TopCentre,
+                        Origin = Anchor.TopCentre,
+                        BackgroundColour = FrameworkColour.YellowGreen,
+                        Action = () => MapSelected(new Map
+                        {
+                            Artist = "Artist",
+                            DifficultyId = -1,
+                            DifficultyName = "Difficulty",
+                            MapCode = "Code",
+                            MapsetId = -1,
+                            Title = "Title"
+                        })
+                    },
                     mapFlow = new FillFlowContainer
                     {
                         AutoSizeAxes = Axes.Both,
