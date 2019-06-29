@@ -436,12 +436,12 @@ namespace RefereeAssistant3.Visual
             team2Button.Text.Text = $"{Match.Team2} won";
             team1Button.Action = () =>
             {
-                proceedButton.Action = () => Match.FinishMap(Match.Team1);
+                proceedButton.Action = () => Match.FinishPlaying(Match.Team1);
                 proceedButton.Text = $"Confirm: {Match.Team1} won";
             };
             team2Button.Action = () =>
             {
-                proceedButton.Action = () => Match.FinishMap(Match.Team2);
+                proceedButton.Action = () => Match.FinishPlaying(Match.Team2);
                 proceedButton.Text = $"Confirm: {Match.Team2} won";
             };
         }

@@ -269,8 +269,7 @@ namespace RefereeAssistant3.Main
                 case MatchProcedure.Playing:
                     return false;
                 case MatchProcedure.PlayingWarmUp:
-                    snapshotName = $"Finish warmup";
-                    break;
+                    return FinishWarmUp();
                 case MatchProcedure.FreePoint1:
                     snapshotName = $"Free point for {Team1}";
                     Scores[Team1]++;
@@ -325,12 +324,21 @@ namespace RefereeAssistant3.Main
             team.PickedMaps.Add(SelectedMap);
         }
 
-        public bool FinishMap(Team winner)
+        public bool FinishPlaying(Team winner)
         {
             if (CurrentProcedure != MatchProcedure.Playing)
                 return false;
             Scores[winner]++;
             var snapshotName = $"{winner} won {SelectedMap}";
+            SelectedMap = null;
+            return GoToNextProcedure(snapshotName);
+        }
+
+        private bool FinishWarmUp()
+        {
+            if (CurrentProcedure != MatchProcedure.PlayingWarmUp)
+                return false;
+            var snapshotName = $"Finished playing warmup {SelectedMap}";
             SelectedMap = null;
             return GoToNextProcedure(snapshotName);
         }
