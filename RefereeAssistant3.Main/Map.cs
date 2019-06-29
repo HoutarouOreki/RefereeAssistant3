@@ -42,6 +42,8 @@ namespace RefereeAssistant3.Main
             }
         }
 
+        public Map(APIMap apiMap) => SetPropertiesFromAPIMap(apiMap);
+
         public async Task DownloadDataAsync(Core core, Action<Map> OnLoaded = null, Scheduler scheduler = null)
         {
             if (downloaded)
@@ -50,15 +52,20 @@ namespace RefereeAssistant3.Main
             if (res != null && res.Length > 0)
             {
                 var apiMap = res[0];
-                MapsetId = apiMap.MapsetId;
-                DifficultyId = apiMap.Id;
-                Artist = apiMap.Artist;
-                Title = apiMap.Title;
-                DifficultyName = apiMap.DifficultyName;
+                SetPropertiesFromAPIMap(apiMap);
                 downloaded = true;
             }
             if (scheduler != null && OnLoaded != null)
                 scheduler.Add(() => OnLoaded?.Invoke(this));
+        }
+
+        private void SetPropertiesFromAPIMap(APIMap apiMap)
+        {
+            MapsetId = apiMap.MapsetId;
+            DifficultyId = apiMap.Id;
+            Artist = apiMap.Artist;
+            Title = apiMap.Title;
+            DifficultyName = apiMap.DifficultyName;
         }
 
         public override string ToString() => $"{Artist} - {Title} [{DifficultyName}]";

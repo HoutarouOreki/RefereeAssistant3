@@ -152,7 +152,7 @@ namespace RefereeAssistant3.Main
 
             Procedures.Add(procedure);
             Procedures.Add(MatchProcedure.GettingReady);
-            Procedures.Add(MatchProcedure.Playing);
+            Procedures.Add(MatchProcedure.PlayingWarmUp);
         }
 
         private void GenerateRollingProcedure() => Procedures.Add(MatchProcedure.Rolling);
@@ -268,6 +268,9 @@ namespace RefereeAssistant3.Main
                     break;
                 case MatchProcedure.Playing:
                     return false;
+                case MatchProcedure.PlayingWarmUp:
+                    snapshotName = $"Finish warmup";
+                    break;
                 case MatchProcedure.FreePoint1:
                     snapshotName = $"Free point for {Team1}";
                     Scores[Team1]++;

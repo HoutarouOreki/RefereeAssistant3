@@ -6,8 +6,6 @@ using osu.Framework.Graphics.Sprites;
 using osuTK;
 using osuTK.Graphics;
 using RefereeAssistant3.Main;
-using System;
-using System.Linq;
 
 namespace RefereeAssistant3.Visual
 {
@@ -43,6 +41,7 @@ namespace RefereeAssistant3.Visual
         private readonly SpriteText stageLabel;
         private readonly RA3Button mapPickerButton;
         private readonly MapPickerOverlay mapPicker;
+        private readonly MapFinderOverlay mapFinder;
         private readonly TeamButton team1Button;
         private readonly TeamButton team2Button;
         private readonly RA3Button proceedButton;
@@ -50,9 +49,10 @@ namespace RefereeAssistant3.Visual
         private readonly Container selectedMapDisplayContainer;
         private readonly TextFlowContainer currentMapLabel;
 
-        public MatchVisualManager(MapPickerOverlay mapPicker)
+        public MatchVisualManager(MapPickerOverlay mapPicker, MapFinderOverlay mapFinder)
         {
             this.mapPicker = mapPicker;
+            this.mapFinder = mapFinder;
             RelativeSizeAxes = Axes.Both;
             Masking = true;
             Children = new Drawable[]
@@ -341,12 +341,10 @@ namespace RefereeAssistant3.Visual
                     OnSettingUpProcedure();
                     break;
                 case MatchProcedure.WarmUp1:
-                    break;
                 case MatchProcedure.WarmUp2:
-                    break;
                 case MatchProcedure.WarmUpRollWinner:
-                    break;
                 case MatchProcedure.WarmUpRollLoser:
+                    OnWarmUpProcedure();
                     break;
                 case MatchProcedure.Rolling:
                     OnRollingProcedure();
@@ -368,6 +366,9 @@ namespace RefereeAssistant3.Visual
                     break;
                 case MatchProcedure.Playing:
                     OnPlayingProcedure();
+                    break;
+                case MatchProcedure.PlayingWarmUp:
+                    OnPlayingWarmUpProcedure();
                     break;
                 case MatchProcedure.FreePoint1:
                 case MatchProcedure.FreePoint2:
@@ -413,6 +414,13 @@ namespace RefereeAssistant3.Visual
             }
         }
 
+        private void OnWarmUpProcedure()
+        {
+            mapPickerButton.Action = mapFinder.Show;
+            if (Match.SelectedMap != null)
+                EnableProceedButton("Proceed");
+        }
+
         private void OnBanningOrPickingProcedure()
         {
             mapPickerButton.Action = mapPicker.Show;
@@ -437,6 +445,8 @@ namespace RefereeAssistant3.Visual
                 proceedButton.Text = $"Confirm: {Match.Team2} won";
             };
         }
+
+        private void OnPlayingWarmUpProcedure() => EnableProceedButton("Finish warmup");
 
         private void OnFreePointProcedure() => EnableProceedButton("Confirm point");
 

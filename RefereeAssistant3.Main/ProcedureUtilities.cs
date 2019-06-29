@@ -38,7 +38,8 @@ namespace RefereeAssistant3.Main
 
             { MatchProcedure.TieBreaker, "Tiebreaker!" },
 
-            { MatchProcedure.Playing, $"Playing" + (match.SelectedMap != null ? $" {match.SelectedMap?.MapCode}: {match.SelectedMap}" : "") },
+            { MatchProcedure.Playing, "Playing" },
+            { MatchProcedure.PlayingWarmUp, "Playing warmup" },
 
             { MatchProcedure.FreePoint1, $"{match.Team1} receives a free point" },
             { MatchProcedure.FreePoint2, $"{match.Team2} receives a free point" },
@@ -96,6 +97,7 @@ namespace RefereeAssistant3.Main
         TieBreaker = 60,
 
         Playing = 70,
+        PlayingWarmUp = 71,
 
         FreePoint1 = 81,
         FreePoint2 = 82,

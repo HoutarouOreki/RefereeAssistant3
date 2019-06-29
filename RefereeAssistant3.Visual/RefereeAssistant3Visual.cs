@@ -68,6 +68,7 @@ namespace RefereeAssistant3.Visual
             var newMatchOverlay = new NewMatchOverlay(core);
             var settingsOverlay = new SettingsOverlay(core);
             var mapPickerOverlay = new MapPickerOverlay(core);
+            var mapFinderOverlay = new MapFinderOverlay(core);
             Children = new Drawable[]
             {
                 new Box { RelativeSizeAxes = Axes.Both, Colour = FrameworkColour.GreenDarker },
@@ -80,7 +81,7 @@ namespace RefereeAssistant3.Visual
                         new Container
                         {
                             RelativeSizeAxes = Axes.Both,
-                            Child = matchVisualManager = new MatchVisualManager(mapPickerOverlay)
+                            Child = matchVisualManager = new MatchVisualManager(mapPickerOverlay, mapFinderOverlay)
                         }
                     }
                 },
@@ -138,6 +139,7 @@ namespace RefereeAssistant3.Visual
                 newMatchOverlay,
                 settingsOverlay,
                 mapPickerOverlay,
+                mapFinderOverlay
             };
             core.NewMatchAdded += OnNewMatchAdded;
         }
