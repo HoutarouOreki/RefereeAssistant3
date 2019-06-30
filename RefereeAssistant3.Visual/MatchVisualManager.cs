@@ -8,6 +8,7 @@ using osu.Framework.Graphics.Textures;
 using osuTK;
 using osuTK.Graphics;
 using RefereeAssistant3.Main;
+using System;
 using System.Threading.Tasks;
 
 namespace RefereeAssistant3.Visual
@@ -57,6 +58,7 @@ namespace RefereeAssistant3.Visual
         private readonly Sprite currentMapCover;
         private readonly Core core;
         private readonly RA3Button matchSubmissionButton;
+        private readonly RA3Button undoButton;
 
         public MatchVisualManager(Core core, MapPickerOverlay mapPicker, MapFinderOverlay mapFinder, MatchPostOverlay postOverlay)
         {
@@ -289,7 +291,7 @@ namespace RefereeAssistant3.Visual
                                     Size = new Vector2(1/4f, Style.COMPONENTS_HEIGHT),
                                     Text = "Match submission"
                                 },
-                                new RA3Button
+                                undoButton = new RA3Button
                                 {
                                     RelativeSizeAxes = Axes.X,
                                     Size = new Vector2(1/4f, Style.COMPONENTS_HEIGHT),
@@ -371,6 +373,8 @@ namespace RefereeAssistant3.Visual
             });
             if (Match?.SelectedMap != null)
                 currentMapCover.FadeTo(0.5f, 200);
+
+            undoButton.Action = Match.History.Count > 0 ? Match.ReverseLastOperation : (Action)null;
 
             team1Button.Action = team2Button.Action = null;
             team1Button.Text.Text = team2Button.Text.Text = null;

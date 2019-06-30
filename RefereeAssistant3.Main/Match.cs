@@ -346,9 +346,9 @@ namespace RefereeAssistant3.Main
 
         private bool GoToNextProcedure(string snapshotName)
         {
+            history.Add(new MatchSnapshot(this, snapshotName));
             CurrentProcedureIndex++;
             DoNewProcedureJobs();
-            history.Add(new MatchSnapshot(this, snapshotName));
             Updated?.Invoke();
             return true;
         }
@@ -361,7 +361,27 @@ namespace RefereeAssistant3.Main
                 MapStartTime = DateTime.UtcNow;
         }
 
-        public void ReverseLastOperation() => Updated?.Invoke();
+        public void ReverseLastOperation()
+        {
+            if (History.Count == 0)
+                return;
+            var lastSnapshot = History.Last();
+
+            CurrentProcedureIndex = lastSnapshot.ProcedureIndex;
+            Scores[Team1] = lastSnapshot.Team1Score;
+            Scores[Team2] = lastSnapshot.Team2Score;
+            Team1.PickedMaps = lastSnapshot.Team1PickedMaps.Select(m => new Map(m)).ToList();
+            Team2.PickedMaps = lastSnapshot.Team2PickedMaps.Select(m => new Map(m)).ToList();
+            Team1.BannedMaps = lastSnapshot.Team1BannedMaps.Select(m => new Map(m)).ToList();
+            Team2.BannedMaps = lastSnapshot.Team2BannedMaps.Select(m => new Map(m)).ToList();
+            rollWinner = lastSnapshot.RollWinnerTeamName == Team1.TeamName ? Team1 :
+                lastSnapshot.RollWinnerTeamName == Team2.TeamName ? Team2 : null;
+
+            cancelledOperations.Add(lastSnapshot);
+            history.Remove(lastSnapshot);
+
+            Updated?.Invoke();
+        }
 
         private void SendAlert(string message) => Alert.Invoke(this, message);
 
