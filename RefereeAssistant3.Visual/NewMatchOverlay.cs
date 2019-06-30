@@ -281,7 +281,7 @@ namespace RefereeAssistant3.Visual
                 { Text = "Loading team members..", Anchor = Anchor.TopLeft, Origin = Anchor.TopLeft };
                 var componentsToLoad = new List<AvatarUsernameLine>();
                 foreach (var member in team1.Members)
-                    componentsToLoad.Add(new AvatarUsernameLine(member, false, core));
+                    componentsToLoad.Add(new AvatarUsernameLine(member, false));
                 LoadComponentsAsync(componentsToLoad, ds => team1MembersDisplay.ChildrenEnumerable = ds);
             }
 
@@ -291,7 +291,7 @@ namespace RefereeAssistant3.Visual
                 { Text = "Loading team members..", Anchor = Anchor.TopRight, Origin = Anchor.TopRight };
                 var componentsToLoad = new List<AvatarUsernameLine>();
                 foreach (var member in team2.Members)
-                    componentsToLoad.Add(new AvatarUsernameLine(member, true, core));
+                    componentsToLoad.Add(new AvatarUsernameLine(member, true));
                 LoadComponentsAsync(componentsToLoad, ds => team2MembersDisplay.ChildrenEnumerable = ds);
             }
 
@@ -302,13 +302,11 @@ namespace RefereeAssistant3.Visual
         {
             private readonly Player player;
             private readonly bool avatarOnLeft;
-            private readonly Core core;
 
-            public AvatarUsernameLine(Player player, bool avatarOnLeft, Core core)
+            public AvatarUsernameLine(Player player, bool avatarOnLeft)
             {
                 this.player = player;
                 this.avatarOnLeft = avatarOnLeft;
-                this.core = core;
                 Anchor = avatarOnLeft ? Anchor.TopLeft : Anchor.TopRight;
                 Origin = avatarOnLeft ? Anchor.TopLeft : Anchor.TopRight;
                 Spacing = new Vector2(6);
@@ -340,7 +338,7 @@ namespace RefereeAssistant3.Visual
                 Add(avatarContainer);
                 Add(usernameText);
                 Add(idText);
-                player.DownloadDataAsync(textures, core, p =>
+                player.DownloadDataAsync(textures, p =>
                 {
                     usernameText.Text = p.Username;
                     avatarContainer.Child = new Sprite { RelativeSizeAxes = Axes.Both, Texture = p.Avatar };

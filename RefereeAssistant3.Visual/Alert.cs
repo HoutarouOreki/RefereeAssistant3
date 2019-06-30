@@ -38,7 +38,7 @@ namespace RefereeAssistant3.Visual
                         Height = Style.COMPONENTS_HEIGHT,
                         Anchor = Anchor.Centre,
                         Origin = Anchor.Centre,
-                        Action = PopOut
+                        Action = Hide
                     }
                 }
             };

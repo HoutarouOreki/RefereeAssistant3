@@ -8,6 +8,8 @@ using osu.Framework.Graphics.Textures;
 using osuTK;
 using osuTK.Graphics;
 using RefereeAssistant3.Main;
+using RefereeAssistant3.Main.Online.APIRequests;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace RefereeAssistant3.Visual
@@ -47,6 +49,7 @@ namespace RefereeAssistant3.Visual
         private readonly RA3Button mapPickerButton;
         private readonly MapPickerOverlay mapPicker;
         private readonly MapFinderOverlay mapFinder;
+        private readonly MatchPostOverlay postOverlay;
         private readonly TeamButton team1Button;
         private readonly TeamButton team2Button;
         private readonly RA3Button proceedButton;
@@ -54,11 +57,15 @@ namespace RefereeAssistant3.Visual
         private readonly Container selectedMapDisplayContainer;
         private readonly TextFlowContainer currentMapLabel;
         private readonly Sprite currentMapCover;
+        private readonly Core core;
+        private readonly RA3Button matchSubmissionButton;
 
-        public MatchVisualManager(MapPickerOverlay mapPicker, MapFinderOverlay mapFinder)
+        public MatchVisualManager(Core core, MapPickerOverlay mapPicker, MapFinderOverlay mapFinder, MatchPostOverlay postOverlay)
         {
+            this.core = core;
             this.mapPicker = mapPicker;
             this.mapFinder = mapFinder;
+            this.postOverlay = postOverlay;
             RelativeSizeAxes = Axes.Both;
             Masking = true;
             Children = new Drawable[]
@@ -307,6 +314,11 @@ namespace RefereeAssistant3.Visual
                                     Text = "Preset messages"
                                 }
                             }
+                        },
+                        matchSubmissionButton = new RA3Button
+                        {
+                            Size = new Vector2(Style.COMPONENTS_WIDTH, Style.COMPONENTS_HEIGHT),
+                            Y = (proceed_button_width / 2) + Style.COMPONENTS_HEIGHT
                         }
                     }
                 }
@@ -340,6 +352,28 @@ namespace RefereeAssistant3.Visual
             matchStateContainer.ResizeWidthTo(Match.SelectedMap == null ? 1 : 1 - mapLabelWidth, duration, easing);
             currentMapLabel.Text = Match.SelectedMap != null ?
                 $"({Match.SelectedMap.MapCode}) {Match.SelectedMap}" : "";
+
+            matchSubmissionButton.Action = null;
+            matchSubmissionButton.Text = "";
+            if (Match?.Id == -1)
+            {
+                matchSubmissionButton.Action = postOverlay.Show;
+                matchSubmissionButton.Text = "Post new match";
+            }
+            else if (Match?.Id > -1 && Match.ModifiedSinceUpdate)
+            {
+                matchSubmissionButton.Action = () =>
+                {
+                    matchSubmissionButton.Text = "Submitting update...";
+                    Task.Run(core.UpdateMatchAsync);
+                };
+                matchSubmissionButton.Text = "Submit match update";
+            }
+            else if (Match?.Id > -1 && !Match.ModifiedSinceUpdate)
+            {
+                matchSubmissionButton.Action = null;
+                matchSubmissionButton.Text = "Match uploaded";
+            }
 
             Task.Run(() =>
             {
@@ -508,7 +542,7 @@ namespace RefereeAssistant3.Visual
             base.Update();
         }
 
-        private void OnMatchUpdate() => GenerateLayout();
+        private void OnMatchUpdate() => Schedule(GenerateLayout);
 
         private class ScoreNumberBox : Container
         {

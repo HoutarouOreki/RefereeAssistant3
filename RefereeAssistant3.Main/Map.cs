@@ -37,14 +37,14 @@ namespace RefereeAssistant3.Main
 
         public Map() { }
 
-        public async Task DownloadDataAsync(Core core, Action<Map> OnLoaded = null, Scheduler scheduler = null)
+        public async Task DownloadDataAsync(Action<Map> OnLoaded = null, Scheduler scheduler = null)
         {
             if (downloaded || !DifficultyId.HasValue)
                 return;
-            var res = await new GetMap(DifficultyId.Value, core).RunTask();
-            if (res != null && res.Length > 0)
+            var res = await new GetMap(DifficultyId.Value).RunTask();
+            if (res.Response.IsSuccessful && res.Object.Length > 0)
             {
-                var apiMap = res[0];
+                var apiMap = res.Object[0];
                 SetPropertiesFromAPIMap(apiMap);
                 downloaded = true;
             }

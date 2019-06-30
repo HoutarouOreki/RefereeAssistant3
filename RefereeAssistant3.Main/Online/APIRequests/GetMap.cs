@@ -12,9 +12,9 @@ namespace RefereeAssistant3.Main.Online.APIRequests
 
         protected override string Target => $"get_beatmaps";
 
-        public GetMap(int id, Core core)
+        public GetMap(int id)
         {
-            AddParameter("k", core.Config.APIKey);
+            AddParameter("k", MainConfig.APIKey);
             AddParameter("b", id.ToString());
         }
     }

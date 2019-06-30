@@ -1,16 +1,13 @@
-﻿using Newtonsoft.Json;
+﻿using RefereeAssistant3.Main.Online.APIRequests;
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Threading.Tasks;
 
 namespace RefereeAssistant3.Main
 {
     public class Core
     {
-        private static readonly string config_path = $"{Utilities.GetBaseDirectory()}/mainConfig.json";
         public event Action<Match> NewMatchAdded;
-
-        public MainConfig Config;
 
         public Match SelectedMatch { get; set; }
 
@@ -19,25 +16,45 @@ namespace RefereeAssistant3.Main
 
         private readonly List<Match> matches = new List<Match>();
 
+        public event Action<string> Alert;
+
         public Core(IEnumerable<Tournament> tournaments)
         {
             Tournaments = tournaments;
-            if (!File.Exists(config_path))
-            {
-                Config = new MainConfig();
-                SaveConfig();
-            }
-            else
-                Config = JsonConvert.DeserializeObject<MainConfig>(File.ReadAllText(config_path));
+            MainConfig.Load();
         }
-
-        public void SaveConfig() => File.WriteAllText(config_path, JsonConvert.SerializeObject(Config));
 
         public void AddNewMatch(Match match)
         {
-            match.TournamentStage.Mappool.DownloadMappoolAsync(this);
+            match.TournamentStage.Mappool.DownloadMappoolAsync();
             matches.Add(match);
             NewMatchAdded?.Invoke(match);
+        }
+
+        public void PushAlert(string text) => Alert(text);
+
+        public async Task UpdateMatchAsync()
+        {
+            var sourceMatch = SelectedMatch;
+            var req = await new PutMatchUpdate(sourceMatch.GenerateAPIMatch()).RunTask();
+            if (req.Response.IsSuccessful)
+                sourceMatch.NotifyAboutUpload();
+            else
+                PushAlert($"Updating match {sourceMatch.Code} failed with code {req.Response.StatusCode}:\n{req.Response.Content}");
+        }
+
+        public async Task PostMatchAsync()
+        {
+            var sourceMatch = SelectedMatch;
+            var req = await new PostNewMatch(sourceMatch.GenerateAPIMatch()).RunTask();
+            if (req.Response.IsSuccessful)
+            {
+                sourceMatch.Id = req.Object.Id;
+                PushAlert($"Match {req.Object.Code} posted successfully");
+                sourceMatch.NotifyAboutUpload();
+            }
+            else
+                PushAlert($"Failed to post match {req.Object.Code}");
         }
     }
 }

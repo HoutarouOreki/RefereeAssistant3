@@ -12,14 +12,14 @@ namespace RefereeAssistant3.Main
         public List<Map> DoubleTime = new List<Map>();
         public List<Map> FreeMod = new List<Map>();
 
-        public async void DownloadMappoolAsync(Core core)
+        public async void DownloadMappoolAsync()
         {
             var tasks = new List<Task>();
-            tasks.AddRange(NoMod.Select(m => m.DownloadDataAsync(core)));
-            tasks.AddRange(Hidden.Select(m => m.DownloadDataAsync(core)));
-            tasks.AddRange(HardRock.Select(m => m.DownloadDataAsync(core)));
-            tasks.AddRange(DoubleTime.Select(m => m.DownloadDataAsync(core)));
-            tasks.AddRange(FreeMod.Select(m => m.DownloadDataAsync(core)));
+            tasks.AddRange(NoMod.Select(m => m.DownloadDataAsync()));
+            tasks.AddRange(Hidden.Select(m => m.DownloadDataAsync()));
+            tasks.AddRange(HardRock.Select(m => m.DownloadDataAsync()));
+            tasks.AddRange(DoubleTime.Select(m => m.DownloadDataAsync()));
+            tasks.AddRange(FreeMod.Select(m => m.DownloadDataAsync()));
             await Task.WhenAll(tasks);
         }
     }

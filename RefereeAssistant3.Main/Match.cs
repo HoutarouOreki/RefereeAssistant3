@@ -6,8 +6,24 @@ namespace RefereeAssistant3.Main
 {
     public class Match
     {
+        private int id = -1;
+        public int Id
+        {
+            get => id;
+            set
+            {
+                id = value;
+                Updated();
+            }
+        }
+
+        private DateTime lastUploadTime;
+        public bool ModifiedSinceUpdate => History.Count > 0 && History.Last().Time > lastUploadTime;
+
         public readonly Team Team1;
         public readonly Team Team2;
+
+        public string Code;
 
         private readonly List<MatchSnapshot> history = new List<MatchSnapshot>();
         public IReadOnlyList<MatchSnapshot> History => history;
@@ -37,7 +53,7 @@ namespace RefereeAssistant3.Main
             set
             {
                 rollWinner = value;
-                Updated();
+                Updated?.Invoke();
             }
         }
         public Team RollLoser => RollWinner == null ? null :
@@ -84,7 +100,7 @@ namespace RefereeAssistant3.Main
 
         public string Title => TournamentStage.RoomName.Replace("TEAM1", Team1.TeamName).Replace("TEAM2", Team2.TeamName);
 
-        public Match(Team team1, Team team2, Tournament tournament, TournamentStage tournamentStage)
+        public Match(Team team1, Team team2, Tournament tournament, TournamentStage tournamentStage) : this()
         {
             // store info about the match
             Team1 = team1;
@@ -98,6 +114,14 @@ namespace RefereeAssistant3.Main
 
             Procedures.Add(MatchProcedure.SettingUp);
             GenerateMatchProcedures();
+        }
+
+        public Match() { }
+
+        public void NotifyAboutUpload()
+        {
+            lastUploadTime = DateTime.UtcNow;
+            Updated();
         }
 
         private void GenerateMatchProcedures()
@@ -372,6 +396,54 @@ namespace RefereeAssistant3.Main
             var snapshotName = $"Finished playing warmup {SelectedMap}";
             SelectedMap = null;
             return GoToNextProcedure(snapshotName);
+        }
+
+        public APIMatch GenerateAPIMatch()
+        {
+            var apiMatch = new APIMatch
+            {
+                Code = Code,
+                History = History.ToList(),
+                Id = Id,
+                MapResults = new List<MapResult>(),
+                RollWinnerTeamName = RollWinner?.TeamName,
+                Team1 = new APITeam
+                {
+                    BannedMaps = Team1.BannedMaps.Select(m => m.DifficultyId.Value).ToList(),
+                    PickedMaps = Team1.PickedMaps.Select(m => m.DifficultyId.Value).ToList(),
+                    Members = Team1.Members.Select(m => new APIPlayer
+                    {
+                        PlayerId = m.Id.Value
+                    }).ToList(),
+                    Score = Scores[Team1],
+                    TeamName = Team1.TeamName
+                },
+                Team2 = new APITeam
+                {
+                    BannedMaps = Team2.BannedMaps.Select(m => m.DifficultyId.Value).ToList(),
+                    PickedMaps = Team2.PickedMaps.Select(m => m.DifficultyId.Value).ToList(),
+                    Members = Team2.Members.Select(m => new APIPlayer
+                    {
+                        PlayerId = m.Id.Value
+                    }).ToList(),
+                    Score = Scores[Team2],
+                    TeamName = Team2.TeamName
+                }
+            };
+            foreach (var finishedMap in MapResults)
+            {
+                var scores = new Dictionary<int, int>();
+
+                foreach (var score in finishedMap.Value)
+                    scores.Add(score.Key.Id.Value, score.Value);
+
+                apiMatch.MapResults.Add(new MapResult
+                {
+                    DifficultyId = finishedMap.Key.DifficultyId.Value,
+                    PlayerScores = scores
+                });
+            }
+            return apiMatch;
         }
     }
 }

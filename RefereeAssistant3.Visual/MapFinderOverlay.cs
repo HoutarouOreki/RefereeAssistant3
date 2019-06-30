@@ -84,7 +84,7 @@ namespace RefereeAssistant3.Visual
                 return;
             }
             textFlow.Text = "Map request in progress.";
-            var req = new GetMap(id, core);
+            var req = new GetMap(id);
             Add(req);
             req.Success += OnSearchSuccess;
             req.Fail += OnSearchFail;

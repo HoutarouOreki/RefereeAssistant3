@@ -17,18 +17,15 @@ namespace RefereeAssistant3.Main.Online.APIRequests
             });
         }
 
-        public new async Task<T> RunTask()
+        public new async Task<APIResponse<T>> RunTask()
         {
             PrepareRequest();
-            var res = await Client.ExecuteGetTaskAsync(Request);
+            var res = await Client.ExecuteTaskAsync(Request);
+
             if (res.IsSuccessful)
-            {
-                try
-                { return JsonConvert.DeserializeObject<T>(res.Content); }
-                catch { return default; }
-            }
+                return new APIResponse<T>(res, JsonConvert.DeserializeObject<T>(res.Content));
             else
-                return default;
+                return new APIResponse<T>(res, default);
         }
 
         public delegate void ResponseSuccesfulGenericEventHandler(T obj, HttpStatusCode code);

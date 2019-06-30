@@ -1,33 +1,50 @@
-﻿using System;
+﻿using MongoDB.Bson.Serialization.Attributes;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RefereeAssistant3.Main
 {
-    public struct MatchSnapshot
+    public class MatchSnapshot
     {
-        public IReadOnlyDictionary<Map, IReadOnlyDictionary<Player, int>> MapResults { get; }
-        public string Name { get; }
-        public int ProcedureIndex { get; }
-        public Team RollWinner { get; }
-        public IReadOnlyDictionary<Team, int> Scores { get; }
-        public IReadOnlyList<Map> Team1PickedMaps { get; }
-        public IReadOnlyList<Map> Team2PickedMaps { get; }
-        public IReadOnlyList<Map> Team1BannedMaps { get; }
-        public IReadOnlyList<Map> Team2BannedMaps { get; }
-        public DateTime Time { get; }
+        public IReadOnlyList<MapResult> MapResults { get; set; }
+        public string Name { get; set; }
+        public int ProcedureIndex { get; set; }
+        public string RollWinnerTeamName { get; set; }
+        public int Team1Score { get; set; }
+        public int Team2Score { get; set; }
+        public IReadOnlyList<int> Team1PickedMaps { get; set; }
+        public IReadOnlyList<int> Team2PickedMaps { get; set; }
+        public IReadOnlyList<int> Team1BannedMaps { get; set; }
+        public IReadOnlyList<int> Team2BannedMaps { get; set; }
+        public DateTime Time { get; set; }
+
+        public MatchSnapshot() { }
 
         public MatchSnapshot(Match match, string name)
         {
-            MapResults = match.MapResults;
+            var mapResults = new List<MapResult>();
+            foreach (var map in match.MapResults)
+            {
+                var mapResult = new MapResult
+                {
+                    DifficultyId = map.Key.DifficultyId.Value,
+                    PlayerScores = new Dictionary<int, int>()
+                };
+                foreach (var playerScore in map.Value)
+                    mapResult.PlayerScores.Add(playerScore.Key.Id.Value, playerScore.Value);
+            }
             Name = name;
             ProcedureIndex = match.CurrentProcedureIndex;
-            Scores = match.Scores;
-            RollWinner = match.RollWinner;
+            MapResults = mapResults;
+            RollWinnerTeamName = match.RollWinner?.TeamName;
             Time = DateTime.UtcNow;
-            Team1PickedMaps = match.Team1.PickedMaps;
-            Team2PickedMaps = match.Team2.PickedMaps;
-            Team1BannedMaps = match.Team1.BannedMaps;
-            Team2BannedMaps = match.Team2.BannedMaps;
+            Team1Score = match.Scores[match.Team1];
+            Team2Score = match.Scores[match.Team2];
+            Team1PickedMaps = match.Team1.PickedMaps.Select(m => m.DifficultyId.Value).ToList();
+            Team2PickedMaps = match.Team2.PickedMaps.Select(m => m.DifficultyId.Value).ToList();
+            Team1BannedMaps = match.Team1.BannedMaps.Select(m => m.DifficultyId.Value).ToList();
+            Team2BannedMaps = match.Team2.BannedMaps.Select(m => m.DifficultyId.Value).ToList();
         }
     }
 }

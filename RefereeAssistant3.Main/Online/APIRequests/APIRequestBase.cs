@@ -56,6 +56,7 @@ namespace RefereeAssistant3.Main.Online.APIRequests
 
             Request.Resource = Target;
             Request.Method = Method;
+            Request.Timeout = 10000;
             Logger.Log($"Creating request to {uri} ({Method})", LoggingTarget.Network);
         }
 

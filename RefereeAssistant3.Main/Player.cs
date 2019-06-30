@@ -18,10 +18,10 @@ namespace RefereeAssistant3.Main
 
         public Player() { }
 
-        public async void DownloadDataAsync(TextureStore textures, Core core, Action<Player> OnLoaded, Scheduler scheduler)
+        public async void DownloadDataAsync(TextureStore textures, Action<Player> OnLoaded, Scheduler scheduler)
         {
             var avatarTask = DownloadAvatar(textures);
-            var metadataTask = DownloadMetadata(core);
+            var metadataTask = DownloadMetadata();
             if (Id.HasValue && string.IsNullOrEmpty(Username))
                 await Task.WhenAll(avatarTask, metadataTask);
             else if (!Id.HasValue || string.IsNullOrEmpty(Username))
@@ -32,13 +32,13 @@ namespace RefereeAssistant3.Main
             scheduler.Add(() => OnLoaded?.Invoke(this));
         }
 
-        private async Task DownloadMetadata(Core core)
+        private async Task DownloadMetadata()
         {
-            var req = await new GetUsers(Id, Username, core).RunTask();
-            if (req != null)
+            var req = await new GetUsers(Id, Username).RunTask();
+            if (req.Response.IsSuccessful && req.Object?.Length > 0)
             {
-                Id = req[0].Id;
-                Username = req[0].Username;
+                Id = req.Object[0].Id;
+                Username = req.Object[0].Username;
             }
         }
 

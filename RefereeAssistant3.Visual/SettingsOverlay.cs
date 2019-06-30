@@ -15,9 +15,6 @@ namespace RefereeAssistant3.Visual
         private FillFlowContainer warningContainer;
         private BasicTextBox ircUsernameTextBox;
         private BasicTextBox ircPasswordTextBox;
-        private readonly Core core;
-
-        public SettingsOverlay(Core core) => this.core = core;
 
         [BackgroundDependencyLoader]
         private void Load(RefereeAssistant3Visual app)
@@ -176,10 +173,10 @@ namespace RefereeAssistant3.Visual
 
         private void ApplySettings()
         {
-            core.Config.APIKey = apiKeyTextBox.Text;
-            core.Config.IRCUsername = ircUsernameTextBox.Text;
-            core.Config.IRCPassword = ircPasswordTextBox.Text;
-            core.SaveConfig();
+            MainConfig.APIKey = apiKeyTextBox.Text;
+            MainConfig.IRCUsername = ircUsernameTextBox.Text;
+            MainConfig.IRCPassword = ircPasswordTextBox.Text;
+            MainConfig.Save();
             Hide();
         }
 
@@ -187,9 +184,9 @@ namespace RefereeAssistant3.Visual
         {
             scroll.Hide();
             warningContainer.Show();
-            apiKeyTextBox.Text = core.Config.APIKey;
-            ircUsernameTextBox.Text = core.Config.IRCUsername;
-            ircPasswordTextBox.Text = core.Config.IRCPassword;
+            apiKeyTextBox.Text = MainConfig.APIKey;
+            ircUsernameTextBox.Text = MainConfig.IRCUsername;
+            ircPasswordTextBox.Text = MainConfig.IRCPassword;
             base.PopIn();
         }
 

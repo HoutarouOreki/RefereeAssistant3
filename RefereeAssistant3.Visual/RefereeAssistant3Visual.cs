@@ -27,6 +27,7 @@ namespace RefereeAssistant3.Visual
         public RefereeAssistant3Visual(Core core)
         {
             this.core = core;
+            core.Alert += OnAlert;
             if (!File.Exists(config_path))
             {
                 visualConfig = new VisualConfig();
@@ -35,6 +36,8 @@ namespace RefereeAssistant3.Visual
             else
                 visualConfig = JsonConvert.DeserializeObject<VisualConfig>(File.ReadAllText(config_path));
         }
+
+        private void OnAlert(string obj) => Schedule(() => ShowAlert(obj));
 
         private void OnWindowStateChanged(object sender, System.EventArgs e)
         {
@@ -66,9 +69,10 @@ namespace RefereeAssistant3.Visual
             base.LoadComplete();
             // doing this in the initializer throws
             var newMatchOverlay = new NewMatchOverlay(core);
-            var settingsOverlay = new SettingsOverlay(core);
+            var settingsOverlay = new SettingsOverlay();
             var mapPickerOverlay = new MapPickerOverlay(core);
             var mapFinderOverlay = new MapFinderOverlay(core);
+            var matchPostOverlay = new MatchPostOverlay(core);
             Children = new Drawable[]
             {
                 new Box { RelativeSizeAxes = Axes.Both, Colour = FrameworkColour.GreenDarker },
@@ -81,7 +85,7 @@ namespace RefereeAssistant3.Visual
                         new Container
                         {
                             RelativeSizeAxes = Axes.Both,
-                            Child = matchVisualManager = new MatchVisualManager(mapPickerOverlay, mapFinderOverlay)
+                            Child = matchVisualManager = new MatchVisualManager(core, mapPickerOverlay, mapFinderOverlay, matchPostOverlay)
                         }
                     }
                 },
@@ -139,7 +143,8 @@ namespace RefereeAssistant3.Visual
                 newMatchOverlay,
                 settingsOverlay,
                 mapPickerOverlay,
-                mapFinderOverlay
+                mapFinderOverlay,
+                matchPostOverlay
             };
             core.NewMatchAdded += OnNewMatchAdded;
         }
@@ -163,6 +168,13 @@ namespace RefereeAssistant3.Visual
                 Add(alert);
                 alert.Show();
             }
+        }
+
+        public void ShowAlert(string text)
+        {
+            var alert = new Alert(text);
+            Add(alert);
+            alert.Show();
         }
 
         private void SelectMatch(Match match)

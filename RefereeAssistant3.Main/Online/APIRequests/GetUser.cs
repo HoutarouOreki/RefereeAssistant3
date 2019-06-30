@@ -12,9 +12,9 @@ namespace RefereeAssistant3.Main.Online.APIRequests
 
         protected override string Target => $"get_user";
 
-        public GetUsers(int? userId, string username, Core core)
+        public GetUsers(int? userId, string username)
         {
-            AddParameter("k", core.Config.APIKey);
+            AddParameter("k", MainConfig.APIKey);
             AddParameter("u", userId.HasValue ? userId.Value.ToString() : username);
         }
     }

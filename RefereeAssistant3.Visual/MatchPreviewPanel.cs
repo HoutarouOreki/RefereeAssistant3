@@ -80,7 +80,7 @@ namespace RefereeAssistant3.Visual
             OnMatchUpdated();
         }
 
-        private void OnMatchUpdated() => GenerateLayout();
+        private void OnMatchUpdated() => Schedule(GenerateLayout);
 
         private void GenerateLayout()
         {

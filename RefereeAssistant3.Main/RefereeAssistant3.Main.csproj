@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MongoDB.Driver" Version="2.8.1" />
     <PackageReference Include="ppy.osu.Framework" Version="2019.625.0" />
     <PackageReference Include="RestSharp" Version="106.6.9" />
   </ItemGroup>
