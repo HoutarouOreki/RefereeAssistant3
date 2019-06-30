@@ -19,7 +19,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitignore = .gitignore
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefereeAssistant3.Resources", "RefereeAssistant3.Resources\RefereeAssistant3.Resources.csproj", "{74614DCC-266B-46AC-BCD1-01D6526FE3E1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RefereeAssistant3.Resources", "RefereeAssistant3.Resources\RefereeAssistant3.Resources.csproj", "{74614DCC-266B-46AC-BCD1-01D6526FE3E1}"
+EndProject
+Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "RefereeAssistant3.Server", "RefereeAssistant3.Server\RefereeAssistant3.Server.njsproj", "{E1DD3AC0-A4E2-4B4F-87DB-AD9E2F87A0BA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,6 +49,10 @@ Global
 		{74614DCC-266B-46AC-BCD1-01D6526FE3E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{74614DCC-266B-46AC-BCD1-01D6526FE3E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{74614DCC-266B-46AC-BCD1-01D6526FE3E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1DD3AC0-A4E2-4B4F-87DB-AD9E2F87A0BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1DD3AC0-A4E2-4B4F-87DB-AD9E2F87A0BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1DD3AC0-A4E2-4B4F-87DB-AD9E2F87A0BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1DD3AC0-A4E2-4B4F-87DB-AD9E2F87A0BA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
