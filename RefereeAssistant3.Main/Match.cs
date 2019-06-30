@@ -370,12 +370,13 @@ namespace RefereeAssistant3.Main
             CurrentProcedureIndex = lastSnapshot.ProcedureIndex;
             Scores[Team1] = lastSnapshot.Team1Score;
             Scores[Team2] = lastSnapshot.Team2Score;
-            Team1.PickedMaps = lastSnapshot.Team1PickedMaps.Select(m => new Map(m)).ToList();
-            Team2.PickedMaps = lastSnapshot.Team2PickedMaps.Select(m => new Map(m)).ToList();
-            Team1.BannedMaps = lastSnapshot.Team1BannedMaps.Select(m => new Map(m)).ToList();
-            Team2.BannedMaps = lastSnapshot.Team2BannedMaps.Select(m => new Map(m)).ToList();
+            Team1.PickedMaps = lastSnapshot.T1PickedMaps.ToList();
+            Team2.PickedMaps = lastSnapshot.T2PickedMaps.ToList();
+            Team1.BannedMaps = lastSnapshot.T1BannedMaps.ToList();
+            Team2.BannedMaps = lastSnapshot.T2BannedMaps.ToList();
             rollWinner = lastSnapshot.RollWinnerTeamName == Team1.TeamName ? Team1 :
                 lastSnapshot.RollWinnerTeamName == Team2.TeamName ? Team2 : null;
+            selectedMap = lastSnapshot.CurrentMap;
 
             cancelledOperations.Add(lastSnapshot);
             history.Remove(lastSnapshot);

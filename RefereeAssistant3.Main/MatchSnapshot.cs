@@ -1,4 +1,5 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,10 +14,29 @@ namespace RefereeAssistant3.Main
         public string RollWinnerTeamName { get; set; }
         public int Team1Score { get; set; }
         public int Team2Score { get; set; }
+
         public IReadOnlyList<int> Team1PickedMaps { get; set; }
         public IReadOnlyList<int> Team2PickedMaps { get; set; }
         public IReadOnlyList<int> Team1BannedMaps { get; set; }
         public IReadOnlyList<int> Team2BannedMaps { get; set; }
+        public int? SelectedMap { get; set; }
+
+        [JsonIgnore]
+        [BsonIgnore]
+        public IReadOnlyList<Map> T1PickedMaps { get; }
+        [JsonIgnore]
+        [BsonIgnore]
+        public IReadOnlyList<Map> T2PickedMaps { get; }
+        [JsonIgnore]
+        [BsonIgnore]
+        public IReadOnlyList<Map> T1BannedMaps { get; }
+        [JsonIgnore]
+        [BsonIgnore]
+        public IReadOnlyList<Map> T2BannedMaps { get; }
+        [JsonIgnore]
+        [BsonIgnore]
+        public Map CurrentMap { get; }
+
         public DateTime Time { get; set; }
 
         public MatchSnapshot() { }
@@ -41,10 +61,16 @@ namespace RefereeAssistant3.Main
             Time = DateTime.UtcNow;
             Team1Score = match.Scores[match.Team1];
             Team2Score = match.Scores[match.Team2];
-            Team1PickedMaps = match.Team1.PickedMaps.Select(m => m.DifficultyId.Value).ToList();
-            Team2PickedMaps = match.Team2.PickedMaps.Select(m => m.DifficultyId.Value).ToList();
-            Team1BannedMaps = match.Team1.BannedMaps.Select(m => m.DifficultyId.Value).ToList();
-            Team2BannedMaps = match.Team2.BannedMaps.Select(m => m.DifficultyId.Value).ToList();
+            T1PickedMaps = match.Team1.PickedMaps;
+            T2PickedMaps = match.Team2.PickedMaps;
+            T1BannedMaps = match.Team1.BannedMaps;
+            T2BannedMaps = match.Team2.BannedMaps;
+            Team1PickedMaps = T1PickedMaps.Select(m => m.DifficultyId.Value).ToList();
+            Team2PickedMaps = T2PickedMaps.Select(m => m.DifficultyId.Value).ToList();
+            Team1BannedMaps = T1BannedMaps.Select(m => m.DifficultyId.Value).ToList();
+            Team2BannedMaps = T2BannedMaps.Select(m => m.DifficultyId.Value).ToList();
+            CurrentMap = match.SelectedMap;
+            SelectedMap = CurrentMap?.DifficultyId;
         }
     }
 }
