@@ -1,3 +1,0 @@
-﻿# RefereeAssistant3.Server
-
-
