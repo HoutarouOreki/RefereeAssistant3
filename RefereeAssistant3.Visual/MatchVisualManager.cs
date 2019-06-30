@@ -283,40 +283,31 @@ namespace RefereeAssistant3.Visual
                             Depth = 2,
                             Children = new Drawable[]
                             {
-                                new RA3Button
+                                matchSubmissionButton = new RA3Button
                                 {
                                     RelativeSizeAxes = Axes.X,
                                     Size = new Vector2(1/4f, Style.COMPONENTS_HEIGHT),
-                                    BackgroundColour = FrameworkColour.Green,
-                                    Text = "History"
+                                    Text = "Match submission"
                                 },
                                 new RA3Button
                                 {
                                     RelativeSizeAxes = Axes.X,
                                     Size = new Vector2(1/4f, Style.COMPONENTS_HEIGHT),
-                                    BackgroundColour = FrameworkColour.Green,
                                     Text = "Undo last action"
                                 },
                                 mapPickerButton = new RA3Button
                                 {
                                     RelativeSizeAxes = Axes.X,
                                     Size = new Vector2(1/4f, Style.COMPONENTS_HEIGHT),
-                                    BackgroundColour = FrameworkColour.Green,
                                     Text = "Pick map"
                                 },
                                 new RA3Button
                                 {
                                     RelativeSizeAxes = Axes.X,
                                     Size = new Vector2(1/4f, Style.COMPONENTS_HEIGHT),
-                                    BackgroundColour = FrameworkColour.Green,
                                     Text = "Preset messages"
                                 }
                             }
-                        },
-                        matchSubmissionButton = new RA3Button
-                        {
-                            Size = new Vector2(Style.COMPONENTS_WIDTH, Style.COMPONENTS_HEIGHT),
-                            Y = (proceed_button_width / 2) + Style.COMPONENTS_HEIGHT
                         }
                     }
                 }
