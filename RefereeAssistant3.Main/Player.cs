@@ -2,6 +2,8 @@
 using osu.Framework.Threading;
 using RefereeAssistant3.Main.Online.APIRequests;
 using System;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace RefereeAssistant3.Main
 {
@@ -10,8 +12,7 @@ namespace RefereeAssistant3.Main
         public int? Id;
         public string Username;
         public Texture Avatar;
-
-        public Player(string username) => Username = username;
+        private string avatarCachePath => $"{Utilities.GetBaseDirectory()}/cache/players/{Id}.png";
 
         public Player(int id) => Id = id;
 
@@ -19,24 +20,49 @@ namespace RefereeAssistant3.Main
 
         public async void DownloadDataAsync(TextureStore textures, Core core, Action<Player> OnLoaded, Scheduler scheduler)
         {
-            if (!Id.HasValue || string.IsNullOrEmpty(Username))
+            var avatarTask = DownloadAvatar(textures);
+            var metadataTask = DownloadMetadata(core);
+            if (Id.HasValue && string.IsNullOrEmpty(Username))
+                await Task.WhenAll(avatarTask, metadataTask);
+            else if (!Id.HasValue || string.IsNullOrEmpty(Username))
             {
-                var req = new GetUsers(Id, Username, core).RunTask();
-                await req;
-                if (req.Result != null)
-                {
-                    Id = req.Result[0].Id;
-                    Username = req.Result[0].Username;
-                }
+                await metadataTask;
+                await avatarTask;
             }
+            scheduler.Add(() => OnLoaded?.Invoke(this));
+        }
 
+        private async Task DownloadMetadata(Core core)
+        {
+            var req = await new GetUsers(Id, Username, core).RunTask();
+            if (req != null)
+            {
+                Id = req[0].Id;
+                Username = req[0].Username;
+            }
+        }
+
+        private async Task DownloadAvatar(TextureStore textures)
+        {
             if (Avatar == null && Id != null)
             {
-                var avatarReq = textures.GetAsync($"https://a.ppy.sh/{Id}");
-                Avatar = await avatarReq;
+                if (!File.Exists(avatarCachePath) || (DateTime.UtcNow - File.GetCreationTimeUtc(avatarCachePath)).TotalDays > 2)
+                {
+                    await Task.Run(() =>
+                    {
+                        using (var fileStream = new FileStream(avatarCachePath, FileMode.OpenOrCreate, FileAccess.Write))
+                        {
+                            var avatarOnlineStream = textures.GetStream($"https://a.ppy.sh/{Id}");
+                            var img = SixLabors.ImageSharp.Image.Load(avatarOnlineStream);
+                            SixLabors.ImageSharp.ImageExtensions.SaveAsPng(img, fileStream);
+                        }
+                    });
+                }
+                using (var s = new FileStream(avatarCachePath, FileMode.Open, FileAccess.Read))
+                {
+                    await Task.Run(() => Avatar = Texture.FromStream(s));
+                }
             }
-
-            scheduler.Add(() => OnLoaded?.Invoke(this));
         }
     }
 }

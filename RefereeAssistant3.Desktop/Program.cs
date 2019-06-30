@@ -29,6 +29,8 @@ namespace RefereeAssistant3
                 Directory.SetCurrentDirectory(dir.FullName);
                 if (!dir.Exists || !tournaments_directory.Exists || tournaments_directory.GetDirectories().Length == 0)
                     CreateExampleTournament();
+                dir.CreateSubdirectory("cache/players");
+                dir.CreateSubdirectory("cache/maps");
 
                 var tournaments = GenerateTournaments();
 

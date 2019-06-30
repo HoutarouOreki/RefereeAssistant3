@@ -3,6 +3,7 @@ using osu.Framework.Graphics.Textures;
 using osu.Framework.Threading;
 using RefereeAssistant3.Main.Online.APIRequests;
 using System;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace RefereeAssistant3.Main
@@ -52,24 +53,24 @@ namespace RefereeAssistant3.Main
                 scheduler.Add(() => OnLoaded?.Invoke(this));
         }
 
-        public async Task<Texture> DownloadCoverAsync(TextureStore textures)
-        {
-            if (Cover == null && MapsetId != null)
-            {
-                var coverReq = textures.GetAsync($"https://assets.ppy.sh/beatmaps/{MapsetId}/covers/cover.jpg");
-                return Cover = await coverReq;
-            }
-            else if (Cover != null)
-                return Cover;
-            else
-                return null;
-        }
-
         public Texture DownloadCover(TextureStore textures)
         {
+            var coverCachePath = $"{Utilities.GetBaseDirectory()}/cache/maps/{MapsetId}.jpg";
             if (Cover == null && MapsetId != null)
             {
-                return Cover = textures.Get($"https://assets.ppy.sh/beatmaps/{MapsetId}/covers/cover.jpg");
+                if (!File.Exists(coverCachePath))
+                {
+                    var coverReq = textures.GetStream($"https://assets.ppy.sh/beatmaps/{MapsetId}/covers/cover.jpg");
+                    if (coverReq == null)
+                        return null;
+                    using (var stream = new FileStream(coverCachePath, FileMode.CreateNew, FileAccess.Write))
+                    {
+                        var img = SixLabors.ImageSharp.Image.Load(coverReq);
+                        SixLabors.ImageSharp.ImageExtensions.SaveAsJpeg(img, stream);
+                    }
+                }
+                using (var stream = new FileStream(coverCachePath, FileMode.Open, FileAccess.Read))
+                { return Cover = Texture.FromStream(stream); }
             }
             else if (Cover != null)
                 return Cover;

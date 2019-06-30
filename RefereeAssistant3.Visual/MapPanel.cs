@@ -1,5 +1,4 @@
 ﻿using osu.Framework.Allocation;
-using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
@@ -9,6 +8,7 @@ using osu.Framework.Input.Events;
 using osuTK.Graphics;
 using RefereeAssistant3.Main;
 using System;
+using System.Threading.Tasks;
 
 namespace RefereeAssistant3.Visual
 {
@@ -19,7 +19,7 @@ namespace RefereeAssistant3.Visual
 
         public Map Map { get; }
 
-        new public Action<Map> Action { get; set; }
+        public new Action<Map> Action { get; set; }
 
         private Color4 backgroundColour => Color4.Black;
 
@@ -107,6 +107,6 @@ namespace RefereeAssistant3.Visual
         }
 
         [BackgroundDependencyLoader]
-        private void Load(TextureStore textures) => Map.DownloadCoverAsync(textures).ContinueWith(t => coverImage.Texture = Map.Cover);
+        private void Load(TextureStore textures) => Task.Run(() => Map.DownloadCover(textures)).ContinueWith(t => coverImage.Texture = Map.Cover);
     }
 }
