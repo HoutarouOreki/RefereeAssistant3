@@ -8,8 +8,6 @@ using osu.Framework.Graphics.Textures;
 using osuTK;
 using osuTK.Graphics;
 using RefereeAssistant3.Main;
-using RefereeAssistant3.Main.Online.APIRequests;
-using System.Net;
 using System.Threading.Tasks;
 
 namespace RefereeAssistant3.Visual

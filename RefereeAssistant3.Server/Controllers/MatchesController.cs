@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using NLog;
 using RefereeAssistant3.Main;
 using RefereeAssistant3.Server.Services;

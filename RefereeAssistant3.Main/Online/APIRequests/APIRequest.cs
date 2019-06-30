@@ -29,6 +29,6 @@ namespace RefereeAssistant3.Main.Online.APIRequests
         }
 
         public delegate void ResponseSuccesfulGenericEventHandler(T obj, HttpStatusCode code);
-        new public event ResponseSuccesfulGenericEventHandler Success;
+        public new event ResponseSuccesfulGenericEventHandler Success;
     }
 }

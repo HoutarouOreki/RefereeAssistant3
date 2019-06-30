@@ -22,7 +22,7 @@ namespace RefereeAssistant3.Visual
         private MatchVisualManager matchVisualManager;
         private readonly VisualConfig visualConfig;
 
-        new public GameHost Host => base.Host;
+        public new GameHost Host => base.Host;
 
         public RefereeAssistant3Visual(Core core)
         {

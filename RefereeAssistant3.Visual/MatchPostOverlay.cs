@@ -1,11 +1,8 @@
-﻿using System;
-using System.Threading.Tasks;
-using osu.Framework.Graphics;
+﻿using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.UserInterface;
 using osuTK;
 using RefereeAssistant3.Main;
-using RefereeAssistant3.Main.Online.APIRequests;
 
 namespace RefereeAssistant3.Visual
 {
