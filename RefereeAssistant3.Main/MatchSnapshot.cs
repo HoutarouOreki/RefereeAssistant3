@@ -20,6 +20,7 @@ namespace RefereeAssistant3.Main
         public IReadOnlyList<int> Team1BannedMaps { get; set; }
         public IReadOnlyList<int> Team2BannedMaps { get; set; }
         public int? SelectedMap { get; set; }
+        public string SelectedWinner { get; set; }
 
         [JsonIgnore]
         [BsonIgnore]
@@ -36,6 +37,9 @@ namespace RefereeAssistant3.Main
         [JsonIgnore]
         [BsonIgnore]
         public Map CurrentMap { get; }
+        [JsonIgnore]
+        [BsonIgnore]
+        public Team CurrentWinner { get; }
 
         public DateTime Time { get; set; }
 
@@ -61,16 +65,18 @@ namespace RefereeAssistant3.Main
             Time = DateTime.UtcNow;
             Team1Score = match.Scores[match.Team1];
             Team2Score = match.Scores[match.Team2];
-            T1PickedMaps = match.Team1.PickedMaps;
-            T2PickedMaps = match.Team2.PickedMaps;
-            T1BannedMaps = match.Team1.BannedMaps;
-            T2BannedMaps = match.Team2.BannedMaps;
+            T1PickedMaps = match.Team1.PickedMaps.ToList();
+            T2PickedMaps = match.Team2.PickedMaps.ToList();
+            T1BannedMaps = match.Team1.BannedMaps.ToList();
+            T2BannedMaps = match.Team2.BannedMaps.ToList();
             Team1PickedMaps = T1PickedMaps.Select(m => m.DifficultyId.Value).ToList();
             Team2PickedMaps = T2PickedMaps.Select(m => m.DifficultyId.Value).ToList();
             Team1BannedMaps = T1BannedMaps.Select(m => m.DifficultyId.Value).ToList();
             Team2BannedMaps = T2BannedMaps.Select(m => m.DifficultyId.Value).ToList();
             CurrentMap = match.SelectedMap;
             SelectedMap = CurrentMap?.DifficultyId;
+            CurrentWinner = match.SelectedWinner;
+            SelectedWinner = CurrentWinner?.TeamName;
         }
     }
 }

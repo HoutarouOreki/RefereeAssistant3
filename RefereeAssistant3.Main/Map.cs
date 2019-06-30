@@ -33,7 +33,11 @@ namespace RefereeAssistant3.Main
 
         public Map(APIMap apiMap) => SetPropertiesFromAPIMap(apiMap);
 
-        public Map(int difficultyId) => DifficultyId = difficultyId;
+        public Map(int difficultyId, string mapCode = null)
+        {
+            DifficultyId = difficultyId;
+            MapCode = mapCode;
+        }
 
         public Map() { }
 

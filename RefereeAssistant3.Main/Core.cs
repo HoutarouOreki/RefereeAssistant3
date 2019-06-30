@@ -54,7 +54,10 @@ namespace RefereeAssistant3.Main
                 sourceMatch.NotifyAboutUpload();
             }
             else
-                PushAlert($"Failed to post match {req.Object.Code}");
+            {
+                sourceMatch.Id = -1;
+                PushAlert($"Failed to post match {sourceMatch.Code}, code {req.Response.StatusCode}\n{req.Response.ErrorMessage}\n{req.Response.Content}");
+            }
         }
     }
 }

@@ -115,11 +115,11 @@ namespace RefereeAssistant3
                     TournamentStageName = "Group Stage",
                     Mappool = new Mappool
                     {
-                        DoubleTime = new List<Map> { new Map(42352), new Map(125325) },
-                        NoMod = new List<Map> { new Map(776951), new Map(100784), new Map(1467593) },
-                        Hidden = new List<Map> { new Map(1070437), new Map(975036) },
-                        HardRock = new List<Map> { new Map(390889), new Map(1490853) },
-                        FreeMod = new List<Map> { new Map(441472), new Map(1827324) }
+                        NoMod = new List<Map> { new Map(776951, "NM1"), new Map(100784, "NM2"), new Map(1467593, "NM3") },
+                        Hidden = new List<Map> { new Map(1070437, "HD1"), new Map(975036, "HD2") },
+                        HardRock = new List<Map> { new Map(390889, "HR1"), new Map(1490853, "HR2") },
+                        DoubleTime = new List<Map> { new Map(42352, "DT1"), new Map(125325, "DT2") },
+                        FreeMod = new List<Map> { new Map(441472, "FM1"), new Map(1827324, "FM2") }
                     },
                     MatchProceedings = "Roll BL BW PW PL PW PL PW PL PW PL TB".Split(' ').ToList(),
                     RoomName = "osu! Example Tournament: (TEAM1) vs (TEAM2)",
@@ -130,11 +130,11 @@ namespace RefereeAssistant3
                     TournamentStageName = "Grand Finals",
                     Mappool = new Mappool
                     {
-                        DoubleTime = new List<Map> { new Map(42352), new Map(125325) },
-                        NoMod = new List<Map> { new Map(776951), new Map(100784), new Map(1467593) },
-                        Hidden = new List<Map> { new Map(1070437), new Map(975036) },
-                        HardRock = new List<Map> { new Map(390889), new Map(1490853) },
-                        FreeMod = new List<Map> { new Map(441472), new Map(1827324) }
+                        NoMod = new List<Map> { new Map(776951, "NM1"), new Map(100784, "NM2"), new Map(1467593, "NM3") },
+                        Hidden = new List<Map> { new Map(1070437, "HD1"), new Map(975036, "HD2") },
+                        HardRock = new List<Map> { new Map(390889, "HR1"), new Map(1490853, "HR2") },
+                        DoubleTime = new List<Map> { new Map(42352, "DT1"), new Map(125325, "DT2") },
+                        FreeMod = new List<Map> { new Map(441472, "FM1"), new Map(1827324, "FM2") }
                     },
                     MatchProceedings = "Free1 Warm1 Warm2 Roll BL BW PW PL PW PL BL BW PW PL B1 PW PL PW PL PW TB".Split(' ').ToList(),
                     RoomName = "o!ExT Grand Finals: (TEAM1) vs (TEAM2)",

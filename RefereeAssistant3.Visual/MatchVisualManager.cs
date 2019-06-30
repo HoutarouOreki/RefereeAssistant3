@@ -9,6 +9,7 @@ using osuTK;
 using osuTK.Graphics;
 using RefereeAssistant3.Main;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace RefereeAssistant3.Visual
@@ -59,6 +60,10 @@ namespace RefereeAssistant3.Visual
         private readonly Core core;
         private readonly RA3Button matchSubmissionButton;
         private readonly RA3Button undoButton;
+        private readonly SpriteText team1BansText;
+        private readonly SpriteText team1PicksText;
+        private readonly SpriteText team2BansText;
+        private readonly SpriteText team2PicksText;
 
         public MatchVisualManager(Core core, MapPickerOverlay mapPicker, MapFinderOverlay mapFinder, MatchPostOverlay postOverlay)
         {
@@ -89,6 +94,26 @@ namespace RefereeAssistant3.Visual
                             Anchor = Anchor.CentreLeft,
                             Origin = Anchor.CentreLeft,
                             Font = new FontUsage(null, team_name_score_font_size)
+                        },
+                        new FillFlowContainer
+                        {
+                            Anchor = Anchor.BottomRight,
+                            Origin = Anchor.BottomRight,
+                            Children = new Drawable[]
+                            {
+                                team1PicksText = new SpriteText
+                                {
+                                    Anchor = Anchor.BottomRight,
+                                    Origin = Anchor.BottomRight,
+                                    Font = new FontUsage(null, 16)
+                                },
+                                team1BansText = new SpriteText
+                                {
+                                    Anchor = Anchor.BottomRight,
+                                    Origin = Anchor.BottomRight,
+                                    Font = new FontUsage(null, 16)
+                                }
+                            }
                         }
                     }
                 },
@@ -112,6 +137,26 @@ namespace RefereeAssistant3.Visual
                             Anchor = Anchor.CentreRight,
                             Origin = Anchor.CentreRight,
                             Font = new FontUsage(null, team_name_score_font_size)
+                        },
+                        new FillFlowContainer
+                        {
+                            Anchor = Anchor.BottomLeft,
+                            Origin = Anchor.BottomLeft,
+                            Children = new Drawable[]
+                            {
+                                team2PicksText = new SpriteText
+                                {
+                                    Anchor = Anchor.BottomLeft,
+                                    Origin = Anchor.BottomLeft,
+                                    Font = new FontUsage(null, 16)
+                                },
+                                team2BansText = new SpriteText
+                                {
+                                    Anchor = Anchor.BottomLeft,
+                                    Origin = Anchor.BottomLeft,
+                                    Font = new FontUsage(null, 16)
+                                }
+                            }
                         }
                     }
                 },
@@ -320,8 +365,12 @@ namespace RefereeAssistant3.Visual
         {
             team1ScoreBox.Label.Text = match.Scores[match.Team1].ToString();
             team1NameLabel.Text = match.Team1.TeamName;
+            team1BansText.Text = match.Team1.BannedMaps.Count > 0 ? $"Bans: {string.Join(' ', match.Team1.BannedMaps.Select(m => m.MapCode))}" : null;
+            team1PicksText.Text = match.Team1.PickedMaps.Count > 0 ? $"Picks: {string.Join(' ', match.Team1.PickedMaps.Select(m => m.MapCode))}" : null;
             team2ScoreBox.Label.Text = match.Scores[match.Team2].ToString();
             team2NameLabel.Text = match.Team2.TeamName;
+            team2BansText.Text = match.Team2.BannedMaps.Count > 0 ? $"Bans: {string.Join(' ', match.Team2.BannedMaps.Select(m => m.MapCode))}" : null;
+            team2PicksText.Text = match.Team2.PickedMaps.Count > 0 ? $"Picks: {string.Join(' ', match.Team2.PickedMaps.Select(m => m.MapCode))}" : null;
 
             tournamentLabel.Text = match.Tournament.TournamentName;
             stageLabel.Text = match.TournamentStage.TournamentStageName;
@@ -349,7 +398,7 @@ namespace RefereeAssistant3.Visual
             if (Match?.Id == -1)
             {
                 matchSubmissionButton.Action = postOverlay.Show;
-                matchSubmissionButton.Text = "Post new match";
+                matchSubmissionButton.Text = "Upload match";
             }
             else if (Match?.Id > -1 && Match.ModifiedSinceUpdate)
             {
@@ -530,7 +579,7 @@ namespace RefereeAssistant3.Visual
         protected override void Update()
         {
             matchControls.Height = DrawHeight - (2 * team_name_score_height) - match_state_height;
-            if ((Match?.CurrentProcedure == MatchProcedure.Playing || Match?.CurrentProcedure == MatchProcedure.PlayingWarmUp) && Match.SelectedMap.Length > 0)
+            if ((Match?.CurrentProcedure == MatchProcedure.Playing || Match?.CurrentProcedure == MatchProcedure.PlayingWarmUp) && Match.SelectedMap?.Length > 0)
                 matchStateLabel.Text = $@"{Match.ReadableCurrentState} ({Match.MapProgressText})";
             base.Update();
         }

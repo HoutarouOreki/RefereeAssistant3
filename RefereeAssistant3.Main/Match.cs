@@ -68,6 +68,8 @@ namespace RefereeAssistant3.Main
             get => selectedMap;
             set
             {
+                if (selectedMap == null)
+                    history.Add(new MatchSnapshot(this, ReadableCurrentState));
                 selectedMap = value;
                 Updated();
             }
@@ -89,6 +91,8 @@ namespace RefereeAssistant3.Main
             get => selectedWinner;
             set
             {
+                if (selectedWinner == null)
+                    history.Add(new MatchSnapshot(this, ReadableCurrentState));
                 selectedWinner = value;
                 Updated();
             }
@@ -270,6 +274,7 @@ namespace RefereeAssistant3.Main
                 return false;
             }
             var snapshotName = string.Empty;
+            var snapshot = (MatchSnapshot)null;
             switch (CurrentProcedure)
             {
                 case MatchProcedure.SettingUp:
@@ -291,28 +296,44 @@ namespace RefereeAssistant3.Main
                     snapshotName = $"Set roll winner: {RollWinner}";
                     break;
                 case MatchProcedure.Banning1:
+                    snapshot = new MatchSnapshot(this, null);
                     BanMap(Team1, out snapshotName);
+                    snapshot.Name = snapshotName;
                     break;
                 case MatchProcedure.Banning2:
+                    snapshot = new MatchSnapshot(this, null);
                     BanMap(Team2, out snapshotName);
+                    snapshot.Name = snapshotName;
                     break;
                 case MatchProcedure.BanningRollWinner:
+                    snapshot = new MatchSnapshot(this, null);
                     BanMap(RollWinner, out snapshotName);
+                    snapshot.Name = snapshotName;
                     break;
                 case MatchProcedure.BanningRollLoser:
+                    snapshot = new MatchSnapshot(this, null);
                     BanMap(RollLoser, out snapshotName);
+                    snapshot.Name = snapshotName;
                     break;
                 case MatchProcedure.Picking1:
+                    snapshot = new MatchSnapshot(this, null);
                     PickMap(Team1, out snapshotName);
+                    snapshot.Name = snapshotName;
                     break;
                 case MatchProcedure.Picking2:
+                    snapshot = new MatchSnapshot(this, null);
                     PickMap(Team2, out snapshotName);
+                    snapshot.Name = snapshotName;
                     break;
                 case MatchProcedure.PickingRollWinner:
+                    snapshot = new MatchSnapshot(this, null);
                     PickMap(RollWinner, out snapshotName);
+                    snapshot.Name = snapshotName;
                     break;
                 case MatchProcedure.PickingRollLoser:
+                    snapshot = new MatchSnapshot(this, null);
                     PickMap(RollLoser, out snapshotName);
+                    snapshot.Name = snapshotName;
                     break;
                 case MatchProcedure.GettingReady:
                     snapshotName = $"Start map: {SelectedMap}";
@@ -341,12 +362,12 @@ namespace RefereeAssistant3.Main
                     Scores[RollLoser]++;
                     break;
             }
-            return GoToNextProcedure(snapshotName);
+            history.Add(snapshot ?? new MatchSnapshot(this, snapshotName));
+            return GoToNextProcedure();
         }
 
-        private bool GoToNextProcedure(string snapshotName)
+        private bool GoToNextProcedure()
         {
-            history.Add(new MatchSnapshot(this, snapshotName));
             CurrentProcedureIndex++;
             DoNewProcedureJobs();
             Updated?.Invoke();
@@ -377,6 +398,7 @@ namespace RefereeAssistant3.Main
             rollWinner = lastSnapshot.RollWinnerTeamName == Team1.TeamName ? Team1 :
                 lastSnapshot.RollWinnerTeamName == Team2.TeamName ? Team2 : null;
             selectedMap = lastSnapshot.CurrentMap;
+            selectedWinner = lastSnapshot.CurrentWinner;
 
             cancelledOperations.Add(lastSnapshot);
             history.Remove(lastSnapshot);
@@ -390,7 +412,7 @@ namespace RefereeAssistant3.Main
         {
             snapshotName = $"{team} bans {SelectedMap}";
             team.BannedMaps.Add(SelectedMap);
-            SelectedMap = null;
+            selectedMap = null;
         }
 
         private void PickMap(Team team, out string snapshotName)
@@ -404,10 +426,11 @@ namespace RefereeAssistant3.Main
             if (CurrentProcedure != MatchProcedure.Playing)
                 return false;
             Scores[SelectedWinner]++;
-            var snapshotName = $"{SelectedWinner} won {SelectedMap}";
-            SelectedMap = null;
-            SelectedWinner = null;
-            return GoToNextProcedure(snapshotName);
+            history.Add(new MatchSnapshot(this, $"{SelectedWinner} wins {SelectedMap}"));
+            selectedMap = null;
+            selectedWinner = null;
+            var retValue = GoToNextProcedure();
+            return retValue;
         }
 
         private bool FinishWarmUp()
@@ -415,8 +438,9 @@ namespace RefereeAssistant3.Main
             if (CurrentProcedure != MatchProcedure.PlayingWarmUp)
                 return false;
             var snapshotName = $"Finished playing warmup {SelectedMap}";
-            SelectedMap = null;
-            return GoToNextProcedure(snapshotName);
+            selectedMap = null;
+            history.Add(new MatchSnapshot(this, snapshotName));
+            return GoToNextProcedure();
         }
 
         public APIMatch GenerateAPIMatch()
