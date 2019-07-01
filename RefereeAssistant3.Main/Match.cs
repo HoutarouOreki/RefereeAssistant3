@@ -425,8 +425,8 @@ namespace RefereeAssistant3.Main
         {
             if (CurrentProcedure != MatchProcedure.Playing)
                 return false;
-            Scores[SelectedWinner]++;
             history.Add(new MatchSnapshot(this, $"{SelectedWinner} wins {SelectedMap}"));
+            Scores[SelectedWinner]++;
             selectedMap = null;
             selectedWinner = null;
             var retValue = GoToNextProcedure();
