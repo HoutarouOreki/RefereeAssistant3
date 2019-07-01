@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using osu.Framework.Bindables;
 
 namespace RefereeAssistant3.Main
 {
@@ -17,6 +18,11 @@ namespace RefereeAssistant3.Main
             }
         }
 
+        public int? RoomId;
+        public string ChannelName => RoomId.HasValue ? $"#mp_{RoomId}" : null;
+
+        public MatchSettings LastReadSettings { get; private set; }
+
         private DateTime lastUploadTime;
         public bool ModifiedSinceUpdate => History.Count > 0 && History.Last().Time > lastUploadTime;
 
@@ -32,6 +38,8 @@ namespace RefereeAssistant3.Main
 
         public event Action Updated;
         public event Action<Match, string> Alert;
+
+        public OsuIrcBot ChatBot { get; }
 
         public IEnumerable<Map> UsedMaps => Team1.PickedMaps.Concat(Team1.BannedMaps.Concat(Team2.PickedMaps.Concat(Team2.BannedMaps)));
 
@@ -102,9 +110,9 @@ namespace RefereeAssistant3.Main
 
         public readonly Dictionary<Map, IReadOnlyDictionary<Player, int>> MapResults = new Dictionary<Map, IReadOnlyDictionary<Player, int>>();
 
-        public string Title => TournamentStage.RoomName.Replace("TEAM1", Team1.TeamName).Replace("TEAM2", Team2.TeamName);
+        public string RoomName => TournamentStage.RoomName.Replace("TEAM1", Team1.TeamName).Replace("TEAM2", Team2.TeamName);
 
-        public Match(Team team1, Team team2, Tournament tournament, TournamentStage tournamentStage) : this()
+        public Match(Team team1, Team team2, Tournament tournament, TournamentStage tournamentStage)
         {
             // store info about the match
             Team1 = team1;
@@ -120,12 +128,15 @@ namespace RefereeAssistant3.Main
             GenerateMatchProcedures();
         }
 
-        public Match() { }
-
         public void NotifyAboutUpload()
         {
             lastUploadTime = DateTime.UtcNow;
             Updated();
+        }
+
+        public void NotifyAboutSettings(string text)
+        {
+
         }
 
         private void GenerateMatchProcedures()

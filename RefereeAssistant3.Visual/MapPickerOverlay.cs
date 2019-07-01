@@ -12,12 +12,12 @@ namespace RefereeAssistant3.Visual
         private readonly Core core;
         private readonly FillFlowContainer mapFlowContainer;
 
-        private Mappool mappool => core.SelectedMatch.TournamentStage.Mappool;
-        private IEnumerable<Map> noMod => mappool.NoMod.Except(core.SelectedMatch.UsedMaps);
-        private IEnumerable<Map> hidden => mappool.Hidden.Except(core.SelectedMatch.UsedMaps);
-        private IEnumerable<Map> hardRock => mappool.HardRock.Except(core.SelectedMatch.UsedMaps);
-        private IEnumerable<Map> doubleTime => mappool.DoubleTime.Except(core.SelectedMatch.UsedMaps);
-        private IEnumerable<Map> freeMod => mappool.FreeMod.Except(core.SelectedMatch.UsedMaps);
+        private Mappool mappool => core.SelectedMatch.Value.TournamentStage.Mappool;
+        private IEnumerable<Map> noMod => mappool.NoMod.Except(core.SelectedMatch.Value.UsedMaps);
+        private IEnumerable<Map> hidden => mappool.Hidden.Except(core.SelectedMatch.Value.UsedMaps);
+        private IEnumerable<Map> hardRock => mappool.HardRock.Except(core.SelectedMatch.Value.UsedMaps);
+        private IEnumerable<Map> doubleTime => mappool.DoubleTime.Except(core.SelectedMatch.Value.UsedMaps);
+        private IEnumerable<Map> freeMod => mappool.FreeMod.Except(core.SelectedMatch.Value.UsedMaps);
 
         public MapPickerOverlay(Core core)
         {
@@ -101,7 +101,7 @@ namespace RefereeAssistant3.Visual
         private void PanelClicked(Map map)
         {
             Hide();
-            core.SelectedMatch.SelectedMap = map;
+            core.SelectedMatch.Value.SelectedMap = map;
         }
     }
 }

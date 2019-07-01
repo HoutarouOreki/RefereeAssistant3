@@ -89,7 +89,7 @@ namespace RefereeAssistant3.Main
         public override string ToString() => $"{Artist} - {Title} [{DifficultyName}]";
     }
 
-    internal enum Mods
+    public enum Mods
     {
         None = 0,
         NoFail = 1,

@@ -41,10 +41,10 @@ namespace RefereeAssistant3.Visual
 
         protected override void PopIn()
         {
-            matchCodeTextBox.Text = core.SelectedMatch.Code;
+            matchCodeTextBox.Text = core.SelectedMatch.Value.Code;
             button.Action = null;
             button.Text = "";
-            if (core.SelectedMatch.Id == -1)
+            if (core.SelectedMatch.Value.Id == -1)
             {
                 button.Action = PostMatch;
                 button.Text = "Submit match";
@@ -54,8 +54,8 @@ namespace RefereeAssistant3.Visual
 
         private void PostMatch()
         {
-            core.SelectedMatch.Code = matchCodeTextBox.Text;
-            core.SelectedMatch.Id = -2;
+            core.SelectedMatch.Value.Code = matchCodeTextBox.Text;
+            core.SelectedMatch.Value.Id = -2;
             button.Action = null;
             button.Text = "";
             var req = core.PostMatchAsync();

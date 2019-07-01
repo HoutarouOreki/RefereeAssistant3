@@ -49,7 +49,6 @@ namespace RefereeAssistant3.Visual
 
             Window.WindowState = VisualConfig.WindowState != WindowState.Minimized ? VisualConfig.WindowState : WindowState.Normal;
             Window.WindowStateChanged += OnWindowStateChanged;
-            Window.WindowState = WindowState.Fullscreen;
 
             Resources.AddStore(new DllResourceStore(@"RefereeAssistant3.Resources.dll"));
 
@@ -156,7 +155,7 @@ namespace RefereeAssistant3.Visual
 
         private void OnMatchAlert(Match source, string text)
         {
-            if (source == core.SelectedMatch)
+            if (source == core.SelectedMatch.Value)
             {
                 var alert = new Alert(text);
                 Add(alert);
@@ -180,10 +179,10 @@ namespace RefereeAssistant3.Visual
 
         private void SelectMatch(Match match)
         {
-            core.SelectedMatch = match;
+            core.SelectedMatch.Value = match;
             foreach (var matchPanel in matchListDisplayer)
             {
-                if (matchPanel.Match == core.SelectedMatch)
+                if (matchPanel.Match == core.SelectedMatch.Value)
                     matchPanel.Select();
                 else
                     matchPanel.Deselect();

@@ -12,9 +12,18 @@ namespace RefereeAssistant3.Main
     {
         public int? Id;
         public string Username;
+        /// <summary>
+        /// If username is unavailable, returns #id
+        /// </summary>
+        public string IRCUsername => string.IsNullOrEmpty(Username) ?
+            Id.HasValue ? $"#{Id.Value}" : null :
+            Username?.Replace(' ', '_');
 
         [JsonIgnore]
         public Texture Avatar;
+
+        [JsonIgnore]
+        public Mods SelectedMods;
 
         private string avatarCachePath => $"{Utilities.GetBaseDirectory()}/cache/players/{Id}.png";
 

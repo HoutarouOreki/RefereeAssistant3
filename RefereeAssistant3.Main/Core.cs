@@ -1,4 +1,5 @@
-﻿using RefereeAssistant3.Main.Online.APIRequests;
+﻿using osu.Framework.Bindables;
+using RefereeAssistant3.Main.Online.APIRequests;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -9,10 +10,11 @@ namespace RefereeAssistant3.Main
     {
         public event Action<Match> NewMatchAdded;
 
-        public Match SelectedMatch { get; set; }
+        public Bindable<Match> SelectedMatch = new Bindable<Match>();
 
         public IReadOnlyList<Match> Matches => matches;
         public IEnumerable<Tournament> Tournaments { get; }
+        public OsuIrcBot ChatBot { get; }
 
         private readonly List<Match> matches = new List<Match>();
 
@@ -22,6 +24,7 @@ namespace RefereeAssistant3.Main
         {
             Tournaments = tournaments;
             MainConfig.Load();
+            ChatBot = new OsuIrcBot();
         }
 
         public void AddNewMatch(Match match)
@@ -35,7 +38,7 @@ namespace RefereeAssistant3.Main
 
         public async Task UpdateMatchAsync()
         {
-            var sourceMatch = SelectedMatch;
+            var sourceMatch = SelectedMatch.Value;
             var req = await new PutMatchUpdate(sourceMatch.GenerateAPIMatch()).RunTask();
             if (req?.Response?.IsSuccessful == true)
                 sourceMatch.NotifyAboutUpload();
@@ -45,7 +48,7 @@ namespace RefereeAssistant3.Main
 
         public async Task PostMatchAsync()
         {
-            var sourceMatch = SelectedMatch;
+            var sourceMatch = SelectedMatch.Value;
             var req = await new PostNewMatch(sourceMatch.GenerateAPIMatch()).RunTask();
             if (req?.Response?.IsSuccessful == true)
             {

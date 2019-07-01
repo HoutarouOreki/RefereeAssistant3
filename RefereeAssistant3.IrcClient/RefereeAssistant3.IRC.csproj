@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <AssemblyName>RefereeAssistant3.IRC</AssemblyName>
+    <RootNamespace>RefereeAssistant3.IRC</RootNamespace>
+  </PropertyGroup>
+
+</Project>

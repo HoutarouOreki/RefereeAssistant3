@@ -119,7 +119,7 @@ namespace RefereeAssistant3.Visual
 
         private void MapSelected(Map obj)
         {
-            core.SelectedMatch.SelectedMap = obj;
+            core.SelectedMatch.Value.SelectedMap = obj;
             Hide();
         }
     }

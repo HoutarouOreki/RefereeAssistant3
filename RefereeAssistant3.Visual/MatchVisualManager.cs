@@ -64,6 +64,7 @@ namespace RefereeAssistant3.Visual
         private readonly SpriteText team1PicksText;
         private readonly SpriteText team2BansText;
         private readonly SpriteText team2PicksText;
+        private readonly ChatContainer chatContainer;
 
         public MatchVisualManager(Core core, MapPickerOverlay mapPicker, MapFinderOverlay mapFinder, MatchPostOverlay postOverlay)
         {
@@ -357,6 +358,11 @@ namespace RefereeAssistant3.Visual
                             }
                         }
                     }
+                },
+                chatContainer = new ChatContainer(core)
+                {
+                    Anchor = Anchor.BottomLeft,
+                    Origin = Anchor.BottomLeft
                 }
             };
         }
@@ -583,8 +589,11 @@ namespace RefereeAssistant3.Visual
         protected override void Update()
         {
             matchControls.Height = DrawHeight - (2 * team_name_score_height) - match_state_height;
+
             if ((Match?.CurrentProcedure == MatchProcedure.Playing || Match?.CurrentProcedure == MatchProcedure.PlayingWarmUp) && Match.SelectedMap?.Length > 0)
                 matchStateLabel.Text = $@"{Match.ReadableCurrentState} ({Match.MapProgressText})";
+
+            chatContainer.Height = DrawHeight - (team_name_score_height * 2) - (proceed_button_width / 2) - match_state_height - Style.COMPONENTS_HEIGHT;
             base.Update();
         }
 
