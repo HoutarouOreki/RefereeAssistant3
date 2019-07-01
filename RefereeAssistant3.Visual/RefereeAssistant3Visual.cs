@@ -8,6 +8,7 @@ using osu.Framework.IO.Stores;
 using osu.Framework.Platform;
 using osuTK;
 using RefereeAssistant3.Main;
+using System;
 using System.IO;
 
 namespace RefereeAssistant3.Visual
@@ -147,6 +148,8 @@ namespace RefereeAssistant3.Visual
                 matchPostOverlay
             };
             core.NewMatchAdded += OnNewMatchAdded;
+            if (string.IsNullOrEmpty(MainConfig.APIKey))
+                ShowAlert("API Key not provided. Some functionality may not be available.", "Open settings", () => settingsOverlay.Show());
         }
 
         private void OnNewMatchAdded(Match match)
@@ -173,6 +176,13 @@ namespace RefereeAssistant3.Visual
         public void ShowAlert(string text)
         {
             var alert = new Alert(text);
+            Add(alert);
+            alert.Show();
+        }
+
+        public void ShowAlert(string message, string buttonMessage, Action buttonAction)
+        {
+            var alert = new Alert(message, buttonMessage, buttonAction);
             Add(alert);
             alert.Show();
         }

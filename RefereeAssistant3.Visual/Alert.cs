@@ -1,4 +1,5 @@
-﻿using osu.Framework.Graphics;
+﻿using System;
+using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osuTK;
 
@@ -6,11 +7,14 @@ namespace RefereeAssistant3.Visual
 {
     public class Alert : RA3OverlayContainer
     {
+        private readonly RA3Button okButton;
+        private readonly FillFlowContainer flow;
+
         public override bool RemoveWhenNotAlive => true;
 
         public Alert(string message)
         {
-            Child = new FillFlowContainer
+            Child = flow = new FillFlowContainer
             {
                 Anchor = Anchor.Centre,
                 Origin = Anchor.Centre,
@@ -30,7 +34,7 @@ namespace RefereeAssistant3.Visual
                         TextAnchor = Anchor.TopCentre
                         //MaximumSize = new Vector2(500, 0)
                     },
-                    new RA3Button
+                    okButton = new RA3Button
                     {
                         Text = "Ok",
                         BackgroundColour = FrameworkColour.Green,
@@ -42,6 +46,28 @@ namespace RefereeAssistant3.Visual
                     }
                 }
             };
+        }
+
+        public Alert(string message, string buttonMessage, Action buttonAction) : this(message)
+        {
+            flow.Remove(okButton);
+            okButton.BackgroundColour = FrameworkColour.YellowDark;
+            okButton.Text = "Cancel";
+            flow.Add(new RA3Button
+            {
+                BackgroundColour = FrameworkColour.Green,
+                Width = Style.COMPONENTS_WIDTH,
+                Height = Style.COMPONENTS_HEIGHT,
+                Anchor = Anchor.Centre,
+                Origin = Anchor.Centre,
+                Text = buttonMessage,
+                Action = () =>
+                {
+                    Hide();
+                    buttonAction();
+                }
+            });
+            flow.Add(okButton);
         }
     }
 }
