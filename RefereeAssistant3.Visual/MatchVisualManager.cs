@@ -175,7 +175,7 @@ namespace RefereeAssistant3.Visual
                                 new Box
                                 {
                                     RelativeSizeAxes = Axes.Both,
-                                    Colour = FrameworkColour.Yellow.Darken(1)
+                                    Colour = FrameworkColour.YellowDark
                                 },
                                 matchStateLabel = new TextFlowContainer(t => t.Font = new FontUsage("OpenSans-Bold", 18))
                                 {
