@@ -30,18 +30,32 @@ namespace RefereeAssistant3.Main.Online.APIRequests
 
         protected bool IncludeSecret { get; set; }
 
-        public APIRequestBase() => Client = new RestClient($"{BaseUrl}");
+        public APIRequestBase()
+        {
+            if (Uri.IsWellFormedUriString(BaseUrl, UriKind.Absolute))
+                Client = new RestClient($"{BaseUrl}");
+        }
 
         public void Run()
         {
+            if (Client == null)
+            {
+                Fail?.Invoke("Could not create a request", HttpStatusCode.BadRequest);
+                return;
+            }
             PrepareRequest();
-            asyncHandle = Client.ExecuteAsync(Request, OnRequestComplete);
+            asyncHandle = Client?.ExecuteAsync(Request, OnRequestComplete);
         }
 
         public virtual Task<IRestResponse> RunTask()
         {
+            if (Client == null)
+            {
+                Fail?.Invoke("Could not create a request", HttpStatusCode.BadRequest);
+                return null;
+            }
             PrepareRequest();
-            return Client.ExecuteGetTaskAsync(Request);
+            return Client?.ExecuteTaskAsync(Request);
         }
 
         protected void SetJsonObject(object obj) => Request.AddJsonBody(JsonConvert.SerializeObject(obj));

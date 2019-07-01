@@ -16,6 +16,10 @@ namespace RefereeAssistant3.Visual
     {
         private readonly Box background;
         private readonly Sprite coverImage;
+        private readonly SpriteText artistText;
+        private readonly SpriteText difficultyText;
+        private readonly SpriteText titleText;
+        private TextureStore textures;
 
         public Map Map { get; }
 
@@ -62,11 +66,10 @@ namespace RefereeAssistant3.Visual
                     Padding = new MarginPadding { Vertical = 4, Horizontal = 8 },
                     Children = new Drawable[]
                     {
-                        new SpriteText
+                        artistText = new SpriteText
                         {
-                            Text = Map.Artist,
                             Colour = Color4.LightGray,
-                            Font = new FontUsage(null, 16)
+                            Font = new FontUsage("OpenSans-Bold", 16)
                         },
                         new FillFlowContainer
                         {
@@ -75,20 +78,39 @@ namespace RefereeAssistant3.Visual
                             Spacing = new osuTK.Vector2(7),
                             Children = new Drawable[]
                             {
-                                new SpriteText
+                                titleText = new SpriteText { Font = new FontUsage("OpenSans-Bold") },
+                                difficultyText = new SpriteText
                                 {
-                                    Text = Map.Title,
-                                },
-                                new SpriteText
-                                {
-                                    Text = $"[{Map.DifficultyName}]",
-                                    Font = new FontUsage(null, 18),
+                                    Font = new FontUsage(null, 16),
+                                    Anchor = Anchor.BottomLeft,
+                                    Origin = Anchor.BottomLeft
                                 }
                             }
                         }
                     }
+                },
+                new SpriteText
+                {
+                    Font = new FontUsage("OpenSans-Bold", 24),
+                    Text = Map.MapCode,
+                    Anchor = Anchor.CentreRight,
+                    Origin = Anchor.CentreRight,
+                    Margin = new MarginPadding { Right = 14 }
                 }
             };
+        }
+
+        private async void DownloadAndSetData(bool setAvatarAfterDownload)
+        {
+            await Map.DownloadDataAsync().ContinueWith(t => Schedule(() =>
+            {
+                artistText.Text = Map.Artist;
+                titleText.Text = Map.Title;
+                difficultyText.Text = Map.DifficultyName;
+                if (setAvatarAfterDownload)
+                    SetCover();
+            }));
+            
         }
 
         protected override bool OnHover(HoverEvent e)
@@ -107,6 +129,14 @@ namespace RefereeAssistant3.Visual
         }
 
         [BackgroundDependencyLoader]
-        private void Load(TextureStore textures) => Task.Run(() => Map.DownloadCover(textures)).ContinueWith(t => coverImage.Texture = Map.Cover);
+        private void Load(TextureStore textures)
+        {
+            this.textures = textures;
+            DownloadAndSetData(!Map.MapsetId.HasValue);
+            if (Map.MapsetId != null)
+                SetCover();
+        }
+
+        private void SetCover() => Task.Run(() => Map.DownloadCover(textures)).ContinueWith(t => coverImage.Texture = Map.Cover);
     }
 }

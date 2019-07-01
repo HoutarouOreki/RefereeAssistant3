@@ -19,11 +19,14 @@ namespace RefereeAssistant3.Main.Online.APIRequests
 
         public new async Task<APIResponse<T>> RunTask()
         {
-            PrepareRequest();
-            var res = await Client.ExecuteTaskAsync(Request);
+            if (Client == null)
+                return new APIResponse<T>(null, default);
 
-            if (res.IsSuccessful)
-                return new APIResponse<T>(res, JsonConvert.DeserializeObject<T>(res.Content));
+            PrepareRequest();
+            var res = await Client?.ExecuteTaskAsync(Request);
+
+            if (res?.IsSuccessful == true)
+                return new APIResponse<T>(res, JsonConvert.DeserializeObject<T>(res?.Content));
             else
                 return new APIResponse<T>(res, default);
         }

@@ -37,17 +37,17 @@ namespace RefereeAssistant3.Main
         {
             var sourceMatch = SelectedMatch;
             var req = await new PutMatchUpdate(sourceMatch.GenerateAPIMatch()).RunTask();
-            if (req.Response.IsSuccessful)
+            if (req?.Response?.IsSuccessful == true)
                 sourceMatch.NotifyAboutUpload();
             else
-                PushAlert($"Updating match {sourceMatch.Code} failed with code {req.Response.StatusCode}:\n{req.Response.Content}");
+                PushAlert($"Updating match {sourceMatch.Code} failed with code {req?.Response?.StatusCode}:\n{req?.Response?.Content}");
         }
 
         public async Task PostMatchAsync()
         {
             var sourceMatch = SelectedMatch;
             var req = await new PostNewMatch(sourceMatch.GenerateAPIMatch()).RunTask();
-            if (req.Response.IsSuccessful)
+            if (req?.Response?.IsSuccessful == true)
             {
                 sourceMatch.Id = req.Object.Id;
                 PushAlert($"Match {req.Object.Code} posted successfully");
@@ -56,7 +56,7 @@ namespace RefereeAssistant3.Main
             else
             {
                 sourceMatch.Id = -1;
-                PushAlert($"Failed to post match {sourceMatch.Code}, code {req.Response.StatusCode}\n{req.Response.ErrorMessage}\n{req.Response.Content}");
+                PushAlert($"Failed to post match {sourceMatch.Code}, code {req?.Response?.StatusCode}\n{req?.Response?.ErrorMessage}\n{req?.Response?.Content}");
             }
         }
     }

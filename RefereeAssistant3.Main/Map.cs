@@ -24,13 +24,6 @@ namespace RefereeAssistant3.Main
 
         private bool downloaded;
 
-        public Map(string mapText)
-        {
-            var mapData = mapText.Split("|||");
-            MapCode = mapData[0];
-            DifficultyId = int.Parse(mapData[1]);
-        }
-
         public Map(APIMap apiMap) => SetPropertiesFromAPIMap(apiMap);
 
         public Map(int difficultyId, string mapCode = null)
@@ -41,7 +34,7 @@ namespace RefereeAssistant3.Main
 
         public Map() { }
 
-        public async Task DownloadDataAsync(Action<Map> OnLoaded = null, Scheduler scheduler = null)
+        public async Task DownloadDataAsync()
         {
             if (downloaded || !DifficultyId.HasValue)
                 return;
@@ -52,9 +45,6 @@ namespace RefereeAssistant3.Main
                 SetPropertiesFromAPIMap(apiMap);
                 downloaded = true;
             }
-
-            if (scheduler != null && OnLoaded != null)
-                scheduler.Add(() => OnLoaded?.Invoke(this));
         }
 
         public Texture DownloadCover(TextureStore textures)

@@ -395,7 +395,11 @@ namespace RefereeAssistant3.Visual
 
             matchSubmissionButton.Action = null;
             matchSubmissionButton.Text = "";
-            if (Match?.Id == -1)
+            if (string.IsNullOrEmpty(MainConfig.ServerURL))
+                matchSubmissionButton.Text = "Server URL not set";
+            else if (!Uri.IsWellFormedUriString(MainConfig.ServerURL, UriKind.Absolute))
+                matchSubmissionButton.Text = "Server URL invalid";
+            else if (Match?.Id == -1)
             {
                 matchSubmissionButton.Action = postOverlay.Show;
                 matchSubmissionButton.Text = "Upload match";
