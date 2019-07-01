@@ -11,6 +11,7 @@ namespace RefereeAssistant3.Main
         public List<Map> HardRock = new List<Map>();
         public List<Map> DoubleTime = new List<Map>();
         public List<Map> FreeMod = new List<Map>();
+        public List<Map> Other = new List<Map>();
 
         public async void DownloadMappoolAsync()
         {

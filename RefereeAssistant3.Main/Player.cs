@@ -1,4 +1,5 @@
-﻿using osu.Framework.Graphics.Textures;
+﻿using Newtonsoft.Json;
+using osu.Framework.Graphics.Textures;
 using osu.Framework.Threading;
 using RefereeAssistant3.Main.Online.APIRequests;
 using System;
@@ -11,7 +12,10 @@ namespace RefereeAssistant3.Main
     {
         public int? Id;
         public string Username;
+
+        [JsonIgnore]
         public Texture Avatar;
+
         private string avatarCachePath => $"{Utilities.GetBaseDirectory()}/cache/players/{Id}.png";
 
         public Player(int id) => Id = id;

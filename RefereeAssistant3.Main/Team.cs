@@ -12,8 +12,10 @@ namespace RefereeAssistant3.Main
         [JsonRequired]
         public readonly List<Player> Members;
 
+        [JsonIgnore]
         public List<Map> BannedMaps = new List<Map>();
 
+        [JsonIgnore]
         public List<Map> PickedMaps = new List<Map>();
 
         public Team(string teamName, IEnumerable<Player> members)

@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using osu.Framework;
+﻿using osu.Framework;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -9,7 +8,6 @@ using osu.Framework.Platform;
 using osuTK;
 using RefereeAssistant3.Main;
 using System;
-using System.IO;
 
 namespace RefereeAssistant3.Visual
 {
@@ -17,11 +15,9 @@ namespace RefereeAssistant3.Visual
     {
         private const float match_list_width = 396;
         private const float match_list_controls_height = 80;
-        private readonly string config_path = $"{Utilities.GetBaseDirectory()}/visualConfig.json";
         private readonly Core core;
         private FillFlowContainer<MatchPreviewPanel> matchListDisplayer;
         private MatchVisualManager matchVisualManager;
-        private readonly VisualConfig visualConfig;
 
         public new GameHost Host => base.Host;
 
@@ -29,24 +25,18 @@ namespace RefereeAssistant3.Visual
         {
             this.core = core;
             core.Alert += OnAlert;
-            if (!File.Exists(config_path))
-            {
-                visualConfig = new VisualConfig();
-                SaveVisualConfig();
-            }
-            else
-                visualConfig = JsonConvert.DeserializeObject<VisualConfig>(File.ReadAllText(config_path));
+            VisualConfig.Load();
         }
 
         private void OnAlert(string obj) => Schedule(() => ShowAlert(obj));
 
-        private void OnWindowStateChanged(object sender, System.EventArgs e)
+        private void OnWindowStateChanged(object sender, EventArgs e)
         {
-            visualConfig.WindowState = Host.Window.WindowState;
-            SaveVisualConfig();
+            if (Window.WindowState == VisualConfig.WindowState)
+                return;
+            VisualConfig.WindowState = Window.WindowState;
+            VisualConfig.Save();
         }
-
-        private void SaveVisualConfig() => File.WriteAllTextAsync(config_path, JsonConvert.SerializeObject(visualConfig));
 
         public DependencyContainer DependencyContainer;
         protected override IReadOnlyDependencyContainer CreateChildDependencies(IReadOnlyDependencyContainer parent) => DependencyContainer = new DependencyContainer(base.CreateChildDependencies(parent));
@@ -55,10 +45,11 @@ namespace RefereeAssistant3.Visual
         {
             DependencyContainer.CacheAs(this);
 
-            Host.Window.Title = "Referee Assistant 3";
+            Window.Title = "Referee Assistant 3";
 
-            Host.Window.WindowState = visualConfig.WindowState != WindowState.Minimized ? visualConfig.WindowState : WindowState.Normal;
-            Host.Window.WindowStateChanged += OnWindowStateChanged;
+            Window.WindowState = VisualConfig.WindowState != WindowState.Minimized ? VisualConfig.WindowState : WindowState.Normal;
+            Window.WindowStateChanged += OnWindowStateChanged;
+            Window.WindowState = WindowState.Fullscreen;
 
             Resources.AddStore(new DllResourceStore(@"RefereeAssistant3.Resources.dll"));
 
