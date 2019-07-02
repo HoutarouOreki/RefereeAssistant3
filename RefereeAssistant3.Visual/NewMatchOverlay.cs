@@ -297,54 +297,5 @@ namespace RefereeAssistant3.Visual
 
             teamMembersDisplay.Width = vsLabel.DrawWidth + (Style.SPACING * 2) + 5;
         }
-
-        private class AvatarUsernameLine : FillFlowContainer
-        {
-            private readonly Player player;
-            private readonly bool avatarOnLeft;
-
-            public AvatarUsernameLine(Player player, bool avatarOnLeft)
-            {
-                this.player = player;
-                this.avatarOnLeft = avatarOnLeft;
-                Anchor = avatarOnLeft ? Anchor.TopLeft : Anchor.TopRight;
-                Origin = avatarOnLeft ? Anchor.TopLeft : Anchor.TopRight;
-                Spacing = new Vector2(6);
-                AutoSizeAxes = Axes.Both;
-                Direction = FillDirection.Horizontal;
-            }
-
-            [BackgroundDependencyLoader]
-            private void Load(TextureStore textures)
-            {
-                var avatarContainer = new Container
-                {
-                    Anchor = avatarOnLeft ? Anchor.CentreLeft : Anchor.CentreRight,
-                    Origin = avatarOnLeft ? Anchor.CentreLeft : Anchor.CentreRight,
-                    Size = new Vector2(24)
-                };
-                var usernameText = new SpriteText
-                {
-                    Anchor = avatarOnLeft ? Anchor.CentreLeft : Anchor.CentreRight,
-                    Origin = avatarOnLeft ? Anchor.CentreLeft : Anchor.CentreRight,
-                    Text = player.Username
-                };
-                var idText = new SpriteText
-                {
-                    Anchor = avatarOnLeft ? Anchor.CentreLeft : Anchor.CentreRight,
-                    Origin = avatarOnLeft ? Anchor.CentreLeft : Anchor.CentreRight,
-                    Text = player.Id.ToString()
-                };
-                Add(avatarContainer);
-                Add(usernameText);
-                Add(idText);
-                player.DownloadDataAsync(textures, p =>
-                {
-                    usernameText.Text = p.Username;
-                    avatarContainer.Child = new Sprite { RelativeSizeAxes = Axes.Both, Texture = p.Avatar };
-                    idText.Text = p.Id.ToString();
-                }, Scheduler);
-            }
-        }
     }
 }

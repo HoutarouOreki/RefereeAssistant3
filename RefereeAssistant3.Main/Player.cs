@@ -33,14 +33,12 @@ namespace RefereeAssistant3.Main
 
         public async void DownloadDataAsync(TextureStore textures, Action<Player> OnLoaded, Scheduler scheduler)
         {
-            var avatarTask = DownloadAvatar(textures);
-            var metadataTask = DownloadMetadata();
             if (Id.HasValue && string.IsNullOrEmpty(Username))
-                await Task.WhenAll(avatarTask, metadataTask);
+                await Task.WhenAll(DownloadAvatar(textures), DownloadMetadata());
             else if (!Id.HasValue || string.IsNullOrEmpty(Username))
             {
-                await metadataTask;
-                await avatarTask;
+                await DownloadMetadata();
+                await DownloadAvatar(textures);
             }
             scheduler.Add(() => OnLoaded?.Invoke(this));
         }

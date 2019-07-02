@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 using Newtonsoft.Json;
+using RefereeAssistant3.IRC;
 using System.Collections.Generic;
 
 namespace RefereeAssistant3.Main
@@ -16,6 +17,8 @@ namespace RefereeAssistant3.Main
         public List<MapResult> MapResults;
 
         public string RollWinnerTeamName;
+
+        public IrcChannel Chat;
 
         [BsonIgnore]
         [JsonIgnore]

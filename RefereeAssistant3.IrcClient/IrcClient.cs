@@ -1,9 +1,8 @@
 ﻿using System;
-using System.ComponentModel;
 using System.IO;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
-using System.Threading;
+using System.Threading.Tasks;
 
 namespace RefereeAssistant3.IRC
 {
@@ -30,9 +29,6 @@ namespace RefereeAssistant3.IRC
         // stream writer to write to the stream
         private StreamWriter writer;
 
-        // AsyncOperation used to handle cross-thread wonderness
-        private readonly AsyncOperation op;
-
         #endregion
 
         #region Constructors
@@ -49,7 +45,6 @@ namespace RefereeAssistant3.IRC
         /// <param name="Port">IRC Port (6667 if you are unsure)</param>
         public IrcClient(string Server, int Port, bool shouldOutput)
         {
-            op = AsyncOperationManager.CreateOperation(null);
             this.Server = Server;
             this.Port = Port;
             ConsoleOutput = shouldOutput;
@@ -98,36 +93,23 @@ namespace RefereeAssistant3.IRC
 
         #region Events
 
-        public event EventHandler<UpdateUsersEventArgs> UpdateUsers = delegate { };
-        public event EventHandler<UserJoinedEventArgs> UserJoined = delegate { };
-        public event EventHandler<UserLeftEventArgs> UserLeft = delegate { };
-        public event EventHandler<UserNickChangedEventArgs> UserNickChange = delegate { };
+        public event Action<UpdateUsersEventArgs> UpdateUsers = delegate { };
+        public event Action<UserJoinedEventArgs> UserJoined = delegate { };
+        public event Action<UserLeftEventArgs> UserLeft = delegate { };
+        public event Action<UserNickChangedEventArgs> UserNickChange = delegate { };
 
-        public event EventHandler<ChannelMessageEventArgs> ChannelMessage = delegate { };
-        public event EventHandler<NoticeMessageEventArgs> NoticeMessage = delegate { };
-        public event EventHandler<PrivateMessageEventArgs> PrivateMessage = delegate { };
-        public event EventHandler<StringEventArgs> ServerMessage = delegate { };
+        public event Action<ChannelMessageEventArgs> ChannelMessage = delegate { };
+        public event Action<NoticeMessageEventArgs> NoticeMessage = delegate { };
+        public event Action<PrivateMessageEventArgs> PrivateMessage = delegate { };
+        public event Action<StringEventArgs> ServerMessage = delegate { };
 
-        public event EventHandler<StringEventArgs> NickTaken = delegate { };
+        public event Action<StringEventArgs> NickTaken = delegate { };
 
-        public event EventHandler OnConnect = delegate { };
+        public event Action OnConnect = delegate { };
 
-        public event EventHandler<ExceptionEventArgs> ExceptionThrown = delegate { };
+        public event Action<Exception> ExceptionThrown = delegate { };
 
-        public event EventHandler<ModeSetEventArgs> ChannelModeSet = delegate { };
-
-        private void Fire_UpdateUsers(UpdateUsersEventArgs o) => op.Post(x => UpdateUsers(this, (UpdateUsersEventArgs)x), o);
-        private void Fire_UserJoined(UserJoinedEventArgs o) => op.Post(x => UserJoined(this, (UserJoinedEventArgs)x), o);
-        private void Fire_UserLeft(UserLeftEventArgs o) => op.Post(x => UserLeft(this, (UserLeftEventArgs)x), o);
-        private void Fire_NickChanged(UserNickChangedEventArgs o) => op.Post(x => UserNickChange(this, (UserNickChangedEventArgs)x), o);
-        private void Fire_ChannelMessage(ChannelMessageEventArgs o) => op.Post(x => ChannelMessage(this, (ChannelMessageEventArgs)x), o);
-        private void Fire_NoticeMessage(NoticeMessageEventArgs o) => op.Post(x => NoticeMessage(this, (NoticeMessageEventArgs)x), o);
-        private void Fire_PrivateMessage(PrivateMessageEventArgs o) => op.Post(x => PrivateMessage(this, (PrivateMessageEventArgs)x), o);
-        private void Fire_ServerMesssage(string s) => op.Post(x => ServerMessage(this, (StringEventArgs)x), new StringEventArgs(s));
-        private void Fire_NickTaken(string s) => op.Post(x => NickTaken(this, (StringEventArgs)x), new StringEventArgs(s));
-        private void Fire_Connected() => op.Post((x) => OnConnect(this, null), null);
-        private void Fire_ExceptionThrown(Exception ex) => op.Post(x => ExceptionThrown(this, (ExceptionEventArgs)x), new ExceptionEventArgs(ex));
-        private void Fire_ChannelModeSet(ModeSetEventArgs o) => op.Post(x => ChannelModeSet(this, (ModeSetEventArgs)x), o);
+        public event Action<ModeSetEventArgs> ChannelModeSet = delegate { };
         #endregion
 
         #region PublicMethods
@@ -136,8 +118,9 @@ namespace RefereeAssistant3.IRC
         /// </summary>
         public void Connect()
         {
-            var t = new Thread(DoConnect) { IsBackground = true };
-            t.Start();
+            //var t = new Thread(DoConnect) { IsBackground = true };
+            //t.Start();
+            DoConnect();
         }
         private void DoConnect()
         {
@@ -158,7 +141,7 @@ namespace RefereeAssistant3.IRC
             }
             catch (Exception ex)
             {
-                Fire_ExceptionThrown(ex);
+                ExceptionThrown(ex);
             }
         }
         /// <summary>
@@ -224,22 +207,23 @@ namespace RefereeAssistant3.IRC
         /// <summary>
         /// Listens for messages from the server
         /// </summary>
-        private void Listen()
+        private async void Listen()
         {
-
             while ((inputLine = reader.ReadLine()) != null)
             {
-                try
-                {
-                    ParseData(inputLine);
-                    if (ConsoleOutput) Console.Write(inputLine);
-                }
-                catch (Exception ex)
-                {
-                    Fire_ExceptionThrown(ex);
-                }
-            }//end while
+                //try
+                //{
+                ParseData(inputLine);
+                if (ConsoleOutput) Console.Write(inputLine);
+                //}
+                //catch (Exception ex)
+                //{
+                //ExceptionThrown(ex);
+                //}
+                await Task.Delay(1);
+            }
         }
+
         /// <summary>
         /// Parses data sent from the server
         /// </summary>
@@ -267,21 +251,25 @@ namespace RefereeAssistant3.IRC
             {
                 case "001": // server welcome message, after this we can join
                     Send("MODE " + Nick + " +B");
-                    Fire_Connected();    //TODO: this might not work
+                    OnConnect?.Invoke();    //TODO: this might not work
                     break;
                 case "353": // member list
                 {
                     var channel = ircData[4];
                     var userList = JoinArray(ircData, 5).Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
-                    Fire_UpdateUsers(new UpdateUsersEventArgs(channel, userList));
+                    UpdateUsers(new UpdateUsersEventArgs(channel, userList));
                 }
                 break;
+                case "401":
+                case "403":
+                case "404":
+                    break;
                 case "433":
                     var takenNick = ircData[3];
 
                     // notify user
-                    Fire_NickTaken(takenNick);
+                    NickTaken(new StringEventArgs(takenNick));
 
                     // try alt nick if it's the first time 
                     if (takenNick == AltNick)
@@ -303,7 +291,7 @@ namespace RefereeAssistant3.IRC
                 {
                     var channel = ircData[2];
                     var user = ircData[0].Substring(1, ircData[0].IndexOf("!", StringComparison.Ordinal) - 1);
-                    Fire_UserJoined(new UserJoinedEventArgs(channel, user));
+                    UserJoined(new UserJoinedEventArgs(channel, user));
                 }
                 break;
                 case "MODE": // MODE was set
@@ -319,7 +307,7 @@ namespace RefereeAssistant3.IRC
 
                         var to = ircData[4];
                         var mode = ircData[3];
-                        Fire_ChannelModeSet(new ModeSetEventArgs(channel, from, to, mode));
+                        ChannelModeSet(new ModeSetEventArgs(channel, from, to, mode));
                     }
 
                     // TODO: event for userMode's
@@ -329,7 +317,7 @@ namespace RefereeAssistant3.IRC
                     var oldNick = ircData[0].Substring(1, ircData[0].IndexOf("!", StringComparison.Ordinal) - 1);
                     var newNick = JoinArray(ircData, 3);
 
-                    Fire_NickChanged(new UserNickChangedEventArgs(oldNick, newNick));
+                    UserNickChange(new UserNickChangedEventArgs(oldNick, newNick));
                     break;
                 case "NOTICE": // someone sent a notice
                 {
@@ -338,10 +326,10 @@ namespace RefereeAssistant3.IRC
                     if (from.Contains("!"))
                     {
                         from = from.Substring(1, ircData[0].IndexOf('!') - 1);
-                        Fire_NoticeMessage(new NoticeMessageEventArgs(from, message));
+                        NoticeMessage(new NoticeMessageEventArgs(from, message));
                     }
                     else
-                        Fire_NoticeMessage(new NoticeMessageEventArgs(Server, message));
+                        NoticeMessage(new NoticeMessageEventArgs(Server, message));
                 }
                 break;
                 case "PRIVMSG": // message was sent to the channel or as private
@@ -352,9 +340,9 @@ namespace RefereeAssistant3.IRC
 
                     // if it's a private message
                     if (string.Equals(to, Nick, StringComparison.CurrentCultureIgnoreCase))
-                        Fire_PrivateMessage(new PrivateMessageEventArgs(from, message));
+                        PrivateMessage(new PrivateMessageEventArgs(from, message));
                     else
-                        Fire_ChannelMessage(new ChannelMessageEventArgs(to, from, message));
+                        ChannelMessage(new ChannelMessageEventArgs(to, from, message));
                 }
                 break;
                 case "PART":
@@ -363,7 +351,7 @@ namespace RefereeAssistant3.IRC
                     var channel = ircData[2];
                     var user = ircData[0].Substring(1, data.IndexOf("!") - 1);
 
-                    Fire_UserLeft(new UserLeftEventArgs(channel, user));
+                    UserLeft(new UserLeftEventArgs(channel, user));
                     Send("NAMES " + ircData[2]);
                 }
                 break;
@@ -371,7 +359,7 @@ namespace RefereeAssistant3.IRC
                     // still using this while debugging
 
                     if (ircData.Length > 3)
-                        Fire_ServerMesssage(JoinArray(ircData, 3));
+                        ServerMessage(new StringEventArgs(JoinArray(ircData, 3)));
 
                     break;
             }
@@ -410,7 +398,10 @@ namespace RefereeAssistant3.IRC
         private void Send(string message)
         {
             writer.WriteLine(message);
-            writer.Flush();
+            if (!Connected)
+                Connect();
+            else
+                writer.Flush();
         }
         #endregion
     }

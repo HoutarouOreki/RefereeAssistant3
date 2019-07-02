@@ -1,5 +1,6 @@
 ﻿using RefereeAssistant3.IRC;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -19,6 +20,9 @@ namespace RefereeAssistant3.Main
 
         public event Action<IrcMessage> PrivateMessageReceived;
         public event Action<IrcMessage> ChannelMessageReceived;
+        public event Action<UpdateUsersEventArgs> UserListUpdated;
+
+        public List<IrcChannel> Channels = new List<IrcChannel>();
 
         public OsuIrcBot()
         {
@@ -31,8 +35,6 @@ namespace RefereeAssistant3.Main
             client.PrivateMessage += OnPrivateMessage;
             client.UpdateUsers += OnUserListUpdated;
             client.Connect();
-
-
         }
 
         private Match lastRequestedMatch;
@@ -46,7 +48,7 @@ namespace RefereeAssistant3.Main
             return true;
         }
 
-        private void OnPrivateMessage(object sender, PrivateMessageEventArgs e)
+        private void OnPrivateMessage(PrivateMessageEventArgs e)
         {
             var matchCreationMatch = regex_create_command.Match(e.Message);
             if (e.From == bancho_bot && matchCreationMatch.Success)
@@ -66,9 +68,28 @@ namespace RefereeAssistant3.Main
             return;
         }
 
-        private void OnChannelMessage(object sender, ChannelMessageEventArgs e) => ChannelMessageReceived?.Invoke(new IrcMessage(e.From, e.Channel, e.Message, DateTime.UtcNow));
+        public IrcChannel GetChannel(string channelName)
+        {
+            if (Channels.FirstOrDefault(c => c.ServerName == client.Server && c.ChannelName == channelName) == null)
+                Channels.Add(new IrcChannel(client.Server, channelName));
+            return Channels.First(c => c.ServerName == client.Server && c.ChannelName == channelName);
+        }
 
-        private void OnUserListUpdated(object sender, UpdateUsersEventArgs e) => SendLocalMessage(e.Channel, $"Present users: {string.Join(", ", e.UserList)}", true);
+        private void OnChannelMessage(ChannelMessageEventArgs e)
+        {
+            var message = new IrcMessage(e.From, e.Channel, e.Message, DateTime.UtcNow);
+            var channel = GetChannel(e.Channel);
+            if (message.Equals(channel.Messages.LastOrDefault()))
+                return;
+            channel.AddMessage(message);
+            ChannelMessageReceived?.Invoke(message);
+        }
+
+        private void OnUserListUpdated(UpdateUsersEventArgs e)
+        {
+            GetChannel(e.Channel).SetUsers(e.UserList);
+            UserListUpdated?.Invoke(e);
+        }
 
         public void SendMessage(string channel, string message)
         {
@@ -77,7 +98,7 @@ namespace RefereeAssistant3.Main
             client.GetChannelUsers($"{channel}");
         }
 
-        public void SendLocalMessage(string channel, string message, bool fromProgram = false) => ChannelMessageReceived?.Invoke(new IrcMessage(fromProgram ? "Referee Assistant 3" : client.Nick, channel, message, DateTime.UtcNow));
+        public void SendLocalMessage(string channel, string message, bool fromProgram = false) => OnChannelMessage(new ChannelMessageEventArgs(channel, fromProgram ? "Referee Assistant 3" : client.Nick, message));
 
         public void InvitePlayer(Match match, Player player) => SendMessage(match.ChannelName, $"!mp invite {player.IRCUsername}");
         public void LockMatch(Match match) => SendMessage(match.ChannelName, "!mp lock");

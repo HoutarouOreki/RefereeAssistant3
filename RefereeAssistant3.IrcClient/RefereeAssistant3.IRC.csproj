@@ -6,4 +6,8 @@
     <RootNamespace>RefereeAssistant3.IRC</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="ppy.osu.Framework" Version="2019.702.0" />
+  </ItemGroup>
+
 </Project>

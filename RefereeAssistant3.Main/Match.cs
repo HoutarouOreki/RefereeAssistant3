@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Bindables;
+using RefereeAssistant3.IRC;
 
 namespace RefereeAssistant3.Main
 {
@@ -20,6 +21,7 @@ namespace RefereeAssistant3.Main
 
         public int? RoomId;
         public string ChannelName => RoomId.HasValue ? $"#mp_{RoomId}" : null;
+        public IrcChannel IrcChannel;
 
         public MatchSettings LastReadSettings { get; private set; }
 
@@ -463,6 +465,7 @@ namespace RefereeAssistant3.Main
                 Id = Id,
                 MapResults = new List<MapResult>(),
                 RollWinnerTeamName = RollWinner?.TeamName,
+                Chat = IrcChannel,
                 Team1 = new APITeam
                 {
                     BannedMaps = Team1.BannedMaps.Select(m => m.DifficultyId.Value).ToList(),
