@@ -233,6 +233,8 @@ namespace RefereeAssistant3.IRC
             // split the data into parts
             var ircData = data.Split(' ');
 
+            if (ircData.Length < 2)
+                return;
             var ircCommand = ircData[1];
 
             // if the message starts with PING we must PONG back
@@ -398,10 +400,8 @@ namespace RefereeAssistant3.IRC
         private void Send(string message)
         {
             writer.WriteLine(message);
-            if (!Connected)
-                Connect();
-            else
-                writer.Flush();
+            try { writer.Flush(); }
+            catch { Connect(); }
         }
         #endregion
     }

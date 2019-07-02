@@ -87,7 +87,7 @@ namespace RefereeAssistant3.Main
 
         private void OnUserListUpdated(UpdateUsersEventArgs e)
         {
-            GetChannel(e.Channel).SetUsers(e.UserList);
+            GetChannel(e.Channel).SetIrcUsers(e.UserList);
             UserListUpdated?.Invoke(e);
         }
 

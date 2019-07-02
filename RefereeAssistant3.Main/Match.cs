@@ -1,8 +1,7 @@
-﻿using System;
+﻿using RefereeAssistant3.IRC;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using osu.Framework.Bindables;
-using RefereeAssistant3.IRC;
 
 namespace RefereeAssistant3.Main
 {
@@ -23,10 +22,12 @@ namespace RefereeAssistant3.Main
         public string ChannelName => RoomId.HasValue ? $"#mp_{RoomId}" : null;
         public IrcChannel IrcChannel;
 
-        public MatchSettings LastReadSettings { get; private set; }
+        public MatchSettings LastReadSettings { get; set; }
 
         private DateTime lastUploadTime;
         public bool ModifiedSinceUpdate => History.Count > 0 && History.Last().Time > lastUploadTime;
+
+        public DateTime TimeOutTime { get; private set; }
 
         public readonly Team Team1;
         public readonly Team Team2;
@@ -128,17 +129,16 @@ namespace RefereeAssistant3.Main
 
             Procedures.Add(MatchProcedure.SettingUp);
             GenerateMatchProcedures();
+
+            RefreshTimeOut();
         }
+
+        private void RefreshTimeOut() => TimeOutTime = DateTime.UtcNow + TimeSpan.FromMinutes(30);
 
         public void NotifyAboutUpload()
         {
             lastUploadTime = DateTime.UtcNow;
             Updated();
-        }
-
-        public void NotifyAboutSettings(string text)
-        {
-
         }
 
         private void GenerateMatchProcedures()
@@ -436,8 +436,9 @@ namespace RefereeAssistant3.Main
 
         private bool FinishPlaying()
         {
-            if (CurrentProcedure != MatchProcedure.Playing)
+            if (CurrentProcedure != MatchProcedure.Playing || SelectedWinner == null)
                 return false;
+            RefreshTimeOut();
             history.Add(new MatchSnapshot(this, $"{SelectedWinner} wins {SelectedMap}"));
             Scores[SelectedWinner]++;
             selectedMap = null;
@@ -450,6 +451,7 @@ namespace RefereeAssistant3.Main
         {
             if (CurrentProcedure != MatchProcedure.PlayingWarmUp)
                 return false;
+            RefreshTimeOut();
             var snapshotName = $"Finished playing warmup {SelectedMap}";
             selectedMap = null;
             history.Add(new MatchSnapshot(this, snapshotName));

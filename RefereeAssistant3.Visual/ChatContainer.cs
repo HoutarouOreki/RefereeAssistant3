@@ -6,6 +6,7 @@ using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.UserInterface;
 using RefereeAssistant3.IRC;
 using RefereeAssistant3.Main;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -13,15 +14,16 @@ namespace RefereeAssistant3.Visual
 {
     public class ChatContainer : Container
     {
-        private const float textbox_height = Style.COMPONENTS_HEIGHT;
         private const float user_list_width = 240;
         private readonly TextFlowContainer textFlow;
         private readonly Core core;
         private readonly Container roomCreationContainer;
         private readonly RA3Button newRoomButton;
-        private readonly FillFlowContainer<AvatarUsernameLine> usersFlow;
+        private readonly FillFlowContainer<AvatarUsernameLine> slotsFlow;
         private readonly BasicScrollContainer messagesScroll;
         private readonly List<Player> downloadedUsers = new List<Player>();
+        private readonly SpriteText matchTimeOutText;
+        private readonly FillFlowContainer<AvatarUsernameLine> ircUsersFlow;
 
         public ChatContainer(Core core)
         {
@@ -36,7 +38,7 @@ namespace RefereeAssistant3.Visual
                     {
                         new Container
                         {
-                            Padding = new MarginPadding { Bottom = textbox_height },
+                            Padding = new MarginPadding { Bottom = Style.COMPONENTS_HEIGHT },
                             RelativeSizeAxes = Axes.Both,
                             Child = messagesScroll = new BasicScrollContainer
                             {
@@ -51,13 +53,12 @@ namespace RefereeAssistant3.Visual
                         new BasicTextBox
                         {
                             RelativeSizeAxes = Axes.X,
-                            Height = textbox_height,
+                            Height = Style.COMPONENTS_HEIGHT,
                             Anchor = Anchor.BottomLeft,
                             Origin = Anchor.BottomLeft,
                             ReleaseFocusOnCommit = false,
                             OnCommit = OnMessageCommit
-                        },
-
+                        }
                     }
                 },
                 new Container
@@ -77,13 +78,39 @@ namespace RefereeAssistant3.Visual
                         {
                             RelativeSizeAxes = Axes.Both,
                             Padding = new MarginPadding(8),
-                            Child = usersFlow = new FillFlowContainer<AvatarUsernameLine>
+                            Child = new FillFlowContainer
                             {
                                 RelativeSizeAxes = Axes.X,
                                 AutoSizeAxes = Axes.Y,
                                 Direction = FillDirection.Vertical,
-                                Spacing = new osuTK.Vector2(4),
+                                Children = new Drawable[]
+                                {
+                                    slotsFlow = new FillFlowContainer<AvatarUsernameLine>
+                                    {
+                                        RelativeSizeAxes = Axes.X,
+                                        AutoSizeAxes = Axes.Y,
+                                        Direction = FillDirection.Vertical,
+                                        Spacing = new osuTK.Vector2(4)
+                                    },
+                                    new Box { RelativeSizeAxes = Axes.X },
+                                    ircUsersFlow = new FillFlowContainer<AvatarUsernameLine>
+                                    {
+                                        RelativeSizeAxes = Axes.X,
+                                        AutoSizeAxes = Axes.Y,
+                                        Direction = FillDirection.Vertical,
+                                        Spacing = new osuTK.Vector2(4)
+                                    }
+                                }
                             }
+                        },
+                        matchTimeOutText = new SpriteText
+                        {
+                            Anchor = Anchor.BottomRight,
+                            Origin = Anchor.BottomRight,
+                            Font = new FontUsage("OpenSans-Bold", 14),
+                            AllowMultiline = true,
+                            Margin = new MarginPadding { Horizontal = 4 },
+                            Alpha = 0.5f
                         }
                     }
                 },
@@ -117,7 +144,8 @@ namespace RefereeAssistant3.Visual
         private void OnMatchChanged(ValueChangedEvent<Match> obj)
         {
             textFlow.Text = "";
-            usersFlow.Clear();
+            slotsFlow.Clear();
+            ircUsersFlow.Clear();
             if (obj.NewValue.RoomId == null)
             {
                 newRoomButton.Action = () =>
@@ -133,7 +161,7 @@ namespace RefereeAssistant3.Visual
                 var channel = core.ChatBot.GetChannel(obj.NewValue.ChannelName);
                 foreach (var message in channel.Messages)
                     OnNewChannelMessage(message);
-                PopulateUserList(channel.Users);
+                PopulateUserList(channel.IrcUsers);
             }
         }
 
@@ -146,7 +174,8 @@ namespace RefereeAssistant3.Visual
             {
                 roomCreationContainer.Hide();
                 textFlow.AddParagraph($@"{message.DateUTC:hh\:mm} ");
-                textFlow.AddText(message.Author, ColourUsername);
+                var author = new SpriteText { Text = GetSavedPlayer(message.Author)?.Username ?? message.Author };
+                textFlow.AddText(author, ColourUsername);
                 textFlow.AddText($": {message.Message}");
             }
             if (isScrolledToEnd)
@@ -166,16 +195,15 @@ namespace RefereeAssistant3.Visual
 
         private void PopulateUserList(IEnumerable<string> users)
         {
-            usersFlow.Clear();
+            slotsFlow.Clear();
             foreach (var user in users)
             {
-                var p = downloadedUsers.Find(dp => dp.IRCUsername == user.Trim('@', '+'));
-                var userLine = new AvatarUsernameLine(p ?? new Player { Username = user.Trim('@', '+') }, true, (line, player) =>
+                var userLine = new AvatarUsernameLine(GetSavedPlayer(user) ?? new Player { Username = user.Trim('@', '+') }, true, (line, player) =>
                 {
                     ColourUsername(line.UsernameText);
                     downloadedUsers.Add(player);
                 });
-                usersFlow.Add(userLine);
+                ircUsersFlow.Add(userLine);
             }
         }
 
@@ -186,6 +214,8 @@ namespace RefereeAssistant3.Visual
             else if (core.SelectedMatch.Value.Team2.Members.Any(m => m.Id.ToString() == t.Text || m.IRCUsername == t.Text || m.Username == t.Text))
                 t.Colour = Style.Blue;
         }
+
+        private Player GetSavedPlayer(string username) => downloadedUsers.Find(dp => dp.IRCUsername == username.Trim('@', '+'));
 
         private void OnMessageCommit(TextBox textBox, bool newText)
         {
@@ -198,6 +228,15 @@ namespace RefereeAssistant3.Visual
             }
             textBox.Text = string.Empty;
             core.ChatBot.SendMessage(channel, text);
+        }
+
+        protected override void Update()
+        {
+            if (core.SelectedMatch.Value != null)
+                matchTimeOutText.Text = $@"this multiplayer room will time out in {core.SelectedMatch.Value.TimeOutTime - DateTime.UtcNow:mm\:ss}";
+            else
+                matchTimeOutText.Text = string.Empty;
+            base.Update();
         }
     }
 }
