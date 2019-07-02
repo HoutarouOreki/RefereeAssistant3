@@ -64,6 +64,17 @@ namespace RefereeAssistant3.IRC
             return true;
         }
 
+        public bool MoveSlotUser(string username, int targetSlot)
+        {
+            if (!Slots.Values.Contains(username) || Slots.ContainsKey(targetSlot))
+                return false;
+            var sourceSlot = Slots.Where(kv => kv.Value == username).First().Key;
+            Slots.Add(targetSlot, Slots[sourceSlot]);
+            Slots.Remove(sourceSlot);
+            SlotsUpdated?.Invoke(Slots);
+            return true;
+        }
+
         public bool RemoveSlot(int slot)
         {
             if (!Slots.ContainsKey(slot))
@@ -73,7 +84,7 @@ namespace RefereeAssistant3.IRC
             return true;
         }
 
-        public bool RemoveSlot(string user)
+        public int RemoveSlot(string user)
         {
             var slot = (int?)null;
             foreach (var _slot in Slots.Keys)
@@ -85,8 +96,10 @@ namespace RefereeAssistant3.IRC
                 }
             }
             if (!slot.HasValue)
-                return false;
-            return RemoveSlot(slot.Value);
+                return -1;
+            if (RemoveSlot(slot.Value))
+                return slot.Value;
+            return -1;
         }
     }
 }

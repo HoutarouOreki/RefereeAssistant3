@@ -75,5 +75,20 @@ namespace RefereeAssistant3.Main
                 }
             }
         }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is Player other))
+                return false;
+            if (other.IRCUsername == IRCUsername)
+                return true;
+            if (other.Username == Username)
+                return true;
+            if (other.Id == Id)
+                return true;
+            return false;
+        }
+
+        public override int GetHashCode() => IRCUsername.GetHashCode() * 2;
     }
 }
