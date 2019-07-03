@@ -40,7 +40,7 @@ namespace RefereeAssistant3.Visual
             {
                 Anchor = avatarOnLeft ? Anchor.CentreLeft : Anchor.CentreRight,
                 Origin = avatarOnLeft ? Anchor.CentreLeft : Anchor.CentreRight,
-                Text = Player?.Id.ToString()
+                Text = Player?.PlayerId.ToString()
             };
         }
 
@@ -73,7 +73,7 @@ namespace RefereeAssistant3.Visual
             {
                 UsernameText.Text = p.Username;
                 AvatarContainer.Add(new Sprite { RelativeSizeAxes = Axes.Both, Texture = p.Avatar });
-                IdText.Text = p.Id.ToString();
+                IdText.Text = p.PlayerId.ToString();
                 onDownloadComplete?.Invoke(this, Player);
             }, Scheduler);
         }

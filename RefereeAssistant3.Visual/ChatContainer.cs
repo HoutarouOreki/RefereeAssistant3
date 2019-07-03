@@ -231,9 +231,9 @@ namespace RefereeAssistant3.Visual
 
         private void ColourUsername(SpriteText t)
         {
-            if (core.SelectedMatch.Value.Team1.Members.Any(m => m.Id.ToString() == t.Text || m.IRCUsername == t.Text || m.Username == t.Text))
+            if (core.SelectedMatch.Value.Team1.Members.Any(m => m.PlayerId.ToString() == t.Text || m.IRCUsername == t.Text || m.Username == t.Text))
                 t.Colour = Style.Red;
-            else if (core.SelectedMatch.Value.Team2.Members.Any(m => m.Id.ToString() == t.Text || m.IRCUsername == t.Text || m.Username == t.Text))
+            else if (core.SelectedMatch.Value.Team2.Members.Any(m => m.PlayerId.ToString() == t.Text || m.IRCUsername == t.Text || m.Username == t.Text))
                 t.Colour = Style.Blue;
         }
 

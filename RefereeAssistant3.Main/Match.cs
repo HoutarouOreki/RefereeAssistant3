@@ -482,10 +482,7 @@ namespace RefereeAssistant3.Main
                 {
                     BannedMaps = Team1.BannedMaps.Select(m => m.DifficultyId.Value).ToList(),
                     PickedMaps = Team1.PickedMaps.Select(m => m.DifficultyId.Value).ToList(),
-                    Members = Team1.Members.Select(m => new APIPlayer
-                    {
-                        PlayerId = m.Id.Value
-                    }).ToList(),
+                    Members = Team1.Members.Select(m => new APIPlayer(m.PlayerId.Value)).ToList(),
                     Score = Scores[Team1],
                     TeamName = Team1.TeamName
                 },
@@ -493,10 +490,7 @@ namespace RefereeAssistant3.Main
                 {
                     BannedMaps = Team2.BannedMaps.Select(m => m.DifficultyId.Value).ToList(),
                     PickedMaps = Team2.PickedMaps.Select(m => m.DifficultyId.Value).ToList(),
-                    Members = Team2.Members.Select(m => new APIPlayer
-                    {
-                        PlayerId = m.Id.Value
-                    }).ToList(),
+                    Members = Team2.Members.Select(m => new APIPlayer(m.PlayerId.Value)).ToList(),
                     Score = Scores[Team2],
                     TeamName = Team2.TeamName
                 }
@@ -506,7 +500,7 @@ namespace RefereeAssistant3.Main
                 var scores = new Dictionary<int, int>();
 
                 foreach (var score in finishedMap.Value)
-                    scores.Add(score.Key.Id.Value, score.Value);
+                    scores.Add(score.Key.PlayerId.Value, score.Value);
 
                 apiMatch.MapResults.Add(new MapResult
                 {

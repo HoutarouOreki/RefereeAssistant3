@@ -180,7 +180,8 @@ namespace RefereeAssistant3.Visual
 
         private bool AreOptionsValid()
         {
-            if (team1 == null || team2 == null || team1 == team2 || !tournament.Teams.Contains(team1) || !tournament.Teams.Contains(team2) || !tournament.Stages.Contains(stage))
+            var teams = tournament?.Teams.Select(teamStorage => new Team(teamStorage));
+            if (team1 == null || team2 == null || team1.Equals(team2) || !teams.Any(t => t.Equals(team1)) || !teams.Any(t => t.Equals(team2)) || !tournament.Stages.Contains(stage))
                 return false;
             return true;
         }
@@ -225,7 +226,7 @@ namespace RefereeAssistant3.Visual
             stageSelectionButton.Text = "Loading...";
 
             // async because JIT takes too long on the first run
-            LoadComponentAsync(teamSelectionOverlay = new SelectionOverlay<Team>(tournament.Teams), d =>
+            LoadComponentAsync(teamSelectionOverlay = new SelectionOverlay<Team>(tournament.Teams.Select(teamStorage => new Team(teamStorage))), d =>
             {
                 Add(d);
                 teamSelectionOverlay.Hide();

@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using osu.Framework;
 using RefereeAssistant3.Main;
+using RefereeAssistant3.Main.Storage;
 using RefereeAssistant3.Visual;
 using System.Collections.Generic;
 using System.IO;
@@ -88,7 +89,7 @@ namespace RefereeAssistant3
 
             await Task.WhenAll(teamsFileTask, confFileTask, stagesFileTask);
 
-            var teams = JsonConvert.DeserializeObject<List<Team>>(teamsFileTask.Result);
+            var teams = JsonConvert.DeserializeObject<List<TeamStorage>>(teamsFileTask.Result);
             var stages = JsonConvert.DeserializeObject<List<TournamentStage>>(stagesFileTask.Result);
             var configuration = JsonConvert.DeserializeObject<TournamentConfiguration>(confFileTask.Result);
             return new Tournament(configuration, stages, teams);
@@ -98,16 +99,11 @@ namespace RefereeAssistant3
         {
             dir.Create();
             tournaments_directory.Create();
-            var exampleTournament = new DirectoryInfo($"{tournaments_directory}/Example Tournament");
-            exampleTournament.Create();
-
             var exampleConfiguration = new TournamentConfiguration
             {
                 Name = "Example Tournament",
                 DoFailedScoresCount = false
             };
-            File.WriteAllText($"{exampleTournament}/configuration.json", JsonConvert.SerializeObject(exampleConfiguration));
-
             var exampleStages = new List<TournamentStage>
             {
                 new TournamentStage
@@ -141,17 +137,16 @@ namespace RefereeAssistant3
                     ScoreRequiredToWin = 7
                 },
             };
-            File.WriteAllText($"{exampleTournament}/stages.json", JsonConvert.SerializeObject(exampleStages));
-            var exampleTeams = new List<Team>
-                    {
-                        new Team("Animals", new List<Player>
-                        { new Player(4185566), new Player(1372608), new Player(7866701) }),
-                        new Team("Joestars", new List<Player>
-                        { new Player(9299739), new Player(7366346), new Player(11351311) }),
-                        new Team("Cars", new List<Player>
-                        { new Player(8654962), new Player(772248) })
-                    };
-            File.WriteAllText($"{exampleTournament}/teams.json", JsonConvert.SerializeObject(exampleTeams));
+            var exampleTeams = new List<TeamStorage>
+            {
+                new TeamStorage("Animals", new List<APIPlayer>
+                { new APIPlayer(4185566), new APIPlayer(1372608), new APIPlayer(7866701) }),
+                new TeamStorage("Joestars", new List<APIPlayer>
+                { new APIPlayer(9299739), new APIPlayer(7366346), new APIPlayer(11351311) }),
+                new TeamStorage("Cars", new List<APIPlayer>
+                { new APIPlayer(8654962), new APIPlayer(772248) })
+            };
+            new Tournament(exampleConfiguration, exampleStages, exampleTeams).Save();
         }
     }
 }

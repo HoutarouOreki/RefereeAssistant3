@@ -56,7 +56,7 @@ namespace RefereeAssistant3.Main
                     PlayerScores = new Dictionary<int, int>()
                 };
                 foreach (var playerScore in map.Value)
-                    mapResult.PlayerScores.Add(playerScore.Key.Id.Value, playerScore.Value);
+                    mapResult.PlayerScores.Add(playerScore.Key.PlayerId.Value, playerScore.Value);
             }
             Name = name;
             ProcedureIndex = match.CurrentProcedureIndex;

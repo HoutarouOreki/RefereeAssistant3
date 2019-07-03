@@ -11,13 +11,13 @@ namespace RefereeAssistant3.Main
 {
     public class Player
     {
-        public int? Id;
+        public int? PlayerId;
         public string Username;
         /// <summary>
         /// If username is unavailable, returns #id
         /// </summary>
         public string IRCUsername => string.IsNullOrEmpty(Username) ?
-            Id.HasValue ? $"#{Id.Value}" : null :
+            PlayerId.HasValue ? $"#{PlayerId.Value}" : null :
             Username?.Replace(' ', '_');
 
         [JsonIgnore]
@@ -29,9 +29,9 @@ namespace RefereeAssistant3.Main
         [JsonIgnore]
         public TeamColour SelectedTeam;
 
-        private string avatarCachePath => $"{Utilities.GetBaseDirectory()}/cache/players/{Id}.png";
+        private string avatarCachePath => $"{Utilities.GetBaseDirectory()}/cache/players/{PlayerId}.png";
 
-        public Player(int id) => Id = id;
+        public Player(int id) => PlayerId = id;
 
         public Player() { }
 
@@ -39,9 +39,9 @@ namespace RefereeAssistant3.Main
 
         public async void DownloadDataAsync(TextureStore textures, Action<Player> OnLoaded, Scheduler scheduler)
         {
-            if (Id.HasValue && string.IsNullOrEmpty(Username))
+            if (PlayerId.HasValue && string.IsNullOrEmpty(Username))
                 await Task.WhenAll(DownloadAvatar(textures), DownloadMetadata());
-            else if (!Id.HasValue || string.IsNullOrEmpty(Username))
+            else if (!PlayerId.HasValue || string.IsNullOrEmpty(Username))
             {
                 await DownloadMetadata();
                 await DownloadAvatar(textures);
@@ -51,17 +51,17 @@ namespace RefereeAssistant3.Main
 
         private async Task DownloadMetadata()
         {
-            var req = await new GetUsers(Id, Username).RunTask();
+            var req = await new GetUsers(PlayerId, Username).RunTask();
             if (req.Response.IsSuccessful && req.Object?.Length > 0)
             {
-                Id = req.Object[0].Id;
+                PlayerId = req.Object[0].Id;
                 Username = req.Object[0].Username;
             }
         }
 
         private async Task DownloadAvatar(TextureStore textures)
         {
-            if (Avatar == null && Id != null)
+            if (Avatar == null && PlayerId != null)
             {
                 if (!File.Exists(avatarCachePath) || (DateTime.UtcNow - File.GetCreationTimeUtc(avatarCachePath)).TotalDays > 2)
                 {
@@ -69,7 +69,7 @@ namespace RefereeAssistant3.Main
                     {
                         using (var fileStream = new FileStream(avatarCachePath, FileMode.OpenOrCreate, FileAccess.Write))
                         {
-                            var avatarOnlineStream = textures.GetStream($"https://a.ppy.sh/{Id}");
+                            var avatarOnlineStream = textures.GetStream($"https://a.ppy.sh/{PlayerId}");
                             var img = SixLabors.ImageSharp.Image.Load(avatarOnlineStream);
                             SixLabors.ImageSharp.ImageExtensions.SaveAsPng(img, fileStream);
                         }
@@ -96,7 +96,7 @@ namespace RefereeAssistant3.Main
                 return true;
             if (other?.Username == Username || s == Username)
                 return true;
-            if (other?.Id == Id || (int.TryParse(s?.Trim('#'), out var parsedId) && parsedId == Id))
+            if (other?.PlayerId == PlayerId || (int.TryParse(s?.Trim('#'), out var parsedId) && parsedId == PlayerId))
                 return true;
             return false;
         }
