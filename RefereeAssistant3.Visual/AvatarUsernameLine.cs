@@ -13,7 +13,6 @@ namespace RefereeAssistant3.Visual
     {
         protected Player Player { get; private set; }
         private readonly Action<AvatarUsernameLine, Player> onDownloadComplete;
-        private readonly bool avatarOnLeft;
         protected Container AvatarContainer { get; private set; }
         public SpriteText UsernameText { get; private set; }
         protected SpriteText IdText { get; private set; }
@@ -22,7 +21,6 @@ namespace RefereeAssistant3.Visual
         {
             Player = player;
             this.onDownloadComplete = onDownloadComplete;
-            this.avatarOnLeft = avatarOnLeft;
             Anchor = avatarOnLeft ? Anchor.TopLeft : Anchor.TopRight;
             Origin = avatarOnLeft ? Anchor.TopLeft : Anchor.TopRight;
             AutoSizeAxes = Axes.Both;
