@@ -3,6 +3,7 @@ using osu.Framework.Graphics.Textures;
 using osu.Framework.Threading;
 using RefereeAssistant3.Main.Online.APIRequests;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -23,7 +24,10 @@ namespace RefereeAssistant3.Main
         public Texture Avatar;
 
         [JsonIgnore]
-        public Mods SelectedMods;
+        public IEnumerable<Mods> SelectedMods;
+
+        [JsonIgnore]
+        public TeamColour SelectedTeam;
 
         private string avatarCachePath => $"{Utilities.GetBaseDirectory()}/cache/players/{Id}.png";
 

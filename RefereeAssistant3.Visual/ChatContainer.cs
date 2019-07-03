@@ -19,7 +19,7 @@ namespace RefereeAssistant3.Visual
         private readonly Core core;
         private readonly Container roomCreationContainer;
         private readonly RA3Button newRoomButton;
-        private readonly FillFlowContainer<AvatarUsernameLine> slotsFlow;
+        private readonly FillFlowContainer<SlotLine> slotsFlow;
         private readonly BasicScrollContainer messagesScroll;
         private readonly List<Player> downloadedUsers = new List<Player>();
         private readonly SpriteText matchTimeOutText;
@@ -85,7 +85,7 @@ namespace RefereeAssistant3.Visual
                                 Direction = FillDirection.Vertical,
                                 Children = new Drawable[]
                                 {
-                                    slotsFlow = new FillFlowContainer<AvatarUsernameLine>
+                                    slotsFlow = new FillFlowContainer<SlotLine>
                                     {
                                         RelativeSizeAxes = Axes.X,
                                         AutoSizeAxes = Axes.Y,
@@ -195,15 +195,37 @@ namespace RefereeAssistant3.Visual
 
         private void PopulateUserList(IEnumerable<string> users)
         {
-            slotsFlow.Clear();
+            ircUsersFlow.Clear();
             foreach (var user in users)
             {
                 var userLine = new AvatarUsernameLine(GetSavedPlayer(user) ?? new Player { Username = user.Trim('@', '+') }, true, (line, player) =>
                 {
                     ColourUsername(line.UsernameText);
-                    downloadedUsers.Add(player);
+                    if (!downloadedUsers.Contains(player))
+                        downloadedUsers.Add(player);
                 });
                 ircUsersFlow.Add(userLine);
+            }
+
+            slotsFlow.Clear();
+            var slots = core.SelectedMatch.Value.IrcChannel.Slots;
+            if (slots.Count == 0)
+                return;
+            for (var i = 1; i <= slots.Keys.Max(); i++)
+            {
+                if (slots.ContainsKey(i))
+                {
+                    var player = GetSavedPlayer(slots[i]) ?? new Player { Username = slots[i].Trim('@', '+') };
+                    var userLine = new SlotLine(i, player, (line, p) =>
+                    {
+                        ColourUsername(line.UsernameText);
+                        if (!downloadedUsers.Contains(p))
+                            downloadedUsers.Add(p);
+                    });
+                    slotsFlow.Add(userLine);
+                }
+                else
+                    slotsFlow.Add(new SlotLine(i, null));
             }
         }
 
@@ -215,7 +237,7 @@ namespace RefereeAssistant3.Visual
                 t.Colour = Style.Blue;
         }
 
-        private Player GetSavedPlayer(string username) => downloadedUsers.Find(dp => dp.IRCUsername == username.Trim('@', '+'));
+        private Player GetSavedPlayer(string username) => core.SelectedMatch.Value.GetPlayer(username) ?? downloadedUsers.Find(dp => dp.IRCUsername == username.Trim('@', '+'));
 
         private void OnMessageCommit(TextBox textBox, bool newText)
         {

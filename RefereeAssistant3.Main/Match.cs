@@ -141,6 +141,16 @@ namespace RefereeAssistant3.Main
             Updated();
         }
 
+        public void SelectMapFromId(int difficultyId)
+        {
+            var map = TournamentStage.Mappool.AllMaps.FirstOrDefault(m => m.DifficultyId == difficultyId);
+            SelectedMap = map ?? new Map(difficultyId);
+            if (!SelectedMap.Downloaded)
+                SelectedMap.DownloadDataAsync().ContinueWith(t => Updated());
+        }
+
+        public Player GetPlayer(string username) => Team1.Members.Concat(Team2.Members).FirstOrDefault(p => p.IRCUsername == username || p.Username == username);
+
         private void GenerateMatchProcedures()
         {
             Procedures.Clear();

@@ -9,55 +9,74 @@ using System;
 
 namespace RefereeAssistant3.Visual
 {
-    public class AvatarUsernameLine : FillFlowContainer
+    public class AvatarUsernameLine : Container
     {
-        private readonly Player player;
+        protected Player Player { get; private set; }
         private readonly Action<AvatarUsernameLine, Player> onDownloadComplete;
-        private readonly Container avatarContainer;
-        public readonly SpriteText UsernameText;
-        private readonly SpriteText idText;
+        private readonly bool avatarOnLeft;
+        protected Container AvatarContainer { get; private set; }
+        public SpriteText UsernameText { get; private set; }
+        protected SpriteText IdText { get; private set; }
 
         public AvatarUsernameLine(Player player, bool avatarOnLeft, Action<AvatarUsernameLine, Player> onDownloadComplete = null)
         {
-            this.player = player;
+            Player = player;
             this.onDownloadComplete = onDownloadComplete;
+            this.avatarOnLeft = avatarOnLeft;
             Anchor = avatarOnLeft ? Anchor.TopLeft : Anchor.TopRight;
             Origin = avatarOnLeft ? Anchor.TopLeft : Anchor.TopRight;
-            Spacing = new Vector2(6);
             AutoSizeAxes = Axes.Both;
-            Direction = FillDirection.Horizontal;
-            Children = new Drawable[]
+            AvatarContainer = new Container
             {
-                avatarContainer = new Container
+                Anchor = avatarOnLeft ? Anchor.CentreLeft : Anchor.CentreRight,
+                Origin = avatarOnLeft ? Anchor.CentreLeft : Anchor.CentreRight,
+                Size = new Vector2(24)
+            };
+            UsernameText = new SpriteText
+            {
+                Anchor = avatarOnLeft ? Anchor.CentreLeft : Anchor.CentreRight,
+                Origin = avatarOnLeft ? Anchor.CentreLeft : Anchor.CentreRight,
+                Text = Player?.Username
+            };
+            IdText = new SpriteText
+            {
+                Anchor = avatarOnLeft ? Anchor.CentreLeft : Anchor.CentreRight,
+                Origin = avatarOnLeft ? Anchor.CentreLeft : Anchor.CentreRight,
+                Text = Player?.Id.ToString()
+            };
+        }
+
+        protected virtual void CreateContent()
+        {
+            Child = new FillFlowContainer
+            {
+                AutoSizeAxes = Axes.Both,
+                Direction = FillDirection.Horizontal,
+                Spacing = new Vector2(4),
+                Children = new Drawable[]
                 {
-                    Anchor = avatarOnLeft ? Anchor.CentreLeft : Anchor.CentreRight,
-                    Origin = avatarOnLeft ? Anchor.CentreLeft : Anchor.CentreRight,
-                    Size = new Vector2(24)
-                },
-                UsernameText = new SpriteText
-                {
-                    Anchor = avatarOnLeft ? Anchor.CentreLeft : Anchor.CentreRight,
-                    Origin = avatarOnLeft ? Anchor.CentreLeft : Anchor.CentreRight,
-                    Text = player.Username
-                },
-                idText = new SpriteText
-                {
-                    Anchor = avatarOnLeft ? Anchor.CentreLeft : Anchor.CentreRight,
-                    Origin = avatarOnLeft ? Anchor.CentreLeft : Anchor.CentreRight,
-                    Text = player.Id.ToString()
+                    AvatarContainer,
+                    UsernameText,
+                    IdText
                 }
             };
+        }
+
+        protected override void LoadComplete()
+        {
+            CreateContent();
+            base.LoadComplete();
         }
 
         [BackgroundDependencyLoader]
         private void Load(TextureStore textures)
         {
-            player.DownloadDataAsync(textures, p =>
+            Player?.DownloadDataAsync(textures, p =>
             {
                 UsernameText.Text = p.Username;
-                avatarContainer.Child = new Sprite { RelativeSizeAxes = Axes.Both, Texture = p.Avatar };
-                idText.Text = p.Id.ToString();
-                onDownloadComplete?.Invoke(this, player);
+                AvatarContainer.Add(new Sprite { RelativeSizeAxes = Axes.Both, Texture = p.Avatar });
+                IdText.Text = p.Id.ToString();
+                onDownloadComplete?.Invoke(this, Player);
             }, Scheduler);
         }
     }

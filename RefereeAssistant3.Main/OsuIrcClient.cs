@@ -9,7 +9,6 @@ namespace RefereeAssistant3.Main
     public class OsuIrcBot
     {
         private readonly IrcClient client;
-        private readonly OsuIrcMatchParseHandler osuIrcMatchParseHandler;
 
         /// <summary>
         /// 1 - slot
@@ -120,7 +119,6 @@ namespace RefereeAssistant3.Main
             client.PrivateMessage += OnPrivateMessage;
             client.UpdateUsers += OnUserListUpdated;
             client.Connect();
-            osuIrcMatchParseHandler = new OsuIrcMatchParseHandler(this);
         }
 
         private Match lastRequestedMatch;
@@ -150,6 +148,7 @@ namespace RefereeAssistant3.Main
             var channelName = match.ChannelName;
             client.JoinChannel(channelName);
             SendLocalMessage(channelName, $"Chat room created successfully ({match.ChannelName})", true);
+            match.IrcChannel = GetChannel(channelName);
             LockMatch(match);
             return;
         }

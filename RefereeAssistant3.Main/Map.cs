@@ -26,7 +26,7 @@ namespace RefereeAssistant3.Main
 
         public int Length;
 
-        private bool downloaded;
+        public bool Downloaded;
 
         public Map(APIMap apiMap) => SetPropertiesFromAPIMap(apiMap);
 
@@ -40,14 +40,14 @@ namespace RefereeAssistant3.Main
 
         public async Task DownloadDataAsync()
         {
-            if (downloaded || !DifficultyId.HasValue)
+            if (Downloaded || !DifficultyId.HasValue)
                 return;
             var res = await new GetMap(DifficultyId.Value).RunTask();
             if (res.Response.IsSuccessful && res.Object.Length > 0)
             {
                 var apiMap = res.Object[0];
                 SetPropertiesFromAPIMap(apiMap);
-                downloaded = true;
+                Downloaded = true;
             }
         }
 
