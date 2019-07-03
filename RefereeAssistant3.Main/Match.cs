@@ -20,7 +20,7 @@ namespace RefereeAssistant3.Main
 
         public int? RoomId;
         public string ChannelName => RoomId.HasValue ? $"#mp_{RoomId}" : null;
-        public IrcChannel IrcChannel;
+        public MpRoomIrcChannel IrcChannel;
 
         public MatchSettings LastReadSettings { get; set; }
 

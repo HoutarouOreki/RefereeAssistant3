@@ -15,12 +15,8 @@ namespace RefereeAssistant3.IRC
         [JsonIgnore]
         public IEnumerable<string> IrcUsers { get; private set; } = new List<string>();
 
-        [JsonIgnore]
-        public Dictionary<int, string> Slots { get; private set; } = new Dictionary<int, string>();
-
         public event Action<IrcMessage> NewMessage;
         public event Action<IEnumerable<string>> IrcUsersUpdated;
-        public event Action<Dictionary<int, string>> SlotsUpdated;
 
         public IrcChannel(string serverName, string channelName)
         {
@@ -43,63 +39,6 @@ namespace RefereeAssistant3.IRC
                     list.Add(user.Trim('~', '&', '@', '%', '+'));
             }
             IrcUsersUpdated?.Invoke(users);
-        }
-
-        public bool AddSlotUser(string user, int slot)
-        {
-            if (Slots.ContainsKey(slot))
-                return false;
-            Slots.Add(slot, user);
-            SlotsUpdated?.Invoke(Slots);
-            return true;
-        }
-
-        public bool MoveSlotUser(int sourceSlot, int targetSlot)
-        {
-            if (!Slots.ContainsKey(sourceSlot) || Slots.ContainsKey(targetSlot))
-                return false;
-            Slots.Add(targetSlot, Slots[sourceSlot]);
-            Slots.Remove(sourceSlot);
-            SlotsUpdated?.Invoke(Slots);
-            return true;
-        }
-
-        public bool MoveSlotUser(string username, int targetSlot)
-        {
-            if (!Slots.Values.Contains(username) || Slots.ContainsKey(targetSlot))
-                return false;
-            var sourceSlot = Slots.Where(kv => kv.Value == username).First().Key;
-            Slots.Add(targetSlot, Slots[sourceSlot]);
-            Slots.Remove(sourceSlot);
-            SlotsUpdated?.Invoke(Slots);
-            return true;
-        }
-
-        public bool RemoveSlot(int slot)
-        {
-            if (!Slots.ContainsKey(slot))
-                return false;
-            Slots.Remove(slot);
-            SlotsUpdated?.Invoke(Slots);
-            return true;
-        }
-
-        public int RemoveSlot(string user)
-        {
-            var slot = (int?)null;
-            foreach (var _slot in Slots.Keys)
-            {
-                if (Slots[_slot] == user)
-                {
-                    slot = _slot;
-                    break;
-                }
-            }
-            if (!slot.HasValue)
-                return -1;
-            if (RemoveSlot(slot.Value))
-                return slot.Value;
-            return -1;
         }
     }
 }

@@ -25,8 +25,7 @@ namespace RefereeAssistant3.Main
         /// </summary>
         private static readonly Regex regex_team_and_mods = new Regex(@"\[(?:Host \/ )?(?:Team (\w+)\s*(?:\/ )*)?((?:\w+,\s+)?\w+)?\]");
 
-        private static readonly Regex regex_map_line = new Regex(@"^Beatmap: https:\/\/osu\.ppy\.sh\/b\/(\d+)");
-        private static readonly Regex map_changed = new Regex(@"^Changed beatmap to https:\/\/osu.ppy.sh\/b\/(\d+)");
+        private static readonly Regex regex_map_line = new Regex(@"(?:B|b)eatmap(?: to|(?: changed to)?:) (?:.*)?https:\/\/osu\.ppy\.sh\/b\/(\d+)");
 
         //private static readonly Regex regex_switched_line = new Regex(@"^Switched ([a-zA-Z0-9_\- ]+) to the tournament server$");
         private static readonly Regex regex_create_command = new Regex(@"^Created the tournament match https:\/\/osu\.ppy\.sh\/mp\/(\d+).*$");
@@ -34,8 +33,9 @@ namespace RefereeAssistant3.Main
         /// <summary>
         /// 1 - username
         /// 2 - slot
+        /// 3 - team
         /// </summary>
-        private static readonly Regex player_joined = new Regex(@"^(.*) joined in slot (\d*)\.$");
+        private static readonly Regex player_joined = new Regex(@"^(.*) joined in slot (\d*)(?: for team (.*))?\.$");
 
         /// <summary>
         /// 1 - username
@@ -101,12 +101,12 @@ namespace RefereeAssistant3.Main
         public event Action<ModsChangedEventArgs> ModsChanged;
         public event Action<PlayerStateEventArgs> PlayerStateReceived;
         public event Action<TeamChangedEventArgs> PlayerTeamChanged;
-        public event Action<IrcChannel, int> MapChanged;
-        public event Action<IrcChannel, string> RefereeAdded;
-        public event Action<IrcChannel, string> RefereeRemoved;
-        public event Action<IrcChannel> MatchLocked;
-        public event Action<IrcChannel> MatchUnlocked;
-        public event Action<IrcChannel> AllPlayersReady;
+        public event Action<MpRoomIrcChannel, int> MapChanged;
+        public event Action<MpRoomIrcChannel, string> RefereeAdded;
+        public event Action<MpRoomIrcChannel, string> RefereeRemoved;
+        public event Action<MpRoomIrcChannel> MatchLocked;
+        public event Action<MpRoomIrcChannel> MatchUnlocked;
+        public event Action<MpRoomIrcChannel> AllPlayersReady;
 
         public OsuIrcBot()
         {
@@ -143,47 +143,63 @@ namespace RefereeAssistant3.Main
         private void OnRoomCreated(int roomId)
         {
             var match = lastRequestedMatch;
+            if (match == null)
+                return;
             lastRequestedMatch = null;
             match.RoomId = roomId;
             var channelName = match.ChannelName;
             client.JoinChannel(channelName);
             SendLocalMessage(channelName, $"Chat room created successfully ({match.ChannelName})", true);
-            match.IrcChannel = GetChannel(channelName);
+            match.IrcChannel = GetChannel(match);
             LockMatch(match);
             return;
         }
 
-        public IrcChannel GetChannel(string channelName)
+        public IrcChannel GetChannel(string channelName, bool dontCreate = false)
         {
             if (Channels.FirstOrDefault(c => c.ServerName == client.Server && c.ChannelName == channelName) == null)
+            {
+                if (dontCreate)
+                    return null;
                 Channels.Add(new IrcChannel(client.Server, channelName));
-            return Channels.First(c => c.ServerName == client.Server && c.ChannelName == channelName);
+            }
+            return Channels.OfType<IrcChannel>().First(c => c.ServerName == client.Server && c.ChannelName == channelName);
+        }
+
+        public MpRoomIrcChannel GetChannel(Match match)
+        {
+            if (Channels.OfType<MpRoomIrcChannel>().FirstOrDefault(c => c.Match == match) == null)
+                Channels.Add(new MpRoomIrcChannel(client.Server, match));
+            return Channels.OfType<MpRoomIrcChannel>().First(c => c.Match == match);
         }
 
         private void OnChannelMessage(ChannelMessageEventArgs e)
         {
             var message = new IrcMessage(e.From, e.Channel, e.Message, DateTime.UtcNow);
-            var channel = GetChannel(e.Channel);
-            if (message.Equals(channel.Messages.LastOrDefault()))
+            var channel = GetChannel(e.Channel, true);
+            if (message.Equals(channel?.Messages.LastOrDefault()))
                 return;
             if (message.Author == bancho_bot)
                 ProcessMessage(message);
-            channel.AddMessage(message);
+            channel?.AddMessage(message);
             ChannelMessageReceived?.Invoke(message);
         }
 
         private void ProcessMessage(IrcMessage message)
         {
             var t = message.Message;
-            var c = GetChannel(message.Channel);
+            var channel = GetChannel(message.Channel, true);
+            if (!(channel is MpRoomIrcChannel c))
+                return;
             #region room operations
             var joined = player_joined.Match(t);
             if (joined.Success)
             {
                 var username = joined.Groups[1].Value;
                 var slot = int.Parse(joined.Groups[2].Value);
+                var team = joined.Groups[3].Value.Equals("red", StringComparison.InvariantCultureIgnoreCase) ? TeamColour.Red : TeamColour.Blue;
                 c.AddSlotUser(username, slot);
-                JoinedInSlot?.Invoke(new UserSlotEventArgs(c, username, slot));
+                JoinedInSlot?.Invoke(new UserSlotEventArgs(c, username, slot, team));
             }
             var changedSlot = player_changed_slot.Match(t);
             if (changedSlot.Success)
@@ -297,14 +313,14 @@ namespace RefereeAssistant3.Main
             var mapLine = regex_map_line.Match(t);
             if (mapLine.Success)
                 MapChanged?.Invoke(c, int.Parse(mapLine.Groups[1].Value));
-            var mapChanged = map_changed.Match(t);
-            if (mapChanged.Success)
-                MapChanged?.Invoke(c, int.Parse(mapChanged.Groups[1].Value));
         }
 
         private void OnUserListUpdated(UpdateUsersEventArgs e)
         {
-            GetChannel(e.Channel).SetIrcUsers(e.UserList);
+            var c = GetChannel(e.Channel, true);
+            if (c == null)
+                return;
+            c.SetIrcUsers(e.UserList);
             UserListUpdated?.Invoke(e);
         }
 

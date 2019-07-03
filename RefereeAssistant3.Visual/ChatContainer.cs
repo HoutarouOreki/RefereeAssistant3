@@ -158,7 +158,7 @@ namespace RefereeAssistant3.Visual
             else
             {
                 roomCreationContainer.Hide();
-                var channel = core.ChatBot.GetChannel(obj.NewValue.ChannelName);
+                var channel = core.ChatBot.GetChannel(obj.NewValue);
                 foreach (var message in channel.Messages)
                     OnNewChannelMessage(message);
                 PopulateUserList(channel.IrcUsers);
@@ -215,7 +215,7 @@ namespace RefereeAssistant3.Visual
             {
                 if (slots.ContainsKey(i))
                 {
-                    var player = GetSavedPlayer(slots[i]) ?? new Player { Username = slots[i].Trim('@', '+') };
+                    var player = slots[i];
                     var userLine = new SlotLine(i, player, (line, p) =>
                     {
                         ColourUsername(line.UsernameText);

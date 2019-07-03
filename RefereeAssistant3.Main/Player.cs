@@ -35,6 +35,8 @@ namespace RefereeAssistant3.Main
 
         public Player() { }
 
+        public Player(string username) => Username = username;
+
         public async void DownloadDataAsync(TextureStore textures, Action<Player> OnLoaded, Scheduler scheduler)
         {
             if (Id.HasValue && string.IsNullOrEmpty(Username))
@@ -82,13 +84,19 @@ namespace RefereeAssistant3.Main
 
         public override bool Equals(object obj)
         {
-            if (!(obj is Player other))
+            Player other = null;
+            string s = null;
+            if (obj is Player player)
+                other = player;
+            if (obj is string username)
+                s = username;
+            if (other == null && s == null)
                 return false;
-            if (other.IRCUsername == IRCUsername)
+            if (other?.IRCUsername == IRCUsername || s == IRCUsername)
                 return true;
-            if (other.Username == Username)
+            if (other?.Username == Username || s == Username)
                 return true;
-            if (other.Id == Id)
+            if (other?.Id == Id || (int.TryParse(s?.Trim('#'), out var parsedId) && parsedId == Id))
                 return true;
             return false;
         }
