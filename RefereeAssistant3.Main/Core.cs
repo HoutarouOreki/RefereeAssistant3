@@ -25,6 +25,7 @@ namespace RefereeAssistant3.Main
             Tournaments = tournaments;
             MainConfig.Load();
             ChatBot = new OsuIrcBot();
+
         }
 
         public void AddNewMatch(Match match)

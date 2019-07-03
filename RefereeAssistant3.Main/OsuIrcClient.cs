@@ -9,6 +9,7 @@ namespace RefereeAssistant3.Main
     public class OsuIrcBot
     {
         private readonly IrcClient client;
+        private readonly OsuIrcMatchParseHandler osuIrcMatchParseHandler;
 
         /// <summary>
         /// 1 - slot
@@ -17,18 +18,17 @@ namespace RefereeAssistant3.Main
         /// 4 - Player username
         /// 5 - Team and mods
         /// </summary>
-        private static readonly Regex regex_player_line = new Regex(@"^Slot (\d+)\s+(Not Ready|Ready) https:\/\/osu\.ppy\.sh\/u\/(\d+)\s+([a-zA-Z0-9_ ]+)\s+\[(.*)\]$");
+        private static readonly Regex regex_player_line = new Regex(@"^Slot (\d+)\s+(Not Ready|Ready) https:\/\/osu\.ppy\.sh\/u\/(\d+)\s+([a-zA-Z0-9_ ]+)\s+(\[(?:.*)\])$");
 
         /// <summary>
         /// 1 - Blue / Red
         /// 2 - Hidden, HardRock
         /// </summary>
-        private static readonly Regex regex_team_and_mods = new Regex(@"\[(?:Team (\w+)\s*(?:\/ )*)?((?:\w+,\s+)?\w+)?\]");
+        private static readonly Regex regex_team_and_mods = new Regex(@"\[(?:Host \/ )?(?:Team (\w+)\s*(?:\/ )*)?((?:\w+,\s+)?\w+)?\]");
 
-        /// <summary>
-        /// 1 = diffId || 2 = artist - title
-        /// </summary>
-        private static readonly Regex regex_map_line = new Regex(@"Beatmap: https:\/\/osu\.ppy\.sh\/b\/(1070437) (.*)");
+        private static readonly Regex regex_map_line = new Regex(@"^Beatmap: https:\/\/osu\.ppy\.sh\/b\/(\d+)");
+        private static readonly Regex map_changed = new Regex(@"^Changed beatmap to https:\/\/osu.ppy.sh\/b\/(\d+)");
+
         //private static readonly Regex regex_switched_line = new Regex(@"^Switched ([a-zA-Z0-9_\- ]+) to the tournament server$");
         private static readonly Regex regex_create_command = new Regex(@"^Created the tournament match https:\/\/osu\.ppy\.sh\/mp\/(\d+).*$");
 
@@ -70,7 +70,7 @@ namespace RefereeAssistant3.Main
         /// </summary>
         private static readonly Regex match_settings_changed_without_size = new Regex(@"^Changed match settings to (\w*), (.*)");
 
-        private static readonly Regex vs_mode_changed = new Regex(@"^Changed match settings to (\D*)$");
+        private static readonly Regex vs_mode_changed = new Regex(@"^Changed match settings to (\w+)$");
 
         /// <summary>
         /// 1 - Enabled/Disabled mods
@@ -102,12 +102,12 @@ namespace RefereeAssistant3.Main
         public event Action<ModsChangedEventArgs> ModsChanged;
         public event Action<PlayerStateEventArgs> PlayerStateReceived;
         public event Action<TeamChangedEventArgs> PlayerTeamChanged;
-        public event Action<int> MapChanged;
-        public event Action<string> RefereeAdded;
-        public event Action<string> RefereeRemoved;
-        public event Action MatchLocked;
-        public event Action MatchUnlocked;
-        public event Action AllPlayersReady;
+        public event Action<IrcChannel, int> MapChanged;
+        public event Action<IrcChannel, string> RefereeAdded;
+        public event Action<IrcChannel, string> RefereeRemoved;
+        public event Action<IrcChannel> MatchLocked;
+        public event Action<IrcChannel> MatchUnlocked;
+        public event Action<IrcChannel> AllPlayersReady;
 
         public OsuIrcBot()
         {
@@ -120,6 +120,7 @@ namespace RefereeAssistant3.Main
             client.PrivateMessage += OnPrivateMessage;
             client.UpdateUsers += OnUserListUpdated;
             client.Connect();
+            osuIrcMatchParseHandler = new OsuIrcMatchParseHandler(this);
         }
 
         private Match lastRequestedMatch;
@@ -202,10 +203,10 @@ namespace RefereeAssistant3.Main
             }
             var lockedRoom = locked_room.Match(t);
             if (lockedRoom.Success)
-                MatchLocked?.Invoke();
+                MatchLocked?.Invoke(c);
             var unlockedRoom = unlocked_room.Match(t);
             if (unlockedRoom.Success)
-                MatchUnlocked?.Invoke();
+                MatchUnlocked?.Invoke(c);
             #endregion
             #region match settings
             var fullSettings = match_settings_changed_full.Match(t);
@@ -214,31 +215,31 @@ namespace RefereeAssistant3.Main
                 var slotAmount = int.Parse(fullSettings.Groups[1].Value);
                 var vsMode = TeamModeFromString(fullSettings.Groups[2].Value);
                 var scoringMode = ScoreModeFromString(fullSettings.Groups[3].Value);
-                MatchSettingsChanged?.Invoke(new MatchSettingsEventArgs(slotAmount, scoringMode, vsMode));
+                MatchSettingsChanged?.Invoke(new MatchSettingsEventArgs(c, slotAmount, scoringMode, vsMode));
             }
             var halfSettings = match_settings_changed_without_size.Match(t);
             if (halfSettings.Success)
             {
-                var vsMode = TeamModeFromString(fullSettings.Groups[1].Value);
-                var scoringMode = ScoreModeFromString(fullSettings.Groups[2].Value);
-                MatchSettingsChanged?.Invoke(new MatchSettingsEventArgs(null, scoringMode, vsMode));
+                var vsMode = TeamModeFromString(halfSettings.Groups[1].Value);
+                var scoringMode = ScoreModeFromString(halfSettings.Groups[2].Value);
+                MatchSettingsChanged?.Invoke(new MatchSettingsEventArgs(c, null, scoringMode, vsMode));
             }
             var vsModeChange = vs_mode_changed.Match(t);
             if (vsModeChange.Success)
             {
                 var vsMode = TeamModeFromString(vsModeChange.Groups[1].Value);
-                MatchSettingsChanged?.Invoke(new MatchSettingsEventArgs(null, null, vsMode));
+                MatchSettingsChanged?.Invoke(new MatchSettingsEventArgs(c, null, null, vsMode));
             }
             var settingsRead = match_settings_read.Match(t);
             if (settingsRead.Success)
             {
                 var vsMode = TeamModeFromString(settingsRead.Groups[1].Value);
                 var winCondition = ScoreModeFromString(settingsRead.Groups[2].Value);
-                MatchSettingsChanged?.Invoke(new MatchSettingsEventArgs(null, winCondition, vsMode));
+                MatchSettingsChanged?.Invoke(new MatchSettingsEventArgs(c, null, winCondition, vsMode));
             }
             var slotAmountChange = changed_slot_amount.Match(t);
             if (slotAmountChange.Success)
-                MatchSettingsChanged?.Invoke(new MatchSettingsEventArgs(int.Parse(slotAmountChange.Groups[1].Value), null, null));
+                MatchSettingsChanged?.Invoke(new MatchSettingsEventArgs(c, int.Parse(slotAmountChange.Groups[1].Value), null, null));
             var modsChange = mods_changed.Match(t);
             if (modsChange.Success)
             {
@@ -247,7 +248,7 @@ namespace RefereeAssistant3.Main
                 if (modsEnabled)
                     mods.AddRange(modsChange.Groups[2].Value.Split(", ").Select(m => ModFromString(m)));
                 var freemodEnabled = modsChange.Groups[3].Value.Equals("enabled", StringComparison.InvariantCultureIgnoreCase);
-                ModsChanged?.Invoke(new ModsChangedEventArgs(mods, freemodEnabled));
+                ModsChanged?.Invoke(new ModsChangedEventArgs(c, mods, freemodEnabled));
             }
             var modsActive = mods_active.Match(t);
             if (modsActive.Success)
@@ -259,7 +260,7 @@ namespace RefereeAssistant3.Main
                     freemodActive = true;
                     modStrings.RemoveAll(s => s == "Freemod");
                 }
-                ModsChanged?.Invoke(new ModsChangedEventArgs(modStrings.Select(m => ModFromString(m)), freemodActive));
+                ModsChanged?.Invoke(new ModsChangedEventArgs(c, modStrings.Select(m => ModFromString(m)), freemodActive));
             }
             #endregion
             #region player settings
@@ -273,33 +274,33 @@ namespace RefereeAssistant3.Main
                 var teamAndMods = regex_team_and_mods.Match(playerState.Groups[5].Value);
                 var team = teamAndMods.Groups[1].Value.Equals("Red", StringComparison.InvariantCultureIgnoreCase) ? TeamColour.Red : TeamColour.Blue;
                 var mods = teamAndMods.Groups[2].Value.Length > 0 ? teamAndMods.Groups[2].Value.Split(", ").Select(m => ModFromString(m)).ToList() : new List<Mods>();
-                PlayerStateReceived?.Invoke(new PlayerStateEventArgs(slot, ready, playerId, username, team, mods));
+                PlayerStateReceived?.Invoke(new PlayerStateEventArgs(c, slot, ready, playerId, username, team, mods));
             }
             var playerTeamChange = player_changed_team.Match(t);
             if (playerTeamChange.Success)
             {
                 var username = playerTeamChange.Groups[1].Value;
                 var team = playerTeamChange.Groups[2].Value.Equals("Red", StringComparison.InvariantCultureIgnoreCase) ? TeamColour.Red : TeamColour.Blue;
-                PlayerTeamChanged?.Invoke(new TeamChangedEventArgs(username, team));
+                PlayerTeamChanged?.Invoke(new TeamChangedEventArgs(c, username, team));
             }
             var allPlayersReady = all_players_ready.Match(t);
             if (allPlayersReady.Success)
-                AllPlayersReady?.Invoke();
+                AllPlayersReady?.Invoke(c);
             #endregion
             #region referees
             var refereeAdded = added_referee.Match(t);
             if (refereeAdded.Success)
-                RefereeAdded?.Invoke(refereeAdded.Groups[1].Value);
+                RefereeAdded?.Invoke(c, refereeAdded.Groups[1].Value);
             var refereeRemoved = removed_referee.Match(t);
             if (refereeRemoved.Success)
-                RefereeRemoved?.Invoke(refereeRemoved.Groups[1].Value);
+                RefereeRemoved?.Invoke(c, refereeRemoved.Groups[1].Value);
             #endregion
             var mapLine = regex_map_line.Match(t);
             if (mapLine.Success)
-            {
-                var diffId = int.Parse(mapLine.Groups[1].Value);
-                MapChanged?.Invoke(diffId);
-            }
+                MapChanged?.Invoke(c, int.Parse(mapLine.Groups[1].Value));
+            var mapChanged = map_changed.Match(t);
+            if (mapChanged.Success)
+                MapChanged?.Invoke(c, int.Parse(mapChanged.Groups[1].Value));
         }
 
         private void OnUserListUpdated(UpdateUsersEventArgs e)
@@ -307,6 +308,8 @@ namespace RefereeAssistant3.Main
             GetChannel(e.Channel).SetIrcUsers(e.UserList);
             UserListUpdated?.Invoke(e);
         }
+
+        public void SendMessage(IrcChannel channel, string message) => SendMessage(channel.ChannelName, message);
 
         public void SendMessage(string channel, string message)
         {
