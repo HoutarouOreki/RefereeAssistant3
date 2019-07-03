@@ -14,7 +14,7 @@ namespace RefereeAssistant3.Visual
     public class RefereeAssistant3Visual : Game
     {
         private const float match_list_width = 396;
-        private const float match_list_controls_height = 80;
+        private const float match_list_controls_height = 3.5f * Style.COMPONENTS_HEIGHT;
         private readonly Core core;
         private FillFlowContainer<MatchPreviewPanel> matchListDisplayer;
         private MatchVisualManager matchVisualManager;
@@ -64,6 +64,7 @@ namespace RefereeAssistant3.Visual
             var mapPickerOverlay = new MapPickerOverlay(core);
             var mapFinderOverlay = new MapFinderOverlay(core);
             var matchPostOverlay = new MatchPostOverlay(core);
+            var tournamentsOverlay = new TournamentsOverlay(core);
             Children = new Drawable[]
             {
                 new Box { RelativeSizeAxes = Axes.Both, Colour = FrameworkColour.GreenDarker },
@@ -115,6 +116,7 @@ namespace RefereeAssistant3.Visual
                                 new RA3Button
                                 {
                                     RelativeSizeAxes = Axes.X,
+                                    Width = 1,
                                     BackgroundColour = FrameworkColour.Green,
                                     Text = "Add new match",
                                     Action = newMatchOverlay.Show
@@ -122,9 +124,18 @@ namespace RefereeAssistant3.Visual
                                 new RA3Button
                                 {
                                     RelativeSizeAxes = Axes.X,
-                                    BackgroundColour = FrameworkColour.YellowGreen,
+                                    Width = 1,
+                                    BackgroundColour = FrameworkColour.BlueGreen,
+                                    Text = "Tournaments",
+                                    Action = tournamentsOverlay.Show
+                                },
+                                new RA3Button
+                                {
+                                    RelativeSizeAxes = Axes.X,
+                                    Width = 1,
+                                    BackgroundColour = FrameworkColour.BlueGreen,
                                     Text = "Settings",
-                                    Action = settingsOverlay.Show
+                                    Action = settingsOverlay.Show,
                                 }
                             }
                         },
@@ -135,7 +146,8 @@ namespace RefereeAssistant3.Visual
                 settingsOverlay,
                 mapPickerOverlay,
                 mapFinderOverlay,
-                matchPostOverlay
+                matchPostOverlay,
+                tournamentsOverlay
             };
             core.NewMatchAdded += OnNewMatchAdded;
             if (string.IsNullOrEmpty(MainConfig.APIKey))
@@ -165,7 +177,7 @@ namespace RefereeAssistant3.Visual
 
         public void ShowAlert(string text)
         {
-            var alert = new Alert(text);
+            var alert = new Alert(text) { Depth = float.MinValue };
             Add(alert);
             alert.Show();
         }

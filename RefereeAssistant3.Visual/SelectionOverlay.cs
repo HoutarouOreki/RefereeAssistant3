@@ -11,6 +11,7 @@ namespace RefereeAssistant3.Visual
     public class SelectionOverlay<T> : RA3OverlayContainer
     {
         private readonly FillFlowContainer<SelectionOverlayButton> selectionButtons;
+        public IEnumerable<T> Items;
         public Action<T> Action;
 
         public SelectionOverlay(IEnumerable<T> items)
@@ -31,8 +32,13 @@ namespace RefereeAssistant3.Visual
                     }
                 },
             };
+            Items = items;
+        }
 
-            foreach (var item in items)
+        protected override void PopIn()
+        {
+            selectionButtons.Clear();
+            foreach (var item in Items)
             {
                 var selectionButton = new SelectionOverlayButton(item)
                 {
@@ -44,6 +50,7 @@ namespace RefereeAssistant3.Visual
                 };
                 selectionButtons.Add(selectionButton);
             }
+            base.PopIn();
         }
 
         public class SelectionOverlayButton : ClickableContainer

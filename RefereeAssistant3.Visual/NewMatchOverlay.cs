@@ -258,7 +258,7 @@ namespace RefereeAssistant3.Visual
 
         private void UpdateDisplay()
         {
-            tournamentSelectionButton.Text = tournament?.TournamentName ?? "Select the tournament";
+            tournamentSelectionButton.Text = tournament?.Configuration.TournamentName ?? "Select the tournament";
             stageSelectionButton.Text = stage?.TournamentStageName ?? "Select the stage";
             team1SelectionButton.Text = team1?.TeamName ?? "Select team 1";
             team2SelectionButton.Text = team2?.TeamName ?? "Select team 2";

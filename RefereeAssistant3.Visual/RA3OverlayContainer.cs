@@ -22,6 +22,7 @@ namespace RefereeAssistant3.Visual
             Anchor = Anchor.Centre;
             Origin = Anchor.Centre;
             RelativeSizeAxes = Axes.Both;
+            Depth = -10;
             InternalChildren = new Drawable[]
             {
                 background = new Box

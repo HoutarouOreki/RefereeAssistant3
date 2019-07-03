@@ -378,7 +378,7 @@ namespace RefereeAssistant3.Visual
             team2BansText.Text = match.Team2.BannedMaps.Count > 0 ? $"Bans: {string.Join(' ', match.Team2.BannedMaps.Select(m => m.MapCode))}" : null;
             team2PicksText.Text = match.Team2.PickedMaps.Count > 0 ? $"Picks: {string.Join(' ', match.Team2.PickedMaps.Select(m => m.MapCode))}" : null;
 
-            tournamentLabel.Text = match.Tournament.TournamentName;
+            tournamentLabel.Text = match.Tournament.Configuration.TournamentName;
             stageLabel.Text = match.TournamentStage.TournamentStageName;
 
             matchStateLabel.Text = "";

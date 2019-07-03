@@ -5,8 +5,16 @@ namespace RefereeAssistant3.Main
     public class TournamentConfiguration
     {
         [JsonRequired]
-        public string Name;
+        public string TournamentName;
 
         public bool DoFailedScoresCount;
+
+        public TournamentConfiguration(string tournamentName, bool doFailedScoresCount = false)
+        {
+            TournamentName = tournamentName;
+            DoFailedScoresCount = doFailedScoresCount;
+        }
+
+        public TournamentConfiguration() { }
     }
 }

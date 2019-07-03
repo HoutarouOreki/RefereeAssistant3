@@ -30,6 +30,7 @@ namespace RefereeAssistant3.Visual
         public RA3Button()
         {
             Height = Style.COMPONENTS_HEIGHT;
+            Width = Style.COMPONENTS_WIDTH;
             Children = new Drawable[]
             {
                 background = new Box

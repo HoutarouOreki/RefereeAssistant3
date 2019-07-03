@@ -18,7 +18,7 @@ namespace RefereeAssistant3.Main
         private static readonly DirectoryInfo tournaments_directory = new DirectoryInfo($"{Utilities.GetBaseDirectory()}/tournaments");
 
         public IReadOnlyList<Match> Matches => matches;
-        public IEnumerable<Tournament> Tournaments { get; private set; }
+        public List<Tournament> Tournaments { get; } = new List<Tournament>();
         public OsuIrcBot ChatBot { get; }
 
         private readonly List<Match> matches = new List<Match>();
@@ -74,9 +74,10 @@ namespace RefereeAssistant3.Main
             }
         }
 
-        private void LoadTournaments()
+        public void LoadTournaments()
         {
             var tournamentTasks = new List<Task<Tournament>>();
+            Tournaments.Clear();
             tournaments_directory.Create();
             foreach (var tournamentDirectory in tournaments_directory.GetDirectories())
             {
@@ -90,7 +91,7 @@ namespace RefereeAssistant3.Main
 
             Task.WaitAll(tournamentTasks.ToArray());
 
-            Tournaments = tournamentTasks.Select(tt => tt.Result);
+            Tournaments.AddRange(tournamentTasks.Select(tt => tt.Result));
         }
 
         private static async Task<Tournament> CreateTournament(string confFile, string stagesFile, string teamsFile)
@@ -110,11 +111,7 @@ namespace RefereeAssistant3.Main
         private static void CreateExampleTournament()
         {
             tournaments_directory.Create();
-            var exampleConfiguration = new TournamentConfiguration
-            {
-                Name = "Example Tournament",
-                DoFailedScoresCount = false
-            };
+            var exampleConfiguration = new TournamentConfiguration("Example Tournament");
             var exampleStages = new List<TournamentStage>
             {
                 new TournamentStage
