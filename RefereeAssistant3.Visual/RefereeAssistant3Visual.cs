@@ -7,6 +7,9 @@ using osu.Framework.IO.Stores;
 using osu.Framework.Platform;
 using osuTK;
 using RefereeAssistant3.Main;
+using RefereeAssistant3.Main.Matches;
+using RefereeAssistant3.Visual.Overlays;
+using RefereeAssistant3.Visual.UI;
 using System;
 
 namespace RefereeAssistant3.Visual
@@ -139,7 +142,7 @@ namespace RefereeAssistant3.Visual
                                 }
                             }
                         },
-                        new BorderContainer(1, true, false, false, false)
+                        new Box { RelativeSizeAxes = Axes.Y }
                     }
                 },
                 newMatchOverlay,
@@ -156,7 +159,7 @@ namespace RefereeAssistant3.Visual
                 ShowAlert("API Key not provided. Some functionality may not be available.", "Open settings", () => settingsOverlay.Show());
         }
 
-        private void OnNewMatchAdded(Match match)
+        private void OnNewMatchAdded(TeamVsMatch match)
         {
             var matchPreviewPanel = new MatchPreviewPanel(match)
             {
@@ -167,7 +170,7 @@ namespace RefereeAssistant3.Visual
             SelectMatch(match);
         }
 
-        private void OnMatchAlert(Match source, string text)
+        private void OnMatchAlert(TeamVsMatch source, string text)
         {
             if (source == core.SelectedMatch.Value)
             {
@@ -191,7 +194,7 @@ namespace RefereeAssistant3.Visual
             alert.Show();
         }
 
-        private void SelectMatch(Match match)
+        private void SelectMatch(TeamVsMatch match)
         {
             core.SelectedMatch.Value = match;
             foreach (var matchPanel in matchListDisplayer)

@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 using osuTK;
-using RefereeAssistant3.Main;
+using RefereeAssistant3.Main.Utilities;
 using System.IO;
 
 namespace RefereeAssistant3.Visual
@@ -9,7 +9,7 @@ namespace RefereeAssistant3.Visual
     {
         public static WindowState WindowState = WindowState.Normal;
 
-        private readonly static string config_path = $"{Utilities.RootProgramDirectory}/visualConfig.json";
+        private static readonly string config_path = $"{PathUtilities.RootProgramDirectory}/visualConfig.json";
 
         public static void Load()
         {

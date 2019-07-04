@@ -1,7 +1,9 @@
-﻿using System;
+﻿using RefereeAssistant3.IRC.Events;
+using System;
 using System.IO;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace RefereeAssistant3.IRC
@@ -96,7 +98,6 @@ namespace RefereeAssistant3.IRC
         public event Action<UpdateUsersEventArgs> UpdateUsers = delegate { };
         public event Action<UserJoinedEventArgs> UserJoined = delegate { };
         public event Action<UserLeftEventArgs> UserLeft = delegate { };
-        public event Action<UserNickChangedEventArgs> UserNickChange = delegate { };
 
         public event Action<ChannelMessageEventArgs> ChannelMessage = delegate { };
         public event Action<NoticeMessageEventArgs> NoticeMessage = delegate { };
@@ -108,8 +109,6 @@ namespace RefereeAssistant3.IRC
         public event Action OnConnect = delegate { };
 
         public event Action<Exception> ExceptionThrown = delegate { };
-
-        public event Action<ModeSetEventArgs> ChannelModeSet = delegate { };
         #endregion
 
         #region PublicMethods
@@ -118,9 +117,9 @@ namespace RefereeAssistant3.IRC
         /// </summary>
         public void Connect()
         {
-            //var t = new Thread(DoConnect) { IsBackground = true };
-            //t.Start();
-            DoConnect();
+            var t = new Thread(DoConnect) { IsBackground = true };
+            t.Start();
+            //DoConnect();
         }
         private void DoConnect()
         {
@@ -207,7 +206,7 @@ namespace RefereeAssistant3.IRC
         /// <summary>
         /// Listens for messages from the server
         /// </summary>
-        private async void Listen()
+        private void Listen()
         {
             while ((inputLine = reader.ReadLine()) != null)
             {
@@ -220,7 +219,6 @@ namespace RefereeAssistant3.IRC
                 //{
                 //ExceptionThrown(ex);
                 //}
-                await Task.Delay(1);
             }
         }
 
@@ -245,7 +243,6 @@ namespace RefereeAssistant3.IRC
                     Send("PONG " + ircData[1]);
                     return;
                 }
-
             }
 
             // re-act according to the IRC Commands
@@ -296,32 +293,7 @@ namespace RefereeAssistant3.IRC
                     UserJoined(new UserJoinedEventArgs(channel, user));
                 }
                 break;
-                case "MODE": // MODE was set
-                {
-                    var channel = ircData[2];
-                    if (channel != Nick)
-                    {
-                        string from;
-                        if (ircData[0].Contains("!"))
-                            from = ircData[0].Substring(1, ircData[0].IndexOf("!", StringComparison.Ordinal) - 1);
-                        else
-                            from = ircData[0].Substring(1);
-
-                        var to = ircData[4];
-                        var mode = ircData[3];
-                        ChannelModeSet(new ModeSetEventArgs(channel, from, to, mode));
-                    }
-
-                    // TODO: event for userMode's
-                }
-                break;
-                case "NICK": // someone changed their nick
-                    var oldNick = ircData[0].Substring(1, ircData[0].IndexOf("!", StringComparison.Ordinal) - 1);
-                    var newNick = JoinArray(ircData, 3);
-
-                    UserNickChange(new UserNickChangedEventArgs(oldNick, newNick));
-                    break;
-                case "NOTICE": // someone sent a notice
+                case "NOTICE":
                 {
                     var from = ircData[0];
                     var message = JoinArray(ircData, 3);
@@ -348,7 +320,7 @@ namespace RefereeAssistant3.IRC
                 }
                 break;
                 case "PART":
-                case "QUIT":// someone left
+                case "QUIT":
                 {
                     var channel = ircData[2];
                     var user = ircData[0].Substring(1, data.IndexOf("!") - 1);
@@ -358,15 +330,13 @@ namespace RefereeAssistant3.IRC
                 }
                 break;
                 default:
-                    // still using this while debugging
-
                     if (ircData.Length > 3)
                         ServerMessage(new StringEventArgs(JoinArray(ircData, 3)));
 
                     break;
             }
-
         }
+
         /// <summary>
         /// Strips the message of unnecessary characters
         /// </summary>
@@ -400,10 +370,8 @@ namespace RefereeAssistant3.IRC
         private void Send(string message)
         {
             writer.WriteLine(message);
-            try { writer.Flush(); }
-            catch { Connect(); }
+            writer.Flush();
         }
         #endregion
     }
-
 }

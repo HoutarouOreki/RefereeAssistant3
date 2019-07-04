@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using RefereeAssistant3.Main.Utilities;
 using System.IO;
 
 namespace RefereeAssistant3.Main
@@ -10,7 +11,7 @@ namespace RefereeAssistant3.Main
         public static string IRCPassword;
         public static string ServerURL;
 
-        private static FileInfo mainConfigFile => new FileInfo($"{Utilities.RootProgramDirectory}/mainConfig.json");
+        private static FileInfo mainConfigFile => new FileInfo($"{PathUtilities.RootProgramDirectory}/mainConfig.json");
 
         public static void Load()
         {

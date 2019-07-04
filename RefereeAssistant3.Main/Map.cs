@@ -1,6 +1,8 @@
 ﻿using Newtonsoft.Json;
 using osu.Framework.Graphics.Textures;
+using RefereeAssistant3.Main.APIModels;
 using RefereeAssistant3.Main.Online.APIRequests;
+using RefereeAssistant3.Main.Utilities;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -53,7 +55,7 @@ namespace RefereeAssistant3.Main
 
         public Texture DownloadCover(TextureStore textures)
         {
-            var coverCachePath = $"{Utilities.MapsCacheDirectory}/{MapsetId}.jpg";
+            var coverCachePath = $"{PathUtilities.MapsCacheDirectory}/{MapsetId}.jpg";
             if (Cover == null && MapsetId != null)
             {
                 if (!File.Exists(coverCachePath))

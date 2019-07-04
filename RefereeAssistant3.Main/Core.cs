@@ -1,7 +1,12 @@
 ﻿using Newtonsoft.Json;
 using osu.Framework.Bindables;
+using RefereeAssistant3.Main.APIModels;
+using RefereeAssistant3.Main.IRC;
+using RefereeAssistant3.Main.Matches;
 using RefereeAssistant3.Main.Online.APIRequests;
 using RefereeAssistant3.Main.Storage;
+using RefereeAssistant3.Main.Tournaments;
+using RefereeAssistant3.Main.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,15 +17,15 @@ namespace RefereeAssistant3.Main
 {
     public class Core
     {
-        public event Action<Match> NewMatchAdded;
+        public event Action<TeamVsMatch> NewMatchAdded;
 
-        public Bindable<Match> SelectedMatch = new Bindable<Match>();
+        public Bindable<TeamVsMatch> SelectedMatch = new Bindable<TeamVsMatch>();
 
-        public IReadOnlyList<Match> Matches => matches;
+        public IReadOnlyList<TeamVsMatch> Matches => matches;
         public List<Tournament> Tournaments { get; } = new List<Tournament>();
-        public OsuIrcBot ChatBot { get; }
+        public BanchoIrcManager ChatBot { get; }
 
-        private readonly List<Match> matches = new List<Match>();
+        private readonly List<TeamVsMatch> matches = new List<TeamVsMatch>();
 
         public event Action<string> Alert;
 
@@ -34,11 +39,11 @@ namespace RefereeAssistant3.Main
             }
             MainConfig.Load();
             LoadSavedMatches();
-            ChatBot = new OsuIrcBot();
+            ChatBot = new BanchoIrcManager();
             new OsuIrcMatchParseHandler(this);
         }
 
-        public void AddNewMatch(Match match)
+        public void AddNewMatch(TeamVsMatch match)
         {
             match.TournamentStage.Mappool.DownloadMappoolAsync();
             matches.Add(match);
@@ -46,18 +51,18 @@ namespace RefereeAssistant3.Main
             match.Updated += () => OnMatchUpdated(match);
         }
 
-        private void OnMatchUpdated(Match match)
+        private void OnMatchUpdated(TeamVsMatch match)
         {
             var serializedMatch = JsonConvert.SerializeObject(match.GenerateAPIMatch());
-            File.WriteAllText($"{Utilities.SavedMatchesDirectory}/{match.CreationDate:yyyy-MM-dd-HH-mm-ss}.json", serializedMatch);
+            File.WriteAllText($"{PathUtilities.SavedMatchesDirectory}/{match.CreationDate:yyyy-MM-dd-HH-mm-ss}.json", serializedMatch);
         }
 
         private void LoadSavedMatches()
         {
-            foreach (var savedMatchFile in Utilities.SavedMatchesDirectory.EnumerateFiles("*.json"))
+            foreach (var savedMatchFile in PathUtilities.SavedMatchesDirectory.EnumerateFiles("*.json"))
             {
                 var text = savedMatchFile.OpenText().ReadToEnd();
-                var match = new Match(this, JsonConvert.DeserializeObject<APIMatch>(text));
+                var match = new TeamVsMatch(this, JsonConvert.DeserializeObject<APIMatch>(text));
                 matches.Add(match);
                 var nameData = savedMatchFile.Name.Replace(".json", "").Split('-');
                 var year = int.Parse(nameData[0]);
@@ -104,7 +109,7 @@ namespace RefereeAssistant3.Main
         {
             var tournamentTasks = new List<Task<Tournament>>();
             Tournaments.Clear();
-            foreach (var tournamentDirectory in Utilities.TournamentsDirectory.GetDirectories())
+            foreach (var tournamentDirectory in PathUtilities.TournamentsDirectory.GetDirectories())
             {
                 var confFile = new FileInfo($"{tournamentDirectory}/configuration.json");
                 var stagesFile = new FileInfo($"{tournamentDirectory}/stages.json");

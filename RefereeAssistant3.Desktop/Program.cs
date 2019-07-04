@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using osu.Framework;
 using RefereeAssistant3.Main;
+using RefereeAssistant3.Main.Utilities;
 using RefereeAssistant3.Visual;
 using System.IO;
 
@@ -20,12 +21,12 @@ namespace RefereeAssistant3
             {
                 //host.ExceptionThrown += HandleException;
 
-                Utilities.RootProgramDirectory.Create();
-                Directory.SetCurrentDirectory(Utilities.RootProgramDirectory.FullName);
-                Utilities.MapsCacheDirectory.Create();
-                Utilities.PlayersCacheDirectory.Create();
-                Utilities.SavedMatchesDirectory.Create();
-                Utilities.TournamentsDirectory.Create();
+                PathUtilities.RootProgramDirectory.Create();
+                Directory.SetCurrentDirectory(PathUtilities.RootProgramDirectory.FullName);
+                PathUtilities.MapsCacheDirectory.Create();
+                PathUtilities.PlayersCacheDirectory.Create();
+                PathUtilities.SavedMatchesDirectory.Create();
+                PathUtilities.TournamentsDirectory.Create();
 
                 var core = new Core();
 
