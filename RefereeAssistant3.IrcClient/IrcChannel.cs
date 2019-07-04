@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace RefereeAssistant3.IRC
 {
@@ -23,6 +22,8 @@ namespace RefereeAssistant3.IRC
             ServerName = serverName;
             ChannelName = channelName;
         }
+
+        public IrcChannel() { }
 
         public void AddMessage(IrcMessage message)
         {

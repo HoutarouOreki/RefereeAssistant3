@@ -10,14 +10,13 @@ namespace RefereeAssistant3.Main
         public static string IRCPassword;
         public static string ServerURL;
 
-        private static FileInfo mainConfigFile => new FileInfo($"{Utilities.GetBaseDirectory()}/mainConfig.json");
+        private static FileInfo mainConfigFile => new FileInfo($"{Utilities.RootProgramDirectory}/mainConfig.json");
 
         public static void Load()
         {
             MainConfigFile settings;
             if (!mainConfigFile.Exists)
             {
-                Utilities.GetBaseDirectory().Create();
                 settings = new MainConfigFile { APIKey = null, IRCPassword = null, IRCUsername = null, ServerURL = null };
                 File.WriteAllText(mainConfigFile.FullName, JsonConvert.SerializeObject(settings));
             }

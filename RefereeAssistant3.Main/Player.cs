@@ -29,7 +29,7 @@ namespace RefereeAssistant3.Main
         [JsonIgnore]
         public TeamColour SelectedTeam;
 
-        private string avatarCachePath => $"{Utilities.GetBaseDirectory()}/cache/players/{PlayerId}.png";
+        private string avatarCachePath => $"{Utilities.PlayersCacheDirectory}/{PlayerId}.png";
 
         public Player(int id) => PlayerId = id;
 

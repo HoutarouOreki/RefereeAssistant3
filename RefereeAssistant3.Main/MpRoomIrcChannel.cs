@@ -10,6 +10,8 @@ namespace RefereeAssistant3.Main
     {
         public MpRoomIrcChannel(string serverName, Match match) : base(serverName, match.ChannelName) => Match = match;
 
+        public MpRoomIrcChannel() { }
+
         [JsonIgnore]
         public readonly Match Match;
 

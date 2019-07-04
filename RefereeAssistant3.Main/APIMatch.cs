@@ -1,6 +1,5 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 using Newtonsoft.Json;
-using RefereeAssistant3.IRC;
 using System.Collections.Generic;
 
 namespace RefereeAssistant3.Main
@@ -16,16 +15,11 @@ namespace RefereeAssistant3.Main
 
         public List<MapResult> MapResults;
 
-        public string RollWinnerTeamName;
-
-        public IrcChannel Chat;
-
-        [BsonIgnore]
-        [JsonIgnore]
-        public APITeam RollWinner => RollWinnerTeamName == Team1?.TeamName ? Team1
-            : RollWinnerTeamName == Team2?.TeamName ? Team2
-            : null;
+        public MpRoomIrcChannel Chat;
 
         public List<MatchSnapshot> History;
+
+        public string TournamentName;
+        public string TournamentStage;
     }
 }

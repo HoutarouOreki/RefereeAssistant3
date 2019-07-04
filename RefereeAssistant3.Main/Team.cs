@@ -28,6 +28,14 @@ namespace RefereeAssistant3.Main
 
         public Team() { }
 
+        public Team(APITeam apiTeam)
+        {
+            TeamName = apiTeam.TeamName;
+            Members = apiTeam.Members.Select(apiPlayer => new Player(apiPlayer.PlayerId)).ToHashSet();
+            BannedMaps = apiTeam.BannedMaps.Select(m => new Map(m)).ToList();
+            PickedMaps = apiTeam.PickedMaps.Select(m => new Map(m)).ToList();
+        }
+
         public override string ToString() => TeamName;
 
         public override bool Equals(object obj)

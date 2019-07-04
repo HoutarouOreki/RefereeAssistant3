@@ -433,7 +433,7 @@ namespace RefereeAssistant3.Visual
             if (Match?.SelectedMap != null)
                 currentMapCover.FadeTo(0.5f, 200);
 
-            undoButton.Action = Match.History.Count > 0 ? Match.ReverseLastOperation : (Action)null;
+            undoButton.Action = Match.History.Count > 1 ? Match.ReverseLastOperation : (Action)null;
 
             team1Button.Action = team2Button.Action = null;
             team1Button.Text.Text = team2Button.Text.Text = null;

@@ -9,14 +9,13 @@ namespace RefereeAssistant3.Visual
     {
         public static WindowState WindowState = WindowState.Normal;
 
-        private readonly static string config_path = $"{Utilities.GetBaseDirectory()}/visualConfig.json";
+        private readonly static string config_path = $"{Utilities.RootProgramDirectory}/visualConfig.json";
 
         public static void Load()
         {
             VisualConfigFile file;
             if (!File.Exists(config_path))
             {
-                Utilities.GetBaseDirectory().Create();
                 file = new VisualConfigFile();
                 File.WriteAllText(config_path, JsonConvert.SerializeObject(file));
             }

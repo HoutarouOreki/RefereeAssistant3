@@ -149,6 +149,8 @@ namespace RefereeAssistant3.Visual
                 matchPostOverlay,
                 tournamentsOverlay
             };
+            foreach (var match in core.Matches)
+                OnNewMatchAdded(match);
             core.NewMatchAdded += OnNewMatchAdded;
             if (string.IsNullOrEmpty(MainConfig.APIKey))
                 ShowAlert("API Key not provided. Some functionality may not be available.", "Open settings", () => settingsOverlay.Show());

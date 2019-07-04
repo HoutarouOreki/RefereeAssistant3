@@ -53,7 +53,7 @@ namespace RefereeAssistant3.Main
 
         public Texture DownloadCover(TextureStore textures)
         {
-            var coverCachePath = $"{Utilities.GetBaseDirectory()}/cache/maps/{MapsetId}.jpg";
+            var coverCachePath = $"{Utilities.MapsCacheDirectory}/{MapsetId}.jpg";
             if (Cover == null && MapsetId != null)
             {
                 if (!File.Exists(coverCachePath))

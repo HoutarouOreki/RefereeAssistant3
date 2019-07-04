@@ -15,7 +15,6 @@ namespace RefereeAssistant3.Main
         public event Action<Match> NewMatchAdded;
 
         public Bindable<Match> SelectedMatch = new Bindable<Match>();
-        private static readonly DirectoryInfo tournaments_directory = new DirectoryInfo($"{Utilities.GetBaseDirectory()}/tournaments");
 
         public IReadOnlyList<Match> Matches => matches;
         public List<Tournament> Tournaments { get; } = new List<Tournament>();
@@ -34,6 +33,7 @@ namespace RefereeAssistant3.Main
                 LoadTournaments();
             }
             MainConfig.Load();
+            LoadSavedMatches();
             ChatBot = new OsuIrcBot();
             new OsuIrcMatchParseHandler(this);
         }
@@ -43,6 +43,32 @@ namespace RefereeAssistant3.Main
             match.TournamentStage.Mappool.DownloadMappoolAsync();
             matches.Add(match);
             NewMatchAdded?.Invoke(match);
+            match.Updated += () => OnMatchUpdated(match);
+        }
+
+        private void OnMatchUpdated(Match match)
+        {
+            var serializedMatch = JsonConvert.SerializeObject(match.GenerateAPIMatch());
+            File.WriteAllText($"{Utilities.SavedMatchesDirectory}/{match.CreationDate:yyyy-MM-dd-HH-mm-ss}.json", serializedMatch);
+        }
+
+        private void LoadSavedMatches()
+        {
+            foreach (var savedMatchFile in Utilities.SavedMatchesDirectory.EnumerateFiles("*.json"))
+            {
+                var text = savedMatchFile.OpenText().ReadToEnd();
+                var match = new Match(this, JsonConvert.DeserializeObject<APIMatch>(text));
+                matches.Add(match);
+                var nameData = savedMatchFile.Name.Replace(".json", "").Split('-');
+                var year = int.Parse(nameData[0]);
+                var month = int.Parse(nameData[1]);
+                var day = int.Parse(nameData[2]);
+                var hour = int.Parse(nameData[3]);
+                var minute = int.Parse(nameData[4]);
+                var second = int.Parse(nameData[5]);
+                match.CreationDate = new DateTime(year, month, day, hour, minute, second);
+                match.Updated += () => OnMatchUpdated(match);
+            }
         }
 
         public void PushAlert(string text) => Alert(text);
@@ -78,8 +104,7 @@ namespace RefereeAssistant3.Main
         {
             var tournamentTasks = new List<Task<Tournament>>();
             Tournaments.Clear();
-            tournaments_directory.Create();
-            foreach (var tournamentDirectory in tournaments_directory.GetDirectories())
+            foreach (var tournamentDirectory in Utilities.TournamentsDirectory.GetDirectories())
             {
                 var confFile = new FileInfo($"{tournamentDirectory}/configuration.json");
                 var stagesFile = new FileInfo($"{tournamentDirectory}/stages.json");
@@ -110,7 +135,6 @@ namespace RefereeAssistant3.Main
 
         private static void CreateExampleTournament()
         {
-            tournaments_directory.Create();
             var exampleConfiguration = new TournamentConfiguration("Example Tournament");
             var exampleStages = new List<TournamentStage>
             {

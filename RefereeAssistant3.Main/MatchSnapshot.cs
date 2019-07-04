@@ -22,25 +22,6 @@ namespace RefereeAssistant3.Main
         public int? SelectedMap { get; set; }
         public string SelectedWinner { get; set; }
 
-        [JsonIgnore]
-        [BsonIgnore]
-        public IReadOnlyList<Map> T1PickedMaps { get; }
-        [JsonIgnore]
-        [BsonIgnore]
-        public IReadOnlyList<Map> T2PickedMaps { get; }
-        [JsonIgnore]
-        [BsonIgnore]
-        public IReadOnlyList<Map> T1BannedMaps { get; }
-        [JsonIgnore]
-        [BsonIgnore]
-        public IReadOnlyList<Map> T2BannedMaps { get; }
-        [JsonIgnore]
-        [BsonIgnore]
-        public Map CurrentMap { get; }
-        [JsonIgnore]
-        [BsonIgnore]
-        public Team CurrentWinner { get; }
-
         public DateTime Time { get; set; }
 
         public MatchSnapshot() { }
@@ -65,18 +46,12 @@ namespace RefereeAssistant3.Main
             Time = DateTime.UtcNow;
             Team1Score = match.Scores[match.Team1];
             Team2Score = match.Scores[match.Team2];
-            T1PickedMaps = match.Team1.PickedMaps.ToList();
-            T2PickedMaps = match.Team2.PickedMaps.ToList();
-            T1BannedMaps = match.Team1.BannedMaps.ToList();
-            T2BannedMaps = match.Team2.BannedMaps.ToList();
-            Team1PickedMaps = T1PickedMaps.Select(m => m.DifficultyId.Value).ToList();
-            Team2PickedMaps = T2PickedMaps.Select(m => m.DifficultyId.Value).ToList();
-            Team1BannedMaps = T1BannedMaps.Select(m => m.DifficultyId.Value).ToList();
-            Team2BannedMaps = T2BannedMaps.Select(m => m.DifficultyId.Value).ToList();
-            CurrentMap = match.SelectedMap;
-            SelectedMap = CurrentMap?.DifficultyId;
-            CurrentWinner = match.SelectedWinner;
-            SelectedWinner = CurrentWinner?.TeamName;
+            Team1PickedMaps = match.Team1.PickedMaps.Select(m => m.DifficultyId.Value).ToList();
+            Team2PickedMaps = match.Team2.PickedMaps.Select(m => m.DifficultyId.Value).ToList();
+            Team1BannedMaps = match.Team1.BannedMaps.Select(m => m.DifficultyId.Value).ToList();
+            Team2BannedMaps = match.Team2.BannedMaps.Select(m => m.DifficultyId.Value).ToList();
+            SelectedMap = match.SelectedMap?.DifficultyId;
+            SelectedWinner = match.SelectedWinner?.TeamName;
         }
     }
 }

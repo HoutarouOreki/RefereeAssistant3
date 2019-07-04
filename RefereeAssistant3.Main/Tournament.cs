@@ -37,7 +37,7 @@ namespace RefereeAssistant3.Main
 
         public static string GetPathFromName(string name)
         {
-            var path = $"{Utilities.GetBaseDirectory()}/tournaments/{name}";
+            var path = $"{Utilities.TournamentsDirectory}/{name}";
             foreach (var character in Path.GetInvalidPathChars().Concat(Path.GetInvalidFileNameChars()))
                 path.Replace(character.ToString(), "");
             path = path.ToLowerInvariant();

@@ -3,7 +3,6 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input.Events;
-using osu.Framework.Logging;
 using osuTK.Graphics;
 using RefereeAssistant3.Main;
 
@@ -97,7 +96,6 @@ namespace RefereeAssistant3.Visual
             if (Match.MapProgress.HasValue)
             {
                 backgroundFill.Width = (float)Match.MapProgress.Value;
-                Logger.Log($"{Match.MapProgress.Value} | {backgroundFill.DrawWidth}");
                 stateLabel.Text = $"{Match.ReadableCurrentState} ({Match.MapProgressText})";
             }
             else

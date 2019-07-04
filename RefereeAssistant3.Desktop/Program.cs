@@ -8,8 +8,6 @@ namespace RefereeAssistant3
 {
     public class Program
     {
-        private static readonly DirectoryInfo dir = Utilities.GetBaseDirectory();
-
         public static int Main()
         {
             JsonConvert.DefaultSettings = () => new JsonSerializerSettings
@@ -22,9 +20,12 @@ namespace RefereeAssistant3
             {
                 //host.ExceptionThrown += HandleException;
 
-                Directory.SetCurrentDirectory(dir.FullName);
-                dir.CreateSubdirectory("cache/players");
-                dir.CreateSubdirectory("cache/maps");
+                Utilities.RootProgramDirectory.Create();
+                Directory.SetCurrentDirectory(Utilities.RootProgramDirectory.FullName);
+                Utilities.MapsCacheDirectory.Create();
+                Utilities.PlayersCacheDirectory.Create();
+                Utilities.SavedMatchesDirectory.Create();
+                Utilities.TournamentsDirectory.Create();
 
                 var core = new Core();
 

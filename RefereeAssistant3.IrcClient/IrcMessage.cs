@@ -29,7 +29,7 @@ namespace RefereeAssistant3.IRC
                 return false;
             if (Channel != other.Channel)
                 return false;
-            if (Message != other.Channel)
+            if (Message != other.Message)
                 return false;
             return true;
         }
