@@ -103,7 +103,7 @@ namespace RefereeAssistant3.Visual.Overlays
         private void PanelClicked(Map map)
         {
             Hide();
-            core.SelectedMatch.Value.SelectedMap = map;
+            core.SelectedMatch.Value.SetMapFromId(map.DifficultyId);
         }
     }
 }

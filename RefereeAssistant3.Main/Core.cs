@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
 using osu.Framework.Bindables;
-using RefereeAssistant3.Main.APIModels;
 using RefereeAssistant3.Main.IRC;
 using RefereeAssistant3.Main.Matches;
+using RefereeAssistant3.Main.Online.APIModels;
 using RefereeAssistant3.Main.Online.APIRequests;
 using RefereeAssistant3.Main.Storage;
 using RefereeAssistant3.Main.Tournaments;
@@ -17,15 +17,15 @@ namespace RefereeAssistant3.Main
 {
     public class Core
     {
-        public event Action<TeamVsMatch> NewMatchAdded;
+        public event Action<OsuMatch> NewMatchAdded;
 
-        public Bindable<TeamVsMatch> SelectedMatch = new Bindable<TeamVsMatch>();
+        public Bindable<OsuMatch> SelectedMatch = new Bindable<OsuMatch>();
 
-        public IReadOnlyList<TeamVsMatch> Matches => matches;
+        public IReadOnlyList<OsuMatch> Matches => matches;
         public List<Tournament> Tournaments { get; } = new List<Tournament>();
         public BanchoIrcManager ChatBot { get; }
 
-        private readonly List<TeamVsMatch> matches = new List<TeamVsMatch>();
+        private readonly List<OsuMatch> matches = new List<OsuMatch>();
 
         public event Action<string> Alert;
 
@@ -43,7 +43,7 @@ namespace RefereeAssistant3.Main
             new OsuIrcMatchParseHandler(this);
         }
 
-        public void AddNewMatch(TeamVsMatch match)
+        public void AddNewMatch(OsuMatch match)
         {
             match.TournamentStage.Mappool.DownloadMappoolAsync();
             matches.Add(match);
@@ -51,7 +51,7 @@ namespace RefereeAssistant3.Main
             match.Updated += () => OnMatchUpdated(match);
         }
 
-        private void OnMatchUpdated(TeamVsMatch match)
+        private void OnMatchUpdated(OsuMatch match)
         {
             var serializedMatch = JsonConvert.SerializeObject(match.GenerateAPIMatch());
             File.WriteAllText($"{PathUtilities.SavedMatchesDirectory}/{match.CreationDate:yyyy-MM-dd-HH-mm-ss}.json", serializedMatch);
@@ -62,7 +62,10 @@ namespace RefereeAssistant3.Main
             foreach (var savedMatchFile in PathUtilities.SavedMatchesDirectory.EnumerateFiles("*.json"))
             {
                 var text = savedMatchFile.OpenText().ReadToEnd();
-                var match = new TeamVsMatch(this, JsonConvert.DeserializeObject<APIMatch>(text));
+                var apiMatch = JsonConvert.DeserializeObject<APIMatch>(text);
+                var tournament = Tournaments.Find(t => t.Configuration.TournamentName == apiMatch.TournamentName);
+                var tournamentStage = tournament.Stages.Find(s => s.TournamentStageName == apiMatch.TournamentStage);
+                var match = new OsuTeamVsMatch(apiMatch, new Team(tournament.Teams.Find(t => t.TeamName == apiMatch.Participants[0].Name)), new Team(tournament.Teams.Find(t => t.TeamName == apiMatch.Participants[1].Name)), tournament, tournamentStage);
                 matches.Add(match);
                 var nameData = savedMatchFile.Name.Replace(".json", "").Split('-');
                 var year = int.Parse(nameData[0]);
@@ -77,33 +80,6 @@ namespace RefereeAssistant3.Main
         }
 
         public void PushAlert(string text) => Alert(text);
-
-        public async Task UpdateMatchAsync()
-        {
-            var sourceMatch = SelectedMatch.Value;
-            var req = await new PutMatchUpdate(sourceMatch.GenerateAPIMatch()).RunTask();
-            if (req?.Response?.IsSuccessful == true)
-                sourceMatch.NotifyAboutUpload();
-            else
-                PushAlert($"Updating match {sourceMatch.Code} failed with code {req?.Response?.StatusCode}:\n{req?.Response?.Content}");
-        }
-
-        public async Task PostMatchAsync()
-        {
-            var sourceMatch = SelectedMatch.Value;
-            var req = await new PostNewMatch(sourceMatch.GenerateAPIMatch()).RunTask();
-            if (req?.Response?.IsSuccessful == true)
-            {
-                sourceMatch.Id = req.Object.Id;
-                PushAlert($"Match {req.Object.Code} posted successfully");
-                sourceMatch.NotifyAboutUpload();
-            }
-            else
-            {
-                sourceMatch.Id = -1;
-                PushAlert($"Failed to post match {sourceMatch.Code}, code {req?.Response?.StatusCode}\n{req?.Response?.ErrorMessage}\n{req?.Response?.Content}");
-            }
-        }
 
         public void LoadTournaments()
         {

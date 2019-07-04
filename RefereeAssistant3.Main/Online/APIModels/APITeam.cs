@@ -1,18 +1,15 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
+using RefereeAssistant3.Main.Tournaments;
 using System.Collections.Generic;
+using System.Linq;
 
-namespace RefereeAssistant3.Main.APIModels
+namespace RefereeAssistant3.Main.Online.APIModels
 {
-    public class APITeam
+    public class APITeam : APIParticipant
     {
-        [BsonRequired]
-        public string TeamName;
-
         [BsonRequired]
         public List<APIPlayer> Members;
 
-        public int Score;
-        public List<int> PickedMaps;
-        public List<int> BannedMaps;
+        public APITeam(Team team, int? score = null) : base(team, score) => Members = team.Members.Select(m => new APIPlayer(m.PlayerId.Value)).ToList();
     }
 }

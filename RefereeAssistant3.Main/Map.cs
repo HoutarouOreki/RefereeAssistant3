@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 using osu.Framework.Graphics.Textures;
-using RefereeAssistant3.Main.APIModels;
+using RefereeAssistant3.Main.Online.APIModels;
 using RefereeAssistant3.Main.Online.APIRequests;
 using RefereeAssistant3.Main.Utilities;
 using System.IO;
@@ -15,7 +15,7 @@ namespace RefereeAssistant3.Main
         public int? MapsetId;
 
         [JsonRequired]
-        public int? DifficultyId;
+        public int DifficultyId;
 
         public string Artist;
 
@@ -42,9 +42,9 @@ namespace RefereeAssistant3.Main
 
         public async Task DownloadDataAsync()
         {
-            if (Downloaded || !DifficultyId.HasValue)
+            if (Downloaded)
                 return;
-            var res = await new GetMap(DifficultyId.Value).RunTask();
+            var res = await new GetMap(DifficultyId).RunTask();
             if (res.Response.IsSuccessful && res.Object.Length > 0)
             {
                 var apiMap = res.Object[0];

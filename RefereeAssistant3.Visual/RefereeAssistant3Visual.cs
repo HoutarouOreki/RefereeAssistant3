@@ -20,7 +20,7 @@ namespace RefereeAssistant3.Visual
         private const float match_list_controls_height = 3.5f * Style.COMPONENTS_HEIGHT;
         private readonly Core core;
         private FillFlowContainer<MatchPreviewPanel> matchListDisplayer;
-        private MatchVisualManager matchVisualManager;
+        private TeamVsMatchVisualManager matchVisualManager;
 
         public new GameHost Host => base.Host;
 
@@ -80,7 +80,7 @@ namespace RefereeAssistant3.Visual
                         new Container
                         {
                             RelativeSizeAxes = Axes.Both,
-                            Child = matchVisualManager = new MatchVisualManager(core, mapPickerOverlay, mapFinderOverlay, matchPostOverlay)
+                            Child = matchVisualManager = new TeamVsMatchVisualManager(core, mapPickerOverlay, mapFinderOverlay, matchPostOverlay)
                         }
                     }
                 },
@@ -159,7 +159,7 @@ namespace RefereeAssistant3.Visual
                 ShowAlert("API Key not provided. Some functionality may not be available.", "Open settings", () => settingsOverlay.Show());
         }
 
-        private void OnNewMatchAdded(TeamVsMatch match)
+        private void OnNewMatchAdded(OsuMatch match)
         {
             var matchPreviewPanel = new MatchPreviewPanel(match)
             {
@@ -170,7 +170,7 @@ namespace RefereeAssistant3.Visual
             SelectMatch(match);
         }
 
-        private void OnMatchAlert(TeamVsMatch source, string text)
+        private void OnMatchAlert(OsuMatch source, string text)
         {
             if (source == core.SelectedMatch.Value)
             {
@@ -194,7 +194,7 @@ namespace RefereeAssistant3.Visual
             alert.Show();
         }
 
-        private void SelectMatch(TeamVsMatch match)
+        private void SelectMatch(OsuMatch match)
         {
             core.SelectedMatch.Value = match;
             foreach (var matchPanel in matchListDisplayer)
@@ -204,7 +204,8 @@ namespace RefereeAssistant3.Visual
                 else
                     matchPanel.Deselect();
             }
-            matchVisualManager.Match = match;
+            if (match  is OsuTeamVsMatch teamVsMatch)
+                matchVisualManager.Match = teamVsMatch;
         }
     }
 }

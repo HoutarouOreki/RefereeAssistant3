@@ -3,7 +3,7 @@ using RefereeAssistant3.Main.IRC;
 using RefereeAssistant3.Main.Matches;
 using System.Collections.Generic;
 
-namespace RefereeAssistant3.Main.APIModels
+namespace RefereeAssistant3.Main.Online.APIModels
 {
     public class APIMatch
     {
@@ -11,14 +11,13 @@ namespace RefereeAssistant3.Main.APIModels
         public int Id;
         public string Code;
 
-        public APITeam Team1;
-        public APITeam Team2;
+        public List<APIParticipant> Participants;
 
         public List<MapResult> MapResults;
 
         public MpRoomIrcChannel Chat;
 
-        public List<TeamVsMatchSnapshot> History;
+        public List<OsuMatchSnapshot> History;
 
         public string TournamentName;
         public string TournamentStage;

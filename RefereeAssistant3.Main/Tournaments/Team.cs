@@ -1,20 +1,18 @@
-﻿using RefereeAssistant3.Main.APIModels;
-using RefereeAssistant3.Main.Matches;
+﻿using RefereeAssistant3.Main.Matches;
+using RefereeAssistant3.Main.Online.APIModels;
 using RefereeAssistant3.Main.Storage;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace RefereeAssistant3.Main.Tournaments
 {
-    public class Team
+    public class Team : MatchParticipant
     {
         public readonly string TeamName;
 
         public readonly HashSet<Player> Members;
 
-        public List<Map> BannedMaps = new List<Map>();
-
-        public List<Map> PickedMaps = new List<Map>();
+        public override string Name => TeamName;
 
         public Team(string teamName, IEnumerable<Player> members)
         {
@@ -32,7 +30,7 @@ namespace RefereeAssistant3.Main.Tournaments
 
         public Team(APITeam apiTeam)
         {
-            TeamName = apiTeam.TeamName;
+            TeamName = apiTeam.Name;
             Members = apiTeam.Members.Select(apiPlayer => new Player(apiPlayer.PlayerId)).ToHashSet();
             BannedMaps = apiTeam.BannedMaps.Select(m => new Map(m)).ToList();
             PickedMaps = apiTeam.PickedMaps.Select(m => new Map(m)).ToList();

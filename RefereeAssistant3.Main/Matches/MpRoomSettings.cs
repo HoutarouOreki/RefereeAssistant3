@@ -1,6 +1,6 @@
 ﻿namespace RefereeAssistant3.Main.Matches
 {
-    public class MatchSettings
+    public class MpRoomSettings
     {
         public string RoomName { get; set; }
         public TeamMode TeamMode { get; set; }

@@ -124,14 +124,14 @@ namespace RefereeAssistant3.Main.IRC
             client.Connect();
         }
 
-        private TeamVsMatch lastRequestedMatch;
+        private OsuMatch lastRequestedMatch;
 
-        public bool CreateRoom(TeamVsMatch match)
+        public bool CreateRoom(OsuMatch match)
         {
             if (lastRequestedMatch != null)
                 return false;
             lastRequestedMatch = match;
-            client.SendMessage(bancho_bot, $"!mp make {match.RoomName}");
+            client.SendMessage(bancho_bot, $"!mp make {match.TournamentStage.RoomName}");
             return true;
         }
 
@@ -150,9 +150,9 @@ namespace RefereeAssistant3.Main.IRC
                 return;
             lastRequestedMatch = null;
             match.RoomId = roomId;
-            var channelName = match.ChannelName;
+            var channelName = $"#mp_{roomId}";
             client.JoinChannel(channelName);
-            SendLocalMessage(channelName, $"Chat room created successfully ({match.ChannelName})", true);
+            SendLocalMessage(channelName, $"Chat room created successfully ({channelName})", true);
             match.IrcChannel = GetChannel(match);
             LockMatch(match);
             return;
@@ -169,11 +169,12 @@ namespace RefereeAssistant3.Main.IRC
             return Channels.OfType<IrcChannel>().First(c => c.ServerName == client.Server && c.ChannelName == channelName);
         }
 
-        public MpRoomIrcChannel GetChannel(TeamVsMatch match)
+        public MpRoomIrcChannel GetChannel(OsuMatch match)
         {
-            if (Channels.OfType<MpRoomIrcChannel>().FirstOrDefault(c => c.Match == match) == null)
+            var channelName = $"#mp_{match.RoomId}";
+            if (Channels.OfType<MpRoomIrcChannel>().FirstOrDefault(c => c.ChannelName == channelName) == null)
                 Channels.Add(new MpRoomIrcChannel(client.Server, match));
-            return Channels.OfType<MpRoomIrcChannel>().First(c => c.Match == match);
+            return Channels.OfType<MpRoomIrcChannel>().First(c => c.ChannelName == channelName);
         }
 
         private void OnChannelMessage(ChannelMessageEventArgs e)
@@ -336,30 +337,30 @@ namespace RefereeAssistant3.Main.IRC
             client.GetChannelUsers($"{channel}");
         }
 
-        public void SendLocalMessage(string channel, string message, bool fromProgram = false) => OnChannelMessage(new ChannelMessageEventArgs(channel, fromProgram ? "Referee Assistant 3" : client.Nick, message));
+        public void SendLocalMessage(string channel, string message, bool fromProgram = false) => OnChannelMessage(new ChannelMessageEventArgs(channel, fromProgram ? "rA3" : client.Nick, message));
 
-        public void InvitePlayer(TeamVsMatch match, Player player) => SendMessage(match.ChannelName, $"!mp invite {player.IRCUsername}");
-        public void LockMatch(TeamVsMatch match) => SendMessage(match.ChannelName, "!mp lock");
-        public void UnlockMatch(TeamVsMatch match) => SendMessage(match.ChannelName, "!mp unlock");
-        public void SetSlotAmount(TeamVsMatch match, int amount) => SendMessage(match.ChannelName, $"!mp size {amount}");
-        public void SetProperties(TeamVsMatch match, TeamMode teamMode, ScoreMode scoreMode, int slotAmount) => SendMessage(match.ChannelName, $"!mp set {(int)teamMode} {(int)scoreMode} {slotAmount}");
-        public void MovePlayer(TeamVsMatch match, Player player, int slot) => SendMessage(match.ChannelName, $"!mp move {player.IRCUsername} {slot}");
-        public void GiveHost(TeamVsMatch match, Player player) => SendMessage(match.ChannelName, $"!mp host {player.IRCUsername}");
-        public void ClearHost(TeamVsMatch match) => SendMessage(match.ChannelName, "!mp clearhost");
-        public void DisplaySettings(TeamVsMatch match) => SendMessage(match.ChannelName, "!mp settings");
-        public void StartMatch(TeamVsMatch match, int secondsUntilStart) => SendMessage(match.ChannelName, $"!mp start {secondsUntilStart}");
-        public void AbortMatch(TeamVsMatch match) => SendMessage(match.ChannelName, "!mp abort");
-        public void SetPlayerTeam(TeamVsMatch match, Player player, TeamColour team) => SendMessage(match.ChannelName, $"!mp team {player.IRCUsername} {team}");
-        public void SetMap(TeamVsMatch match, Map map, PlayMode playMode) => SendMessage(match.ChannelName, $"!mp map {map.DifficultyId} {playMode}");
-        public void SetMods(TeamVsMatch match, params ModsLetters[] mods) => SendMessage(match.ChannelName, $"!mp mods {string.Join(' ', mods)}");
-        public void SetTimer(TeamVsMatch match, int seconds) => SendMessage(match.ChannelName, $"!mp timer {seconds}");
-        public void AbortTimer(TeamVsMatch match) => SendMessage(match.ChannelName, $"!mp aborttimer");
-        public void KickPlayer(TeamVsMatch match, string username) => SendMessage(match.ChannelName, $"!mp kick {username}");
-        public void SetPassword(TeamVsMatch match, string password) => SendMessage(match.ChannelName, $"!mp password {password}");
-        public void AddReferees(TeamVsMatch match, params Player[] referees) => SendMessage(match.ChannelName, $"!mp addref {string.Join(' ', referees.Select(r => r.IRCUsername))}");
-        public void RemoveReferees(TeamVsMatch match, params Player[] referees) => SendMessage(match.ChannelName, $"!mp removeref {string.Join(' ', referees.Select(r => r.IRCUsername))}");
-        public void ListReferees(TeamVsMatch match) => SendMessage(match.ChannelName, "!mp listrefs");
-        public void CloseMatch(TeamVsMatch match) => SendMessage(match.ChannelName, "!mp close");
+        public void InvitePlayer(OsuMatch match, Player player) => SendMessage(match.IrcChannel, $"!mp invite {player.IRCUsername}");
+        public void LockMatch(OsuMatch match) => SendMessage(match.IrcChannel, "!mp lock");
+        public void UnlockMatch(OsuMatch match) => SendMessage(match.IrcChannel, "!mp unlock");
+        public void SetSlotAmount(OsuMatch match, int amount) => SendMessage(match.IrcChannel, $"!mp size {amount}");
+        public void SetProperties(OsuMatch match, TeamMode teamMode, ScoreMode scoreMode, int slotAmount) => SendMessage(match.IrcChannel, $"!mp set {(int)teamMode} {(int)scoreMode} {slotAmount}");
+        public void MovePlayer(OsuMatch match, Player player, int slot) => SendMessage(match.IrcChannel, $"!mp move {player.IRCUsername} {slot}");
+        public void GiveHost(OsuMatch match, Player player) => SendMessage(match.IrcChannel, $"!mp host {player.IRCUsername}");
+        public void ClearHost(OsuMatch match) => SendMessage(match.IrcChannel, "!mp clearhost");
+        public void DisplaySettings(OsuMatch match) => SendMessage(match.IrcChannel, "!mp settings");
+        public void StartMatch(OsuMatch match, int secondsUntilStart) => SendMessage(match.IrcChannel, $"!mp start {secondsUntilStart}");
+        public void AbortMatch(OsuMatch match) => SendMessage(match.IrcChannel, "!mp abort");
+        public void SetPlayerTeam(OsuMatch match, Player player, TeamColour team) => SendMessage(match.IrcChannel, $"!mp team {player.IRCUsername} {team}");
+        public void SetMap(OsuMatch match, Map map, PlayMode playMode) => SendMessage(match.IrcChannel, $"!mp map {map.DifficultyId} {playMode}");
+        public void SetMods(OsuMatch match, params ModsLetters[] mods) => SendMessage(match.IrcChannel, $"!mp mods {string.Join(' ', mods)}");
+        public void SetTimer(OsuMatch match, int seconds) => SendMessage(match.IrcChannel, $"!mp timer {seconds}");
+        public void AbortTimer(OsuMatch match) => SendMessage(match.IrcChannel, $"!mp aborttimer");
+        public void KickPlayer(OsuMatch match, string username) => SendMessage(match.IrcChannel, $"!mp kick {username}");
+        public void SetPassword(OsuMatch match, string password) => SendMessage(match.IrcChannel, $"!mp password {password}");
+        public void AddReferees(OsuMatch match, params Player[] referees) => SendMessage(match.IrcChannel, $"!mp addref {string.Join(' ', referees.Select(r => r.IRCUsername))}");
+        public void RemoveReferees(OsuMatch match, params Player[] referees) => SendMessage(match.IrcChannel, $"!mp removeref {string.Join(' ', referees.Select(r => r.IRCUsername))}");
+        public void ListReferees(OsuMatch match) => SendMessage(match.IrcChannel, "!mp listrefs");
+        public void CloseMatch(OsuMatch match) => SendMessage(match.IrcChannel, "!mp close");
 
         private TeamMode? TeamModeFromString(string s)
         {

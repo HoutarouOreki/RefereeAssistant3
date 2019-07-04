@@ -9,24 +9,26 @@ namespace RefereeAssistant3.Main.IRC
 {
     public class MpRoomIrcChannel : IrcChannel
     {
-        public MpRoomIrcChannel(string serverName, TeamVsMatch match) : base(serverName, match.ChannelName) => Match = match;
+        public MpRoomIrcChannel(string serverName, OsuMatch osuMatch) : base(serverName, osuMatch.ChannelName) => Match = osuMatch;
 
         public MpRoomIrcChannel() { }
 
-        [JsonIgnore]
-        public readonly TeamVsMatch Match;
-
         public event Action<Dictionary<int, Player>> SlotsUpdated;
+
+        public DateTime CreationTime { get; } = DateTime.UtcNow;
+
+        public DateTime TimeOutTime { get; private set; }
 
         [JsonIgnore]
         public Dictionary<int, Player> Slots { get; private set; } = new Dictionary<int, Player>();
+
+        public OsuMatch Match { get; }
 
         public bool AddSlotUser(string username, int slot)
         {
             if (Slots.ContainsKey(slot))
                 return false;
-            var player = Match.GetPlayer(username) ?? new Player(username);
-            Slots.Add(slot, player);
+            Slots.Add(slot, Match.GetPlayer(username));
             SlotsUpdated?.Invoke(Slots);
             return true;
         }
@@ -78,5 +80,10 @@ namespace RefereeAssistant3.Main.IRC
                 return slot.Value;
             return -1;
         }
+
+        /// <summary>
+        /// Tournament multiplayer rooms time out in 30 minutes after creation or after the last map was finished (unless a map is in progress). Use this function to refresh this time.
+        /// </summary>
+        public void RefreshTimeOutTime() => TimeOutTime = DateTime.UtcNow + TimeSpan.FromMinutes(30);
     }
 }

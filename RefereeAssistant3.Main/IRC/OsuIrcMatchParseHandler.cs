@@ -9,7 +9,7 @@ namespace RefereeAssistant3.Main.IRC
     public class OsuIrcMatchParseHandler
     {
         private readonly BanchoIrcManager bot;
-        private readonly IReadOnlyList<TeamVsMatch> matches;
+        private readonly IReadOnlyList<OsuMatch> matches;
         private const string name = "rA3";
 
         public OsuIrcMatchParseHandler(Core core)
@@ -61,11 +61,11 @@ namespace RefereeAssistant3.Main.IRC
         private void OnMapChanged(IrcChannel channel, int difficultyId)
         {
             SendDebugMessage(channel, $"map was set to {difficultyId}");
-            GetMatch(channel).SelectMapFromId(difficultyId);
+            GetMatch(channel).SetMapFromId(difficultyId);
         }
 
-        private TeamVsMatch GetMatch(string channel) => matches.FirstOrDefault(m => m.ChannelName == channel);
-        private TeamVsMatch GetMatch(IrcChannel channel) => GetMatch(channel.ChannelName);
+        private OsuMatch GetMatch(string channel) => matches.FirstOrDefault(m => m.ChannelName == channel);
+        private OsuMatch GetMatch(IrcChannel channel) => GetMatch(channel.ChannelName);
 
         private void SendDebugMessage(string channel, string message) => bot.SendMessage(channel, $"rA3 debug: {message}");
         private void SendDebugMessage(IrcChannel channel, string message) => SendDebugMessage(channel.ChannelName, message);

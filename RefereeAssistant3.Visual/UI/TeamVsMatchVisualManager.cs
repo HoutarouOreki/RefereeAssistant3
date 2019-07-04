@@ -10,7 +10,6 @@ using osuTK.Graphics;
 using RefereeAssistant3.Main;
 using RefereeAssistant3.Main.Matches;
 using RefereeAssistant3.Main.Tournaments;
-using RefereeAssistant3.Main.Utilities;
 using RefereeAssistant3.Visual.Overlays;
 using System;
 using System.Linq;
@@ -18,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace RefereeAssistant3.Visual.UI
 {
-    public class MatchVisualManager : Container
+    public class TeamVsMatchVisualManager : Container
     {
         private const int proceed_button_width = 240;
         private const float team_name_score_height = 84;
@@ -27,7 +26,7 @@ namespace RefereeAssistant3.Visual.UI
         private const float match_state_height = 42;
         private static readonly Color4 proceed_button_default_colour = FrameworkColour.Green.Darken(0.5f);
 
-        public TeamVsMatch Match
+        public OsuTeamVsMatch Match
         {
             get => match;
             set
@@ -40,7 +39,7 @@ namespace RefereeAssistant3.Visual.UI
             }
         }
 
-        private TeamVsMatch match;
+        private OsuTeamVsMatch match;
         private TextureStore textures;
         private readonly ScoreNumberBox team1ScoreBox;
         private readonly ScoreNumberBox team2ScoreBox;
@@ -70,7 +69,7 @@ namespace RefereeAssistant3.Visual.UI
         private readonly SpriteText team2PicksText;
         private readonly ChatContainer chatContainer;
 
-        public MatchVisualManager(Core core, MapPickerOverlay mapPicker, MapFinderOverlay mapFinder, MatchPostOverlay postOverlay)
+        public TeamVsMatchVisualManager(Core core, MapPickerOverlay mapPicker, MapFinderOverlay mapFinder, MatchPostOverlay postOverlay)
         {
             this.core = core;
             this.mapPicker = mapPicker;
@@ -386,7 +385,7 @@ namespace RefereeAssistant3.Visual.UI
             stageLabel.Text = match.TournamentStage.TournamentStageName;
 
             matchStateLabel.Text = "";
-            matchStateLabel.AddText(match.ReadableCurrentState);
+            matchStateLabel.AddText(match.CurrentProcedureName);
 
             ColourProceedButton(null);
 
@@ -419,7 +418,7 @@ namespace RefereeAssistant3.Visual.UI
                 matchSubmissionButton.Action = () =>
                 {
                     matchSubmissionButton.Text = "Submitting update...";
-                    Task.Run(core.UpdateMatchAsync);
+                    Task.Run(core.SelectedMatch.Value.PostMatchAsync);
                 };
                 matchSubmissionButton.Text = "Submit match update";
             }
@@ -449,51 +448,39 @@ namespace RefereeAssistant3.Visual.UI
 
             if (Match.IsFinished)
             {
-                matchStateLabel.Text = $"{Match.Winner} won the match";
+                matchStateLabel.Text = $"{Match.WinnerName} won the match";
                 return;
             }
 
-            switch (Match.CurrentProcedure)
+            switch (Match.CurrentProcedureType)
             {
-                case MatchProcedure.SettingUp:
+                case MatchProcedureTypes.SettingUp:
                     OnSettingUpProcedure();
                     break;
-                case MatchProcedure.WarmUp1:
-                case MatchProcedure.WarmUp2:
-                case MatchProcedure.WarmUpRollWinner:
-                case MatchProcedure.WarmUpRollLoser:
+                case MatchProcedureTypes.WarmUp:
                     OnWarmUpProcedure();
                     break;
-                case MatchProcedure.Rolling:
+                case MatchProcedureTypes.Rolling:
                     OnRollingProcedure();
                     break;
-                case MatchProcedure.Banning1:
-                case MatchProcedure.Banning2:
-                case MatchProcedure.BanningRollWinner:
-                case MatchProcedure.BanningRollLoser:
+                case MatchProcedureTypes.Banning:
                     OnBanningProcedure();
                     break;
-                case MatchProcedure.Picking1:
-                case MatchProcedure.Picking2:
-                case MatchProcedure.PickingRollWinner:
-                case MatchProcedure.PickingRollLoser:
+                case MatchProcedureTypes.Picking:
                     OnPickingProcedure();
                     break;
-                case MatchProcedure.GettingReady:
+                case MatchProcedureTypes.GettingReady:
                     OnGettingReadyProcedure();
                     break;
-                case MatchProcedure.TieBreaker:
+                case MatchProcedureTypes.TieBreaker:
                     break;
-                case MatchProcedure.Playing:
+                case MatchProcedureTypes.Playing:
                     OnPlayingProcedure();
                     break;
-                case MatchProcedure.PlayingWarmUp:
+                case MatchProcedureTypes.PlayingWarmUp:
                     OnPlayingWarmUpProcedure();
                     break;
-                case MatchProcedure.FreePoint1:
-                case MatchProcedure.FreePoint2:
-                case MatchProcedure.FreePointRollWinner:
-                case MatchProcedure.FreePointRollLoser:
+                case MatchProcedureTypes.FreePoint:
                     OnFreePointProcedure();
                     break;
                 default:
@@ -594,8 +581,8 @@ namespace RefereeAssistant3.Visual.UI
         {
             matchControls.Height = DrawHeight - (2 * team_name_score_height) - match_state_height;
 
-            if ((Match?.CurrentProcedure == MatchProcedure.Playing || Match?.CurrentProcedure == MatchProcedure.PlayingWarmUp) && Match.SelectedMap?.Length > 0)
-                matchStateLabel.Text = $@"{Match.ReadableCurrentState} ({Match.MapProgressText})";
+            if ((Match?.CurrentProcedure.ProcedureType == MatchProcedureTypes.Playing || Match?.CurrentProcedure.ProcedureType == MatchProcedureTypes.PlayingWarmUp) && Match.SelectedMap?.Length > 0)
+                matchStateLabel.Text = $@"{Match.CurrentProcedure.Name} ({Match.MapProgressText})";
 
             chatContainer.Height = DrawHeight - (team_name_score_height * 2) - (proceed_button_width / 2) - match_state_height - Style.COMPONENTS_HEIGHT;
             base.Update();

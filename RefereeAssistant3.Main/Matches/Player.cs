@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace RefereeAssistant3.Main.Matches
 {
-    public class Player
+    public class Player : MatchParticipant
     {
         public int? PlayerId;
         public string Username;
@@ -20,6 +20,8 @@ namespace RefereeAssistant3.Main.Matches
         public string IRCUsername => string.IsNullOrEmpty(Username) ?
             PlayerId.HasValue ? $"#{PlayerId.Value}" : null :
             Username?.Replace(' ', '_');
+
+        public override string Name => Username;
 
         [JsonIgnore]
         public Texture Avatar;
@@ -38,7 +40,7 @@ namespace RefereeAssistant3.Main.Matches
 
         public Player(string username) => Username = username;
 
-        public async void DownloadDataAsync(TextureStore textures, Action<Player> OnLoaded, Scheduler scheduler)
+        public async void DownloadFullDataAsync(TextureStore textures, Action<Player> OnLoaded, Scheduler scheduler)
         {
             if (PlayerId.HasValue && string.IsNullOrEmpty(Username))
                 await Task.WhenAll(DownloadAvatar(textures), DownloadMetadata());
@@ -50,7 +52,7 @@ namespace RefereeAssistant3.Main.Matches
             scheduler.Add(() => OnLoaded?.Invoke(this));
         }
 
-        private async Task DownloadMetadata()
+        public async Task DownloadMetadata()
         {
             var req = await new GetUsers(PlayerId, Username).RunTask();
             if (req.Response.IsSuccessful && req.Object?.Length > 0)

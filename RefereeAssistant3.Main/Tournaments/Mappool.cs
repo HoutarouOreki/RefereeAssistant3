@@ -12,7 +12,7 @@ namespace RefereeAssistant3.Main.Tournaments
         public List<Map> DoubleTime = new List<Map>();
         public List<Map> FreeMod = new List<Map>();
         public List<Map> Other = new List<Map>();
-        public IEnumerable<Map> AllMaps => NoMod.Concat(Hidden).Concat(HardRock).Concat(DoubleTime).Concat(FreeMod).Concat(Other);
+        public List<Map> AllMaps => NoMod.Concat(Hidden).Concat(HardRock).Concat(DoubleTime).Concat(FreeMod).Concat(Other).ToList();
 
         public async void DownloadMappoolAsync()
         {

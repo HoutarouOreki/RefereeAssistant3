@@ -143,7 +143,7 @@ namespace RefereeAssistant3.Visual.UI
             core.ChatBot.UserListUpdated += OnUserListUpdatedNonUpdateThread;
         }
 
-        private void OnMatchChanged(ValueChangedEvent<TeamVsMatch> obj)
+        private void OnMatchChanged(ValueChangedEvent<OsuMatch> obj)
         {
             textFlow.Text = "";
             slotsFlow.Clear();
@@ -172,7 +172,7 @@ namespace RefereeAssistant3.Visual.UI
         private void OnNewChannelMessage(IrcMessage message)
         {
             var isScrolledToEnd = messagesScroll.IsScrolledToEnd();
-            if (message.Channel == core.SelectedMatch.Value.ChannelName)
+            if (message.Channel == core.SelectedMatch.Value.IrcChannel.ChannelName)
             {
                 roomCreationContainer.Hide();
                 textFlow.AddParagraph($@"{message.DateUTC:hh\:mm} ");
@@ -191,7 +191,7 @@ namespace RefereeAssistant3.Visual.UI
 
         private void OnUserListUpdated(UpdateUsersEventArgs obj)
         {
-            if (obj.Channel == core.SelectedMatch.Value.ChannelName)
+            if (obj.Channel == core.SelectedMatch.Value.IrcChannel.ChannelName)
                 PopulateUserList(obj.UserList);
         }
 
@@ -233,10 +233,13 @@ namespace RefereeAssistant3.Visual.UI
 
         private void ColourUsername(SpriteText t)
         {
-            if (core.SelectedMatch.Value.Team1.Members.Any(m => m.PlayerId.ToString() == t.Text || m.IRCUsername == t.Text || m.Username == t.Text))
-                t.Colour = Style.Red;
-            else if (core.SelectedMatch.Value.Team2.Members.Any(m => m.PlayerId.ToString() == t.Text || m.IRCUsername == t.Text || m.Username == t.Text))
-                t.Colour = Style.Blue;
+            if (core.SelectedMatch.Value is OsuTeamVsMatch teamVsMatch)
+            {
+                if (teamVsMatch.Team1.Members.Any(m => m.PlayerId.ToString() == t.Text || m.IRCUsername == t.Text || m.Username == t.Text))
+                    t.Colour = Style.Red;
+                else if (teamVsMatch.Team2.Members.Any(m => m.PlayerId.ToString() == t.Text || m.IRCUsername == t.Text || m.Username == t.Text))
+                    t.Colour = Style.Blue;
+            }
         }
 
         private Player GetSavedPlayer(string username) => core.SelectedMatch.Value.GetPlayer(username) ?? downloadedUsers.Find(dp => dp.IRCUsername == username.Trim('@', '+'));
@@ -256,8 +259,8 @@ namespace RefereeAssistant3.Visual.UI
 
         protected override void Update()
         {
-            if (core.SelectedMatch.Value != null)
-                matchTimeOutText.Text = $@"this multiplayer room will time out in {core.SelectedMatch.Value.TimeOutTime - DateTime.UtcNow:mm\:ss}";
+            if (core.SelectedMatch.Value?.IrcChannel != null)
+                matchTimeOutText.Text = $@"this multiplayer room will time out in {core.SelectedMatch.Value.IrcChannel.TimeOutTime - DateTime.UtcNow:mm\:ss}";
             else
                 matchTimeOutText.Text = string.Empty;
             base.Update();

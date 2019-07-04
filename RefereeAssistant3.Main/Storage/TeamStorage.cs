@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using RefereeAssistant3.Main.APIModels;
+using RefereeAssistant3.Main.Online.APIModels;
 using System.Collections.Generic;
 
 namespace RefereeAssistant3.Main.Storage

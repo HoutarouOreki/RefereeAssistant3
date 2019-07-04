@@ -5,13 +5,12 @@ using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input.Events;
 using osuTK.Graphics;
 using RefereeAssistant3.Main.Matches;
-using RefereeAssistant3.Main.Utilities;
 
 namespace RefereeAssistant3.Visual.UI
 {
     public class MatchPreviewPanel : ClickableContainer
     {
-        public readonly TeamVsMatch Match;
+        public readonly OsuMatch Match;
 
         private readonly Box background;
         private readonly Box hoverOverlay;
@@ -20,8 +19,9 @@ namespace RefereeAssistant3.Visual.UI
         private readonly SpriteText team1Label;
         private readonly SpriteText team2Label;
         private readonly Box backgroundFill;
+        private readonly Container labelContainer;
 
-        public MatchPreviewPanel(TeamVsMatch match)
+        public MatchPreviewPanel(OsuMatch match)
         {
             Match = match;
             RelativeSizeAxes = Axes.X;
@@ -49,27 +49,10 @@ namespace RefereeAssistant3.Visual.UI
                     Direction = FillDirection.Vertical,
                     Children = new Drawable[]
                     {
-                        new Container // team1 | x - y | team2
+                        labelContainer = new Container // team1 | x - y | team2
                         {
                             RelativeSizeAxes = Axes.X,
                             AutoSizeAxes = Axes.Y,
-                            Children = new Drawable[]
-                            {
-                                team1Label = new SpriteText
-                                {
-                                    Text = match.Team1.TeamName,
-                                    Anchor = Anchor.Centre,
-                                    Origin = Anchor.CentreRight
-                                },
-                                scoreText = new SpriteText
-                                { Text = "VS", Anchor = Anchor.Centre, Origin = Anchor.Centre },
-                                team2Label = new SpriteText
-                                {
-                                    Text = match.Team2.TeamName,
-                                    Anchor = Anchor.Centre,
-                                    Origin = Anchor.CentreLeft
-                                }
-                            }
                         },
                         new Box { RelativeSizeAxes = Axes.X, Height = 1, Alpha = 0.1f },
                         stateLabel = new SpriteText { Anchor = Anchor.TopCentre, Origin = Anchor.TopCentre }
@@ -77,6 +60,26 @@ namespace RefereeAssistant3.Visual.UI
                 }
             };
             match.Updated += OnMatchUpdated;
+            if (Match is OsuTeamVsMatch vsMatch)
+            {
+                labelContainer.AddRange(new Drawable[]
+                {
+                    team1Label = new SpriteText
+                    {
+                        Text = vsMatch.Team1.TeamName,
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.CentreRight
+                    },
+                    scoreText = new SpriteText
+                    { Text = "VS", Anchor = Anchor.Centre, Origin = Anchor.Centre },
+                    team2Label = new SpriteText
+                    {
+                        Text = vsMatch.Team2.TeamName,
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.CentreLeft
+                    }
+                });
+            }
             OnMatchUpdated();
         }
 
@@ -84,10 +87,11 @@ namespace RefereeAssistant3.Visual.UI
 
         private void GenerateLayout()
         {
-            scoreText.Text = $"| {Match.Scores[Match.Team1]} - {Match.Scores[Match.Team2]} |";
-            if (Match.CurrentProcedure == MatchProcedure.SettingUp)
+            if (Match is OsuTeamVsMatch vsMatch)
+            scoreText.Text = $"| {vsMatch.Scores[vsMatch.Team1]} - {vsMatch.Scores[vsMatch.Team2]} |";
+            if (Match.CurrentProcedureType == MatchProcedureTypes.SettingUp)
                 scoreText.Text = "VS";
-            stateLabel.Text = Match.ReadableCurrentState;
+            stateLabel.Text = Match.CurrentProcedureType.ToString();
         }
 
         protected override void Update()
@@ -97,7 +101,7 @@ namespace RefereeAssistant3.Visual.UI
             if (Match.MapProgress.HasValue)
             {
                 backgroundFill.Width = (float)Match.MapProgress.Value;
-                stateLabel.Text = $"{Match.ReadableCurrentState} ({Match.MapProgressText})";
+                stateLabel.Text = $"{Match.CurrentProcedureType} ({Match.MapProgressText})";
             }
             else
                 backgroundFill.Width = 0;

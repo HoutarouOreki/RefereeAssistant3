@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace RefereeAssistant3.Main.APIModels
+namespace RefereeAssistant3.Main.Online.APIModels
 {
     public class APIUser
     {

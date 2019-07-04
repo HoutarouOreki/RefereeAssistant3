@@ -69,7 +69,7 @@ namespace RefereeAssistant3.Visual.UI
         [BackgroundDependencyLoader]
         private void Load(TextureStore textures)
         {
-            Player?.DownloadDataAsync(textures, p =>
+            Player?.DownloadFullDataAsync(textures, p =>
             {
                 UsernameText.Text = p.Username;
                 AvatarContainer.Add(new Sprite { RelativeSizeAxes = Axes.Both, Texture = p.Avatar });

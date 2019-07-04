@@ -4,7 +4,7 @@ using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.UserInterface;
 using osuTK;
 using RefereeAssistant3.Main;
-using RefereeAssistant3.Main.APIModels;
+using RefereeAssistant3.Main.Online.APIModels;
 using RefereeAssistant3.Main.Online.APIRequests;
 using RefereeAssistant3.Visual.UI;
 
@@ -121,7 +121,7 @@ namespace RefereeAssistant3.Visual.Overlays
 
         private void MapSelected(Map obj)
         {
-            core.SelectedMatch.Value.SelectedMap = obj;
+            core.SelectedMatch.Value.SetMapFromId(obj.DifficultyId);
             Hide();
         }
     }

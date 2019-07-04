@@ -1,4 +1,4 @@
-﻿using RefereeAssistant3.Main.APIModels;
+﻿using RefereeAssistant3.Main.Online.APIModels;
 using RestSharp;
 
 namespace RefereeAssistant3.Main.Online.APIRequests

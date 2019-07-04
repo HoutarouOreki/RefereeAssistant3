@@ -191,7 +191,7 @@ namespace RefereeAssistant3.Visual.Overlays
         {
             if (!AreOptionsValid())
                 return;
-            var match = new TeamVsMatch(team1, team2, tournament, stage);
+            var match = new OsuTeamVsMatch(team1, team2, tournament, stage);
             core.AddNewMatch(match);
             Hide();
             tournament = null;

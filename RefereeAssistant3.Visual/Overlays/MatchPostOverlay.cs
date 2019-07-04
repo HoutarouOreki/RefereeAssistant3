@@ -56,10 +56,9 @@ namespace RefereeAssistant3.Visual.Overlays
         private void PostMatch()
         {
             core.SelectedMatch.Value.Code = matchCodeTextBox.Text;
-            core.SelectedMatch.Value.Id = -2;
             button.Action = null;
             button.Text = "";
-            var req = core.PostMatchAsync();
+            var req = core.SelectedMatch.Value.PostMatchAsync();
             req.ContinueWith(res => Schedule(Hide));
         }
     }
