@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
-using RefereeAssistant3.Main;
+using RefereeAssistant3.Main.Online.APIModels;
 using System.Collections.Generic;
 
 namespace RefereeAssistant3.Server.Services

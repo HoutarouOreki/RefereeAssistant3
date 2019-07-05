@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using NLog;
-using RefereeAssistant3.Main;
+using RefereeAssistant3.Main.Online.APIModels;
 using RefereeAssistant3.Server.Services;
 using System;
 using System.Collections.Generic;
