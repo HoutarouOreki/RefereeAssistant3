@@ -12,6 +12,10 @@ namespace RefereeAssistant3.Server
 
         public static string ConnectionString { get; set; }
 
+        public static string SheetsClientId { get; set; }
+
+        public static string SheetsClientSecret { get; set; }
+
         public static void LoadSettings()
         {
             SettingsFile settings;
@@ -24,6 +28,8 @@ namespace RefereeAssistant3.Server
             else
                 settings = JsonConvert.DeserializeObject<SettingsFile>(File.ReadAllText(SettingsFile.FullName));
             ConnectionString = settings.ConnectionString;
+            SheetsClientId = settings.SheetsClientId;
+            SheetsClientSecret = settings.SheetsClientSecret;
         }
     }
 }

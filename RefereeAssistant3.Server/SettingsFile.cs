@@ -4,5 +4,7 @@
     {
         public int Port;
         public string ConnectionString;
+        public string SheetsClientId;
+        public string SheetsClientSecret;
     }
 }
