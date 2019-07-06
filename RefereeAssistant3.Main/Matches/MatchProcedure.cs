@@ -1,6 +1,6 @@
 ﻿namespace RefereeAssistant3.Main.Matches
 {
-    public class MatchProcedure<TParticipant> where TParticipant : IMatchParticipant
+    public class MatchProcedure<TParticipant> where TParticipant : MatchParticipant
     {
         public MatchProcedure(MatchProcedureTypes procedureType, TParticipant participant)
         {

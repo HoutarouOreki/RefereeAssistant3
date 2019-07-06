@@ -19,7 +19,7 @@ namespace RefereeAssistant3.Main.Matches
         public DateTime CreationDate = DateTime.UtcNow;
         public int? RoomId { get; set; }
         public MpRoomIrcChannel IrcChannel { get; set; }
-        public string ChannelName => RoomId.HasValue ? $"#mp_{RoomId}" : throw new ArgumentNullException();
+        public string ChannelName => $"#mp_{RoomId}";
         public MpRoomSettings MpRoomSettings { get; set; }
 
         public string Code;
@@ -40,7 +40,7 @@ namespace RefereeAssistant3.Main.Matches
         protected readonly List<OsuMatchSnapshot> RevertedSnapshots = new List<OsuMatchSnapshot>();
         public IReadOnlyList<OsuMatchSnapshot> CancelledOperations => RevertedSnapshots;
 
-        public List<Player> SavedPlayers { get; } = new List<Player>();
+        protected List<Player> Players = new List<Player>();
 
         public abstract IEnumerable<Map> UsedMaps { get; }
 
@@ -69,6 +69,8 @@ namespace RefereeAssistant3.Main.Matches
             }
         }
 
+        public BanchoIrcManager BanchoIrc { get; set; }
+
         protected OsuMatch(Tournament tournament, TournamentStage tournamentStage)
         {
             Tournament = tournament;
@@ -81,6 +83,12 @@ namespace RefereeAssistant3.Main.Matches
         {
             Id = apiMatch.Id;
             Snapshots = apiMatch.History;
+            foreach (var p in apiMatch.Players)
+            {
+                var player = GetPlayer(p.PlayerId);
+                if (player != null)
+                    player.MapResults = p.MapResults;
+            }
         }
 
         /// <summary>
@@ -108,11 +116,30 @@ namespace RefereeAssistant3.Main.Matches
             return map;
         }
 
+        public void SetPlayerScoreOnCurrentMap(string username, int score, bool passed)
+        {
+            if (SelectedMap == null)
+            {
+                SendAlert("Setting a player score requires a map to be selected");
+                return;
+            }
+            var player = GetPlayer(username);
+            player.MapResults.Add(new PlayerMapResult(SelectedMap.DifficultyId, passed, score, player.SelectedMods));
+        }
+
+        public abstract void OnMatchFinished();
+
         public abstract APIMatch GenerateAPIMatch();
 
         public abstract bool Proceed();
 
         public abstract void ReverseLastOperation();
+
+        /// <summary>
+        /// This function will be ran by <see cref="Core"/> after this match is constructed.
+        /// Inside it all participating players' info is downloaded (usernames, ids, etc).
+        /// </summary>
+        public async Task PreparePlayersInfo() => await Task.WhenAll(Players.Select(p => p.DownloadMetadata()));
 
         public async Task UpdateMatchAsync()
         {
@@ -142,23 +169,19 @@ namespace RefereeAssistant3.Main.Matches
 
         public virtual Player GetPlayer(int playerId)
         {
-            var player = SavedPlayers.Find(p => p.PlayerId == playerId);
+            var player = Players.Find(p => p.PlayerId == playerId);
             if (player == null)
-            {
-                SavedPlayers.Add(player = new Player(playerId));
-                Task.Run(player.DownloadMetadata);
-            }
+                Players.Add(player = new Player(playerId));
+            Task.Run(player.DownloadMetadata);
             return player;
         }
 
         public virtual Player GetPlayer(string username)
         {
-            var player = SavedPlayers.Find(p => p.Equals(username));
+            var player = Players.Find(p => p.Equals(username));
             if (player == null)
-            {
-                SavedPlayers.Add(player = new Player(username));
-                Task.Run(player.DownloadMetadata);
-            }
+                Players.Add(player = new Player(username));
+            Task.Run(player.DownloadMetadata);
             return player;
         }
 
@@ -255,8 +278,10 @@ namespace RefereeAssistant3.Main.Matches
                     break;
                 case MatchProcedureTypes.Picking:
                     CurrentProcedure.Participant.PickedMaps.Add(SelectedMap);
+                    BanchoIrc?.SetMap(this, SelectedMap, PlayMode.osu);
                     break;
                 case MatchProcedureTypes.GettingReady:
+                    BanchoIrc?.StartMatch(this, 10);
                     break;
                 case MatchProcedureTypes.TieBreaker:
                     break;
@@ -303,11 +328,7 @@ namespace RefereeAssistant3.Main.Matches
                 Code = Code,
                 History = History.ToList(),
                 Id = Id,
-                MapResults = new List<MapResult>(MapResults.Select(mapPlayerScore => new MapResult
-                {
-                    DifficultyId = mapPlayerScore.Key.DifficultyId,
-                    PlayerScores = new Dictionary<int, int>(mapPlayerScore.Value.Select(playerScore => new KeyValuePair<int, int>(playerScore.Key.PlayerId, playerScore.Value)))
-                })),
+                Players = new List<APIPlayer>(Players.Select(p => new APIPlayer(p.PlayerId.Value) { MapResults = p.MapResults })),
                 Chat = IrcChannel,
                 Participants = new List<APIParticipant>(Participants.Select(p => new APIParticipant(p, Scores[p]))),
                 TournamentName = Tournament.Configuration.TournamentName,

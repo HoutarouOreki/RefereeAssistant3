@@ -1,5 +1,6 @@
 ﻿using RefereeAssistant3.IRC.Events;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
@@ -30,6 +31,8 @@ namespace RefereeAssistant3.IRC
 
         // stream writer to write to the stream
         private StreamWriter writer;
+
+        private int messageBurstLimiter;
 
         #endregion
 
@@ -123,8 +126,8 @@ namespace RefereeAssistant3.IRC
         }
         private void DoConnect()
         {
-            try
-            {
+            //try
+            //{
                 irc = new TcpClient(Server, Port);
                 stream = irc.GetStream();
                 reader = new StreamReader(stream);
@@ -137,11 +140,12 @@ namespace RefereeAssistant3.IRC
                 Send("USER " + Nick + " 0 * :" + Nick);
 
                 Listen();
-            }
-            catch (Exception ex)
-            {
-                ExceptionThrown(ex);
-            }
+            //}
+            //catch (Exception ex)
+            //{
+            //    ExceptionThrown(ex);
+            //    throw;
+            //}
         }
         /// <summary>
         /// Disconnect from the IRC server
@@ -185,7 +189,18 @@ namespace RefereeAssistant3.IRC
         /// </summary>
         /// <param name="channel">Channel to send message</param>
         /// <param name="message">Message to send</param>
-        public void SendMessage(string channel, string message) => Send("PRIVMSG " + channel + " :" + message);
+        public void SendMessage(string channel, string message)
+        {
+            if (messageBurstLimiter >= 5)
+            {
+                ChannelMessage?.Invoke(new ChannelMessageEventArgs(channel, "LOCAL IRC CLIENT", $"Burst limiter reached, wait a bit before sending more messages (message \"{message}\" was not sent)"));
+                return;
+            }
+            messageBurstLimiter++;
+            Task.Delay(3000).ContinueWith(t => messageBurstLimiter--);
+            Send("PRIVMSG " + channel + " :" + message);
+        }
+
         /// <summary>
         /// Send RAW IRC commands
         /// </summary>
@@ -212,12 +227,13 @@ namespace RefereeAssistant3.IRC
             {
                 //try
                 //{
-                ParseData(inputLine);
-                if (ConsoleOutput) Console.Write(inputLine);
+                    ParseData(inputLine);
+                    if (ConsoleOutput) Console.Write(inputLine);
                 //}
                 //catch (Exception ex)
                 //{
-                //ExceptionThrown(ex);
+                //    ExceptionThrown(ex);
+                //    throw;
                 //}
             }
         }
@@ -372,6 +388,7 @@ namespace RefereeAssistant3.IRC
             writer.WriteLine(message);
             writer.Flush();
         }
+
         #endregion
     }
 }

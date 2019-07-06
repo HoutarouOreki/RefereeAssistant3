@@ -2,13 +2,19 @@
 
 namespace RefereeAssistant3.Main
 {
-    public class MapResult
+    public class PlayerMapResult
     {
         public int DifficultyId;
+        public int Score;
+        public IEnumerable<Mods> SelectedMods;
+        public bool Passed;
 
-        /// <summary>
-        /// Key = player's id. Value = player's score.
-        /// </summary>
-        public Dictionary<int, int> PlayerScores;
+        public PlayerMapResult(int difficultyId, bool passed, int score, IEnumerable<Mods> selectedMods = null)
+        {
+            DifficultyId = difficultyId;
+            Passed = passed;
+            Score = score;
+            SelectedMods = selectedMods ?? new List<Mods>();
+        }
     }
 }

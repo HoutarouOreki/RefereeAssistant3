@@ -4,6 +4,7 @@ using osu.Framework.Graphics.Sprites;
 using osuTK;
 using RefereeAssistant3.Main;
 using RefereeAssistant3.Main.Matches;
+using RefereeAssistant3.Main.Storage;
 using RefereeAssistant3.Main.Tournaments;
 using RefereeAssistant3.Visual.UI;
 using System;
@@ -27,12 +28,12 @@ namespace RefereeAssistant3.Visual.Overlays
         private readonly FillFlowContainer team2MembersDisplay;
         private readonly Container teamMembersDisplay;
         private SelectionOverlay<TournamentStage> stageSelectionOverlay;
-        private SelectionOverlay<Team> teamSelectionOverlay;
+        private SelectionOverlay<TeamStorage> teamSelectionOverlay;
 
         private Tournament tournament;
         private TournamentStage stage;
-        private Team team1;
-        private Team team2;
+        private TeamStorage team1;
+        private TeamStorage team2;
 
         public NewMatchOverlay(Core core)
         {
@@ -181,8 +182,7 @@ namespace RefereeAssistant3.Visual.Overlays
 
         private bool AreOptionsValid()
         {
-            var teams = tournament?.Teams.Select(teamStorage => new Team(teamStorage));
-            if (team1 == null || team2 == null || team1.Equals(team2) || !teams.Any(t => t.Equals(team1)) || !teams.Any(t => t.Equals(team2)) || !tournament.Stages.Contains(stage))
+            if (team1 == null || team2 == null || team1.Equals(team2) || !tournament.Teams?.Any(t => t.Equals(team1)) == true || !tournament?.Teams.Any(t => t.Equals(team2)) == true || !tournament.Stages.Contains(stage))
                 return false;
             return true;
         }
@@ -227,7 +227,7 @@ namespace RefereeAssistant3.Visual.Overlays
             stageSelectionButton.Text = "Loading...";
 
             // async because JIT takes too long on the first run
-            LoadComponentAsync(teamSelectionOverlay = new SelectionOverlay<Team>(tournament.Teams.Select(teamStorage => new Team(teamStorage))), d =>
+            LoadComponentAsync(teamSelectionOverlay = new SelectionOverlay<TeamStorage>(tournament.Teams), d =>
             {
                 Add(d);
                 teamSelectionOverlay.Hide();
@@ -245,13 +245,13 @@ namespace RefereeAssistant3.Visual.Overlays
             });
         }
 
-        private void SetTeam1(Team team)
+        private void SetTeam1(TeamStorage team)
         {
             team1 = team;
             UpdateDisplay();
         }
 
-        private void SetTeam2(Team team)
+        private void SetTeam2(TeamStorage team)
         {
             team2 = team;
             UpdateDisplay();
@@ -283,7 +283,7 @@ namespace RefereeAssistant3.Visual.Overlays
                 { Text = "Loading team members..", Anchor = Anchor.TopLeft, Origin = Anchor.TopLeft };
                 var componentsToLoad = new List<AvatarUsernameLine>();
                 foreach (var member in team1.Members)
-                    componentsToLoad.Add(new AvatarUsernameLine(member, false));
+                    componentsToLoad.Add(new AvatarUsernameLine(new Player(member.PlayerId), false));
                 LoadComponentsAsync(componentsToLoad, ds => team1MembersDisplay.ChildrenEnumerable = ds);
             }
 
@@ -293,7 +293,7 @@ namespace RefereeAssistant3.Visual.Overlays
                 { Text = "Loading team members..", Anchor = Anchor.TopRight, Origin = Anchor.TopRight };
                 var componentsToLoad = new List<AvatarUsernameLine>();
                 foreach (var member in team2.Members)
-                    componentsToLoad.Add(new AvatarUsernameLine(member, true));
+                    componentsToLoad.Add(new AvatarUsernameLine(new Player(member.PlayerId), true));
                 LoadComponentsAsync(componentsToLoad, ds => team2MembersDisplay.ChildrenEnumerable = ds);
             }
 

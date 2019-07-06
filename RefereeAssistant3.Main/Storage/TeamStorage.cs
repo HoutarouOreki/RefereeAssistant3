@@ -17,5 +17,7 @@ namespace RefereeAssistant3.Main.Storage
             TeamName = teamName;
             Members = members;
         }
+
+        public override string ToString() => TeamName;
     }
 }

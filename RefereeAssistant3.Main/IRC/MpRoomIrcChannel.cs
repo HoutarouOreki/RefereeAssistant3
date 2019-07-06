@@ -17,18 +17,19 @@ namespace RefereeAssistant3.Main.IRC
 
         public DateTime CreationTime { get; } = DateTime.UtcNow;
 
-        public DateTime TimeOutTime { get; private set; }
+        public DateTime TimeOutTime { get; private set; } = DateTime.UtcNow;
 
         [JsonIgnore]
         public Dictionary<int, Player> Slots { get; private set; } = new Dictionary<int, Player>();
 
+        [JsonIgnore]
         public OsuMatch Match { get; }
 
         public bool AddSlotUser(string username, int slot)
         {
             if (Slots.ContainsKey(slot))
                 return false;
-            Slots.Add(slot, Match.GetPlayer(username));
+            Slots.Add(slot, Match.GetPlayer(username.Trim('~', '@', '+')));
             SlotsUpdated?.Invoke(Slots);
             return true;
         }
@@ -68,7 +69,7 @@ namespace RefereeAssistant3.Main.IRC
             var slot = (int?)null;
             foreach (var _slot in Slots.Keys)
             {
-                if (Slots[_slot].Equals(user))
+                if (Slots.GetValueOrDefault(_slot)?.Equals(user) == true)
                 {
                     slot = _slot;
                     break;

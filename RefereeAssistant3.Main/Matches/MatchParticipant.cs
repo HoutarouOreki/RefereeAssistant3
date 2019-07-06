@@ -2,7 +2,7 @@
 
 namespace RefereeAssistant3.Main.Matches
 {
-    public abstract class MatchParticipant : IMatchParticipant
+    public abstract class MatchParticipant
     {
         public abstract string Name { get; }
 

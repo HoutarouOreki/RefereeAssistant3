@@ -13,7 +13,7 @@ namespace RefereeAssistant3.Main.Online.APIModels
 
         public List<APIParticipant> Participants;
 
-        public List<MapResult> MapResults;
+        public List<APIPlayer> Players;
 
         public MpRoomIrcChannel Chat;
 

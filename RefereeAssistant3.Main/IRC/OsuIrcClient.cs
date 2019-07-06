@@ -20,13 +20,13 @@ namespace RefereeAssistant3.Main.IRC
         /// 4 - Player username
         /// 5 - Team and mods
         /// </summary>
-        private static readonly Regex regex_player_line = new Regex(@"^Slot (\d+)\s+(Not Ready|Ready) https:\/\/osu\.ppy\.sh\/u\/(\d+)\s+([a-zA-Z0-9_ ]+)\s+(\[(?:.*)\])$");
+        private static readonly Regex regex_player_line = new Regex(@"^Slot (\d+)\s+(Not Ready|Ready)\s+https:\/\/osu\.ppy\.sh\/u\/(\d+)\s+([a-zA-Z0-9_ ]+)\s+(\[(?:.*)\])$");
 
         /// <summary>
         /// 1 - Blue / Red
         /// 2 - Hidden, HardRock
         /// </summary>
-        private static readonly Regex regex_team_and_mods = new Regex(@"\[(?:Host \/ )?(?:Team (\w+)\s*(?:\/ )*)?((?:\w+,\s+)?\w+)?\]");
+        private static readonly Regex regex_team_and_mods = new Regex(@"\[(?:Host\s*\/\s*)?(?:Team\s*(\w+)\s*(?:\/\s*)*)?((?:\w+,\s+)*\w+)?\]");
 
         private static readonly Regex regex_map_line = new Regex(@"(?:B|b)eatmap(?: to|(?: changed to)?:) (?:.*)?https:\/\/osu\.ppy\.sh\/b\/(\d+)");
 
@@ -82,6 +82,14 @@ namespace RefereeAssistant3.Main.IRC
         private static readonly Regex mods_changed = new Regex(@"^(Enabled|Disabled) (.*), (enabled|disabled) FreeMod$");
         private static readonly Regex mods_active = new Regex(@"^Active mods: ((?:\w+(?:, )?)+)");
 
+        /// <summary>
+        /// 1 - irc username
+        /// 2 - score
+        /// 3 - PASSED/FAILED
+        /// </summary>
+        private static readonly Regex player_finished = new Regex(@"^((?:\w|\s)+)\s+finished\s+playing\s+\(Score:\s+(\d+),\s+(\w+)\)\.$");
+
+        private static readonly Regex match_finished = new Regex(@"^The match has finished!$");
         private static readonly Regex added_referee = new Regex(@"^Added (.*) to the match referees$");
         private static readonly Regex removed_referee = new Regex(@"^Removed (.*) from the match referees$");
         private static readonly Regex unlocked_room = new Regex(@"^Unlocked the match$");
@@ -110,6 +118,8 @@ namespace RefereeAssistant3.Main.IRC
         public event Action<MpRoomIrcChannel> MatchLocked;
         public event Action<MpRoomIrcChannel> MatchUnlocked;
         public event Action<MpRoomIrcChannel> AllPlayersReady;
+        public event Action<PlayerFinishedEventArgs> PlayerFinishedPlaying;
+        public event Action<MpRoomIrcChannel> MatchFinished;
 
         public BanchoIrcManager()
         {
@@ -150,10 +160,10 @@ namespace RefereeAssistant3.Main.IRC
                 return;
             lastRequestedMatch = null;
             match.RoomId = roomId;
+            match.IrcChannel = GetChannel(match);
             var channelName = $"#mp_{roomId}";
             client.JoinChannel(channelName);
             SendLocalMessage(channelName, $"Chat room created successfully ({channelName})", true);
-            match.IrcChannel = GetChannel(match);
             LockMatch(match);
             return;
         }
@@ -293,6 +303,8 @@ namespace RefereeAssistant3.Main.IRC
                 var teamAndMods = regex_team_and_mods.Match(playerState.Groups[5].Value);
                 var team = teamAndMods.Groups[1].Value.Equals("Red", StringComparison.InvariantCultureIgnoreCase) ? TeamColour.Red : TeamColour.Blue;
                 var mods = teamAndMods.Groups[2].Value.Length > 0 ? teamAndMods.Groups[2].Value.Split(", ").Select(m => ModFromString(m)).ToList() : new List<Mods>();
+                c.Slots[slot].SelectedMods = mods;
+                c.Slots[slot].SelectedTeam = team;
                 PlayerStateReceived?.Invoke(new PlayerStateEventArgs(c, slot, ready, playerId, username, team, mods));
             }
             var playerTeamChange = player_changed_team.Match(t);
@@ -317,6 +329,17 @@ namespace RefereeAssistant3.Main.IRC
             var mapLine = regex_map_line.Match(t);
             if (mapLine.Success)
                 MapChanged?.Invoke(c, int.Parse(mapLine.Groups[1].Value));
+            var playerScore = player_finished.Match(t);
+            if (playerScore.Success)
+            {
+                var username = playerScore.Groups[1].Value;
+                var score = int.Parse(playerScore.Groups[2].Value);
+                var passed = playerScore.Groups[3].Value.Equals("passed", StringComparison.InvariantCultureIgnoreCase);
+                PlayerFinishedPlaying?.Invoke(new PlayerFinishedEventArgs(c, username, score, passed));
+            }
+            if (match_finished.IsMatch(t))
+                MatchFinished?.Invoke(c);
+
         }
 
         private void OnUserListUpdated(UpdateUsersEventArgs e)
@@ -351,7 +374,7 @@ namespace RefereeAssistant3.Main.IRC
         public void StartMatch(OsuMatch match, int secondsUntilStart) => SendMessage(match.IrcChannel, $"!mp start {secondsUntilStart}");
         public void AbortMatch(OsuMatch match) => SendMessage(match.IrcChannel, "!mp abort");
         public void SetPlayerTeam(OsuMatch match, Player player, TeamColour team) => SendMessage(match.IrcChannel, $"!mp team {player.IRCUsername} {team}");
-        public void SetMap(OsuMatch match, Map map, PlayMode playMode) => SendMessage(match.IrcChannel, $"!mp map {map.DifficultyId} {playMode}");
+        public void SetMap(OsuMatch match, Map map, PlayMode playMode) => SendMessage(match.IrcChannel, $"!mp map {map.DifficultyId} {(int)playMode}");
         public void SetMods(OsuMatch match, params ModsLetters[] mods) => SendMessage(match.IrcChannel, $"!mp mods {string.Join(' ', mods)}");
         public void SetTimer(OsuMatch match, int seconds) => SendMessage(match.IrcChannel, $"!mp timer {seconds}");
         public void AbortTimer(OsuMatch match) => SendMessage(match.IrcChannel, $"!mp aborttimer");

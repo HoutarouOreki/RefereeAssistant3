@@ -7,6 +7,7 @@ namespace RefereeAssistant3.Main
     public static class MainConfig
     {
         public static string APIKey;
+        public static bool IRCDebugMessages;
         public static string IRCUsername;
         public static string IRCPassword;
         public static string ServerURL;
@@ -24,6 +25,7 @@ namespace RefereeAssistant3.Main
             else
                 settings = JsonConvert.DeserializeObject<MainConfigFile>(File.ReadAllText(mainConfigFile.FullName));
             APIKey = settings.APIKey;
+            IRCDebugMessages = settings.IRCDebugMessages;
             IRCUsername = settings.IRCUsername;
             IRCPassword = settings.IRCPassword;
             ServerURL = settings.ServerURL;

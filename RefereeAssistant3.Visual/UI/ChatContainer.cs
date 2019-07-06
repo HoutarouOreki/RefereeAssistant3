@@ -17,7 +17,7 @@ namespace RefereeAssistant3.Visual.UI
     public class ChatContainer : Container
     {
         private const float user_list_width = 240;
-        private readonly TextFlowContainer textFlow;
+        private readonly FillFlowContainer<MessageLine> messagesFlow;
         private readonly Core core;
         private readonly Container roomCreationContainer;
         private readonly RA3Button newRoomButton;
@@ -45,7 +45,7 @@ namespace RefereeAssistant3.Visual.UI
                             Child = messagesScroll = new BasicScrollContainer
                             {
                                 RelativeSizeAxes = Axes.Both,
-                                Child = textFlow = new TextFlowContainer
+                                Child = messagesFlow = new FillFlowContainer<MessageLine>
                                 {
                                     RelativeSizeAxes = Axes.X,
                                     AutoSizeAxes = Axes.Y
@@ -145,7 +145,7 @@ namespace RefereeAssistant3.Visual.UI
 
         private void OnMatchChanged(ValueChangedEvent<OsuMatch> obj)
         {
-            textFlow.Text = "";
+            messagesFlow.Clear();
             slotsFlow.Clear();
             ircUsersFlow.Clear();
             if (obj.NewValue.RoomId == null)
@@ -175,10 +175,10 @@ namespace RefereeAssistant3.Visual.UI
             if (message.Channel == core.SelectedMatch.Value.IrcChannel.ChannelName)
             {
                 roomCreationContainer.Hide();
-                textFlow.AddParagraph($@"{message.DateUTC:hh\:mm} ");
-                var author = new SpriteText { Text = GetSavedPlayer(message.Author)?.Username ?? message.Author };
-                textFlow.AddText(author, ColourUsername);
-                textFlow.AddText($": {message.Message}");
+                var authorText = (SpriteText)null;
+                messagesFlow.Add(new MessageLine(message, t => authorText = t));
+                authorText.Text = GetSavedPlayer(message.Author)?.Username ?? message.Author;
+                ColourUsername(authorText);
             }
             if (isScrolledToEnd)
             {
@@ -200,7 +200,7 @@ namespace RefereeAssistant3.Visual.UI
             ircUsersFlow.Clear();
             foreach (var user in users)
             {
-                var userLine = new AvatarUsernameLine(GetSavedPlayer(user) ?? new Player { Username = user.Trim('@', '+') }, true, (line, player) =>
+                var userLine = new AvatarUsernameLine(GetSavedPlayer(user), true, (line, player) =>
                 {
                     ColourUsername(line.UsernameText);
                     if (!downloadedUsers.Contains(player))
@@ -235,14 +235,16 @@ namespace RefereeAssistant3.Visual.UI
         {
             if (core.SelectedMatch.Value is OsuTeamVsMatch teamVsMatch)
             {
-                if (teamVsMatch.Team1.Members.Any(m => m.PlayerId.ToString() == t.Text || m.IRCUsername == t.Text || m.Username == t.Text))
+                if (teamVsMatch.Team1.Members.Any(m => m.Equals(t.Text.Text.Original)))
                     t.Colour = Style.Red;
-                else if (teamVsMatch.Team2.Members.Any(m => m.PlayerId.ToString() == t.Text || m.IRCUsername == t.Text || m.Username == t.Text))
+                else if (teamVsMatch.Team2.Members.Any(m => m.Equals(t.Text.Text.Original)))
                     t.Colour = Style.Blue;
+                else
+                    t.Colour = FrameworkColour.YellowDark;
             }
         }
 
-        private Player GetSavedPlayer(string username) => core.SelectedMatch.Value.GetPlayer(username) ?? downloadedUsers.Find(dp => dp.IRCUsername == username.Trim('@', '+'));
+        private Player GetSavedPlayer(string username) => core.SelectedMatch.Value.GetPlayer(username.Trim('@', '+', '~')) ?? downloadedUsers.Find(dp => dp.IRCUsername == username.Trim('@', '+', '~'));
 
         private void OnMessageCommit(TextBox textBox, bool newText)
         {
@@ -264,6 +266,37 @@ namespace RefereeAssistant3.Visual.UI
             else
                 matchTimeOutText.Text = string.Empty;
             base.Update();
+        }
+
+        private class MessageLine : Container
+        {
+            private const float time_author_width = 200;
+
+            private readonly SpriteText author;
+
+            public MessageLine(IrcMessage message, Action<SpriteText> authorTextCallback = null)
+            {
+                RelativeSizeAxes = Axes.X;
+                AutoSizeAxes = Axes.Y;
+                Children = new Drawable[]
+                {
+                    new SpriteText { Text = $@"{message.DateUTC:hh\:mm}" },
+                    author = new SpriteText { Text = message.Author, X = 50 },
+                    new Container
+                    {
+                        RelativeSizeAxes = Axes.X,
+                        AutoSizeAxes = Axes.Y,
+                        Padding = new MarginPadding { Left = time_author_width },
+                        Child = new TextFlowContainer
+                        {
+                            RelativeSizeAxes = Axes.X,
+                            AutoSizeAxes = Axes.Y,
+                            Text = message.Message
+                        }
+                    }
+                };
+                authorTextCallback?.Invoke(author);
+            }
         }
     }
 }

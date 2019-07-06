@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 
 namespace RefereeAssistant3.Main.Matches
 {
+    /// <summary>
+    /// This class should be used on a per-one-match basis, since it contains members that break if the instance is in more than one match, such as <see cref="SelectedMods"/> and <see cref="SelectedTeam"/>.
+    /// </summary>
     public class Player : MatchParticipant
     {
         public int? PlayerId;
@@ -23,14 +26,13 @@ namespace RefereeAssistant3.Main.Matches
 
         public override string Name => Username;
 
-        [JsonIgnore]
         public Texture Avatar;
 
-        [JsonIgnore]
         public IEnumerable<Mods> SelectedMods;
 
-        [JsonIgnore]
         public TeamColour SelectedTeam;
+
+        public List<PlayerMapResult> MapResults = new List<PlayerMapResult>();
 
         private string avatarCachePath => $"{PathUtilities.PlayersCacheDirectory}/{PlayerId}.png";
 
@@ -49,6 +51,8 @@ namespace RefereeAssistant3.Main.Matches
                 await DownloadMetadata();
                 await DownloadAvatar(textures);
             }
+            else if (Avatar == null)
+                await DownloadAvatar(textures);
             scheduler.Add(() => OnLoaded?.Invoke(this));
         }
 
@@ -66,7 +70,7 @@ namespace RefereeAssistant3.Main.Matches
         {
             if (Avatar == null && PlayerId != null)
             {
-                if (!File.Exists(avatarCachePath) || (DateTime.UtcNow - File.GetCreationTimeUtc(avatarCachePath)).TotalDays > 2)
+                if (!File.Exists(avatarCachePath) || (DateTime.UtcNow - File.GetLastWriteTimeUtc(avatarCachePath)).TotalDays > 2)
                 {
                     await Task.Run(() =>
                     {
@@ -95,9 +99,9 @@ namespace RefereeAssistant3.Main.Matches
                 s = username;
             if (other == null && s == null)
                 return false;
-            if (other?.IRCUsername == IRCUsername || s == IRCUsername)
+            if ((!string.IsNullOrEmpty(other?.IRCUsername) && other.IRCUsername == IRCUsername) || (!string.IsNullOrEmpty(s) && s == IRCUsername))
                 return true;
-            if (other?.Username == Username || s == Username)
+            if ((!string.IsNullOrEmpty(other?.Username) && other.Username == Username) || (!string.IsNullOrEmpty(s) && s == Username))
                 return true;
             if (other?.PlayerId == PlayerId || (int.TryParse(s?.Trim('#'), out var parsedId) && parsedId == PlayerId))
                 return true;

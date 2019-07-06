@@ -8,7 +8,7 @@ namespace RefereeAssistant3.Main.Matches
     {
         public DateTime Time { get; } = DateTime.UtcNow;
         public IReadOnlyList<APIParticipant> Participants { get; set; }
-        public IReadOnlyList<MapResult> MapResults { get; set; }
+        public IReadOnlyList<APIPlayer> Players { get; set; }
         public string Name { get; set; }
         public int ProcedureIndex { get; set; }
         public string RollWinnersName { get; set; }

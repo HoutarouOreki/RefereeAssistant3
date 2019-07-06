@@ -29,28 +29,44 @@ namespace RefereeAssistant3.Main.IRC
             bot.PlayerTeamChanged += OnPlayerTeamChanged;
             bot.RefereeAdded += OnRefereeAdded;
             bot.RefereeRemoved += OnRefereeRemoved;
+            bot.PlayerFinishedPlaying += OnPlayerFinishedPlaying;
+            bot.MatchFinished += OnMatchFinished;
         }
 
-        private void OnRefereeRemoved(IrcChannel channel, string obj) => bot.SendMessage(channel, $"{name}: {obj} removed from referees");
-        private void OnRefereeAdded(IrcChannel channel, string obj) => bot.SendMessage(channel, $"{name}: {obj} added as a referee");
+        private void OnMatchFinished(MpRoomIrcChannel channel)
+        {
+            SendDebugMessage(channel, "Match has ended");
+            GetMatch(channel).OnMatchFinished();
+        }
+
+        private void OnPlayerFinishedPlaying(PlayerFinishedEventArgs obj)
+        {
+            SendDebugMessage(obj.Channel, $"{obj.Username} finished with score {obj.Score} and {(obj.Passed ? "passed" : "failed")}");
+            GetMatch(obj.Channel).SetPlayerScoreOnCurrentMap(obj.Username, obj.Score, obj.Passed);
+        }
+
+        private void OnRefereeRemoved(IrcChannel channel, string obj) => SendDebugMessage(channel, $"{obj} removed from referees");
+        private void OnRefereeAdded(IrcChannel channel, string obj) => SendDebugMessage(channel, $"{obj} added as a referee");
 
         private void OnPlayerTeamChanged(TeamChangedEventArgs obj)
         {
-            bot.SendMessage(obj.Channel, $"{name}: {obj.Username} changed team to {obj.Team}");
+            SendDebugMessage(obj.Channel, $"{obj.Username} changed team to {obj.Team}");
             var match = GetMatch(obj.Channel);
             match.GetPlayer(obj.Username).SelectedTeam = obj.Team;
         }
 
-        private void OnPlayerStateReceived(PlayerStateEventArgs obj) => bot.SendMessage(obj.Channel, $"{name}: player state received: {obj.Username} ({obj.PlayerId}) is {(obj.Ready ? "ready" : "not ready")}, is in slot {obj.Slot}, has {obj.Mods.Count} mods ({string.Join(' ', obj.Mods)}), is in team {obj.Team}");
-        private void OnModsChanged(ModsChangedEventArgs obj) => bot.SendMessage(obj.Channel, $"{name}: mods changed: {string.Join(", ", obj.Mods)}, freemod is {(obj.FreemodEnabled ? "enabled" : "disabled")}");
-        private void OnMatchUnlocked(IrcChannel channel) => bot.SendMessage(channel, $"{name}: match unlocked");
-        private void OnMatchLocked(IrcChannel channel) => bot.SendMessage(channel, $"{name}: match locked");
-        private void OnLeftRoom(UserSlotEventArgs obj) => bot.SendMessage(obj.Channel, $"{name}: {obj.Username} left room (from slot {obj.Slot})");
-        private void OnChangedSlot(UserSlotEventArgs obj) => bot.SendMessage(obj.Channel, $"{name}: {obj.Username} changed slot to {obj.Slot}");
+        private void OnPlayerStateReceived(PlayerStateEventArgs obj) => SendDebugMessage(obj.Channel, $"{name}: player state received: {obj.Username} ({obj.PlayerId}) is {(obj.Ready ? "ready" : "not ready")}, is in slot {obj.Slot}, has {obj.Mods.Count} mods ({string.Join(' ', obj.Mods)}), is in team {obj.Team}");
+
+        private void OnModsChanged(ModsChangedEventArgs obj) => SendDebugMessage(obj.Channel, $"mods changed: {string.Join(", ", obj.Mods)}, freemod is {(obj.FreemodEnabled ? "enabled" : "disabled")}");
+
+        private void OnMatchUnlocked(IrcChannel channel) => SendDebugMessage(channel, $"match unlocked");
+        private void OnMatchLocked(IrcChannel channel) => SendDebugMessage(channel, $"match locked");
+        private void OnLeftRoom(UserSlotEventArgs obj) => SendDebugMessage(obj.Channel, $"{obj.Username} left room (from slot {obj.Slot})");
+        private void OnChangedSlot(UserSlotEventArgs obj) => SendDebugMessage(obj.Channel, $"{obj.Username} changed slot to {obj.Slot}");
 
         private void OnAllPlayersReady(MpRoomIrcChannel channel)
         {
-            bot.SendMessage(channel, $"{name}: all players are ready");
+            SendDebugMessage(channel, $"all players are ready");
             bot.DisplaySettings(channel.Match);
         }
 
@@ -67,7 +83,12 @@ namespace RefereeAssistant3.Main.IRC
         private OsuMatch GetMatch(string channel) => matches.FirstOrDefault(m => m.ChannelName == channel);
         private OsuMatch GetMatch(IrcChannel channel) => GetMatch(channel.ChannelName);
 
-        private void SendDebugMessage(string channel, string message) => bot.SendMessage(channel, $"rA3 debug: {message}");
+        private void SendDebugMessage(string channel, string message)
+        {
+            if (MainConfig.IRCDebugMessages)
+                bot.SendMessage(channel, $"rA3 debug: {message}");
+        }
+
         private void SendDebugMessage(IrcChannel channel, string message) => SendDebugMessage(channel.ChannelName, message);
     }
 }

@@ -38,17 +38,21 @@ namespace RefereeAssistant3.Main
                 LoadTournaments();
             }
             MainConfig.Load();
-            LoadSavedMatches();
             ChatBot = new BanchoIrcManager();
             new OsuIrcMatchParseHandler(this);
+            LoadSavedMatches();
         }
 
         public void AddNewMatch(OsuMatch match)
         {
             match.TournamentStage.Mappool.DownloadMappoolAsync();
-            matches.Add(match);
-            NewMatchAdded?.Invoke(match);
-            match.Updated += () => OnMatchUpdated(match);
+            match.BanchoIrc = ChatBot;
+            match.PreparePlayersInfo().ContinueWith(t =>
+            {
+                match.Updated += () => OnMatchUpdated(match);
+                matches.Add(match);
+                NewMatchAdded?.Invoke(match);
+            });
         }
 
         private void OnMatchUpdated(OsuMatch match)
@@ -61,12 +65,11 @@ namespace RefereeAssistant3.Main
         {
             foreach (var savedMatchFile in PathUtilities.SavedMatchesDirectory.EnumerateFiles("*.json"))
             {
-                var text = savedMatchFile.OpenText().ReadToEnd();
+                var text = File.ReadAllText(savedMatchFile.FullName);
                 var apiMatch = JsonConvert.DeserializeObject<APIMatch>(text);
                 var tournament = Tournaments.Find(t => t.Configuration.TournamentName == apiMatch.TournamentName);
                 var tournamentStage = tournament.Stages.Find(s => s.TournamentStageName == apiMatch.TournamentStage);
-                var match = new OsuTeamVsMatch(apiMatch, new Team(tournament.Teams.Find(t => t.TeamName == apiMatch.Participants[0].Name)), new Team(tournament.Teams.Find(t => t.TeamName == apiMatch.Participants[1].Name)), tournament, tournamentStage);
-                matches.Add(match);
+                var match = new OsuTeamVsMatch(apiMatch, tournament.Teams.Find(t => t.TeamName == apiMatch.Participants[0].Name), tournament.Teams.Find(t => t.TeamName == apiMatch.Participants[1].Name), tournament, tournamentStage);
                 var nameData = savedMatchFile.Name.Replace(".json", "").Split('-');
                 var year = int.Parse(nameData[0]);
                 var month = int.Parse(nameData[1]);
@@ -75,7 +78,7 @@ namespace RefereeAssistant3.Main
                 var minute = int.Parse(nameData[4]);
                 var second = int.Parse(nameData[5]);
                 match.CreationDate = new DateTime(year, month, day, hour, minute, second);
-                match.Updated += () => OnMatchUpdated(match);
+                AddNewMatch(match);
             }
         }
 
