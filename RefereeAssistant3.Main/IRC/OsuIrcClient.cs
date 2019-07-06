@@ -351,7 +351,11 @@ namespace RefereeAssistant3.Main.IRC
             UserListUpdated?.Invoke(e);
         }
 
-        public void SendMessage(IrcChannel channel, string message) => SendMessage(channel.ChannelName, message);
+        public void SendMessage(IrcChannel channel, string message)
+        {
+            if (channel?.ChannelName != null)
+                SendMessage(channel.ChannelName, message);
+        }
 
         public void SendMessage(string channel, string message)
         {

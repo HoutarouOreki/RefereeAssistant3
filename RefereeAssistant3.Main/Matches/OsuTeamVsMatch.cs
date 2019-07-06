@@ -59,7 +59,7 @@ namespace RefereeAssistant3.Main.Matches
 
         public override Player GetPlayer(string username) => Team1 == null ? null : base.GetPlayer(username);
 
-        public override void OnMatchFinished()
+        protected override void OnMatchFinished()
         {
             var team1Score = 0;
             var team2Score = 0;

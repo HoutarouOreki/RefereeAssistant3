@@ -103,7 +103,7 @@ namespace RefereeAssistant3.Main.Matches
                 return true;
             if ((!string.IsNullOrEmpty(other?.Username) && other.Username == Username) || (!string.IsNullOrEmpty(s) && s == Username))
                 return true;
-            if (other?.PlayerId == PlayerId || (int.TryParse(s?.Trim('#'), out var parsedId) && parsedId == PlayerId))
+            if ((PlayerId.HasValue && other?.PlayerId == PlayerId) || (int.TryParse(s?.Trim('#'), out var parsedId) && parsedId == PlayerId))
                 return true;
             return false;
         }

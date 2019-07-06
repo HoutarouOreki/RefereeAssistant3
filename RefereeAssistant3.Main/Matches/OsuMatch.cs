@@ -127,7 +127,11 @@ namespace RefereeAssistant3.Main.Matches
             player.MapResults.Add(new PlayerMapResult(SelectedMap.DifficultyId, passed, score, player.SelectedMods));
         }
 
-        public abstract void OnMatchFinished();
+        public void FinishMatch()
+        {
+            IrcChannel?.RefreshTimeOutTime();
+            OnMatchFinished();
+        }
 
         public abstract APIMatch GenerateAPIMatch();
 
@@ -198,6 +202,8 @@ namespace RefereeAssistant3.Main.Matches
         protected abstract OsuMatchSnapshot CreateSnapshot();
 
         protected abstract void SetStateFromSnapshot(OsuMatchSnapshot matchSnapshot);
+
+        protected abstract void OnMatchFinished();
     }
 
     public abstract class OsuMatch<TParticipant> : OsuMatch where TParticipant : MatchParticipant

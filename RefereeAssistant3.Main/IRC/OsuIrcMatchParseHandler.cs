@@ -36,7 +36,7 @@ namespace RefereeAssistant3.Main.IRC
         private void OnMatchFinished(MpRoomIrcChannel channel)
         {
             SendDebugMessage(channel, "Match has ended");
-            GetMatch(channel).OnMatchFinished();
+            GetMatch(channel).FinishMatch();
         }
 
         private void OnPlayerFinishedPlaying(PlayerFinishedEventArgs obj)
