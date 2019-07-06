@@ -34,6 +34,7 @@ namespace RefereeAssistant3.Main
         public static void Save() => File.WriteAllText(mainConfigFile.FullName, JsonConvert.SerializeObject(new MainConfigFile
         {
             APIKey = APIKey,
+            IRCDebugMessages = IRCDebugMessages,
             IRCUsername = IRCUsername,
             IRCPassword = IRCPassword,
             ServerURL = ServerURL
