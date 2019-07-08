@@ -10,6 +10,6 @@ namespace RefereeAssistant3.Main.Online.APIModels
         [BsonRequired]
         public List<APIPlayer> Members;
 
-        public APITeam(Team team, int? score = null) : base(team, score) => Members = team.Members.Select(m => new APIPlayer(m.PlayerId.Value)).ToList();
+        public APITeam(Team team, int score) : base(team, score) => Members = team.Members.Select(m => new APIPlayer(m.PlayerId.Value)).ToList();
     }
 }

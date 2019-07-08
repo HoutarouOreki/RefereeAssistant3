@@ -2,7 +2,6 @@
 using RefereeAssistant3.Main.Storage;
 using RefereeAssistant3.Main.Tournaments;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace RefereeAssistant3.Main.Matches
 {
@@ -20,25 +19,24 @@ namespace RefereeAssistant3.Main.Matches
 
         public override string WinnerName => Winner?.Name;
 
-        public string RoomName => TournamentStage.RoomName.Replace("TEAM1", Team1.TeamName).Replace("TEAM2", Team2.TeamName);
+        public string RoomName => TournamentStage.RoomSettings.RoomName.Replace("TEAM1", Team1.TeamName).Replace("TEAM2", Team2.TeamName);
 
-        public OsuTeamVsMatch(TeamStorage team1, TeamStorage team2, Tournament tournament, TournamentStage tournamentStage) : base(tournament, tournamentStage)
+        public OsuTeamVsMatch(TeamStorage team1, TeamStorage team2, Tournament tournament, TournamentStageConfiguration tournamentStage) : base(tournament, tournamentStage)
         {
             Participants.Add(new Team(team1));
             Participants.Add(new Team(team2));
             Players.AddRange(Team1.Members.Concat(Team2.Members));
             Scores.Add(Team1, 0);
             Scores.Add(Team2, 0);
-            GenerateMatchProcedures();
         }
 
-        public OsuTeamVsMatch(APIMatch apiMatch, TeamStorage team1, TeamStorage team2, Tournament tournament, TournamentStage tournamentStage) : base(apiMatch, tournament, tournamentStage)
+        public OsuTeamVsMatch(APIMatch apiMatch, TeamStorage team1, TeamStorage team2, Tournament tournament, TournamentStageConfiguration tournamentStage) : base(apiMatch, tournament, tournamentStage)
         {
             Participants.Add(new Team(team1));
             Participants.Add(new Team(team2));
             Players.AddRange(Team1.Members.Concat(Team2.Members));
-            Scores[Team1] = apiMatch.Participants[0].Score ?? 0;
-            Scores[Team2] = apiMatch.Participants[1].Score ?? 1;
+            Scores[Team1] = apiMatch.Participants[0].Score;
+            Scores[Team2] = apiMatch.Participants[1].Score;
             if (Snapshots.Count > 0)
             {
                 var lastSnapshot = apiMatch.History[apiMatch.History.Count - 1];
@@ -52,7 +50,6 @@ namespace RefereeAssistant3.Main.Matches
             }
             IrcChannel = apiMatch.Chat;
             Code = apiMatch.Code;
-            GenerateMatchProcedures();
         }
 
         public override Player GetPlayer(int playerId) => Team1 == null ? null : base.GetPlayer(playerId);
@@ -81,15 +78,15 @@ namespace RefereeAssistant3.Main.Matches
             ProcedureIndex = CurrentProcedureIndex,
             RollWinnersName = RollWinner?.Name,
             SelectedMap = SelectedMap?.DifficultyId,
-            SelectedWinner = SelectedWinner == null ? null : new APIParticipant(SelectedWinner),
+            SelectedWinner = SelectedWinner == null ? null : new APIParticipant(SelectedWinner, Scores[SelectedWinner]),
             Players = Players.Select(p => new APIPlayer(p.PlayerId.Value) { MapResults = p.MapResults }).ToList()
         };
 
         protected override void SetStateFromSnapshot(OsuMatchSnapshot lastSnapshot)
         {
             CurrentProcedureIndex = lastSnapshot.ProcedureIndex;
-            Scores[Team1] = lastSnapshot.Participants[0].Score ?? 0;
-            Scores[Team2] = lastSnapshot.Participants[1].Score ?? 0;
+            Scores[Team1] = lastSnapshot.Participants[0].Score;
+            Scores[Team2] = lastSnapshot.Participants[1].Score;
             Team1.PickedMaps = lastSnapshot.Participants[0].PickedMaps.Select(m => GetMap(m)).ToList();
             Team2.PickedMaps = lastSnapshot.Participants[1].PickedMaps.Select(m => GetMap(m)).ToList();
             Team1.BannedMaps = lastSnapshot.Participants[0].BannedMaps.Select(m => GetMap(m)).ToList();

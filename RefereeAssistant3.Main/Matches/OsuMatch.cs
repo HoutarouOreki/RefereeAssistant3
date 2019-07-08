@@ -24,7 +24,7 @@ namespace RefereeAssistant3.Main.Matches
 
         public string Code;
         public readonly Tournament Tournament;
-        public readonly TournamentStage TournamentStage;
+        public readonly TournamentStageConfiguration TournamentStage;
 
         public abstract MatchProcedureTypes CurrentProcedureType { get; }
         public abstract string CurrentProcedureName { get; }
@@ -71,7 +71,7 @@ namespace RefereeAssistant3.Main.Matches
 
         public BanchoIrcManager BanchoIrc { get; set; }
 
-        protected OsuMatch(Tournament tournament, TournamentStage tournamentStage)
+        protected OsuMatch(Tournament tournament, TournamentStageConfiguration tournamentStage)
         {
             Tournament = tournament;
             TournamentStage = tournamentStage;
@@ -79,10 +79,12 @@ namespace RefereeAssistant3.Main.Matches
             IrcChannel?.RefreshTimeOutTime();
         }
 
-        protected OsuMatch(APIMatch apiMatch, Tournament tournament, TournamentStage tournamentStage) : this(tournament, tournamentStage)
+        protected OsuMatch(APIMatch apiMatch, Tournament tournament, TournamentStageConfiguration tournamentStage) : this(tournament, tournamentStage)
         {
             Id = apiMatch.Id;
             Snapshots = apiMatch.History;
+            IrcChannel = apiMatch.Chat;
+            Code = apiMatch.Code;
             foreach (var p in apiMatch.Players)
             {
                 var player = GetPlayer(p.PlayerId);
@@ -135,6 +137,11 @@ namespace RefereeAssistant3.Main.Matches
 
         public abstract APIMatch GenerateAPIMatch();
 
+        /// <summary>
+        /// This function is called by <see cref="Core"/> after creating the match and after rolling.
+        /// </summary>
+        public abstract void GenerateMatchProcedures();
+
         public abstract bool Proceed();
 
         public abstract void ReverseLastOperation();
@@ -142,8 +149,9 @@ namespace RefereeAssistant3.Main.Matches
         /// <summary>
         /// This function will be ran by <see cref="Core"/> after this match is constructed.
         /// Inside it all participating players' info is downloaded (usernames, ids, etc).
+        /// This is required for properly recognizing participants.
         /// </summary>
-        public async Task PreparePlayersInfo() => await Task.WhenAll(Players.Select(p => p.DownloadMetadata()));
+        public virtual async Task PreparePlayersInfo() => await Task.WhenAll(Players.Select(p => p.DownloadMetadata()));
 
         public async Task UpdateMatchAsync()
         {
@@ -247,9 +255,19 @@ namespace RefereeAssistant3.Main.Matches
 
         public Dictionary<TParticipant, int> Scores = new Dictionary<TParticipant, int>();
 
-        public OsuMatch(Tournament tournament, TournamentStage tournamentStage) : base(tournament, tournamentStage) { }
+        public OsuMatch(Tournament tournament, TournamentStageConfiguration tournamentStage) : base(tournament, tournamentStage) { }
 
-        public OsuMatch(APIMatch apiMatch, Tournament tournament, TournamentStage tournamentStage) : base(apiMatch, tournament, tournamentStage) { }
+        public OsuMatch(APIMatch apiMatch, Tournament tournament, TournamentStageConfiguration tournamentStage) : base(apiMatch, tournament, tournamentStage) { }
+
+        public override void GenerateMatchProcedures()
+        {
+            Procedures.Clear();
+            Procedures.Add(new MatchProcedure<TParticipant>(MatchProcedureTypes.SettingUp));
+            if (Snapshots.Count == 0)
+                Snapshots.Add(CreateSnapshot());
+            foreach (var procedureParameter in TournamentStage.MatchProceedings)
+                GenerateMatchProcedure(procedureParameter);
+        }
 
         public override bool Proceed()
         {
@@ -367,16 +385,6 @@ namespace RefereeAssistant3.Main.Matches
                 RollWinner = null;
             if (CurrentProcedure.ProcedureType == MatchProcedureTypes.Playing || CurrentProcedure.ProcedureType == MatchProcedureTypes.PlayingWarmUp)
                 MapStartTime = DateTime.UtcNow;
-        }
-
-        protected void GenerateMatchProcedures()
-        {
-            Procedures.Clear();
-            Procedures.Add(new MatchProcedure<TParticipant>(MatchProcedureTypes.SettingUp));
-            if (Snapshots.Count == 0)
-                Snapshots.Add(CreateSnapshot());
-            foreach (var procedureParameter in TournamentStage.MatchProceedings)
-                GenerateMatchProcedure(procedureParameter);
         }
 
         private void GenerateMatchProcedure(string param)

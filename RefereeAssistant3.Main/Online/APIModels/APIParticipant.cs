@@ -10,13 +10,13 @@ namespace RefereeAssistant3.Main.Online.APIModels
         [BsonRequired]
         public string Name;
 
-        public int? Score;
+        public int Score;
         public List<int> BannedMaps;
         public List<int> PickedMaps;
 
         public APIParticipant() { }
 
-        public APIParticipant(MatchParticipant participant, int? score = null)
+        public APIParticipant(MatchParticipant participant, int score)
         {
             Name = participant.Name;
             Score = score;

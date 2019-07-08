@@ -10,10 +10,10 @@ namespace RefereeAssistant3.Main.Tournaments
     public class Tournament
     {
         public TournamentConfiguration Configuration { get; }
-        public List<TournamentStage> Stages { get; } = new List<TournamentStage>();
+        public List<TournamentStageConfiguration> Stages { get; } = new List<TournamentStageConfiguration>();
         public List<TeamStorage> Teams { get; } = new List<TeamStorage>();
 
-        public Tournament(TournamentConfiguration configuration, IEnumerable<TournamentStage> stages, IEnumerable<TeamStorage> teams)
+        public Tournament(TournamentConfiguration configuration, IEnumerable<TournamentStageConfiguration> stages, IEnumerable<TeamStorage> teams)
         {
             Configuration = configuration;
             Stages = stages.ToList();
@@ -27,11 +27,7 @@ namespace RefereeAssistant3.Main.Tournaments
             var dir = new DirectoryInfo(GetPathFromName(Configuration.TournamentName));
             dir.Create();
 
-            File.WriteAllText($"{dir}/configuration.json", JsonConvert.SerializeObject(new TournamentConfiguration
-            {
-                DoFailedScoresCount = Configuration.DoFailedScoresCount,
-                TournamentName = Configuration.TournamentName
-            }));
+            File.WriteAllText($"{dir}/configuration.json", JsonConvert.SerializeObject(new TournamentConfiguration { TournamentName = Configuration.TournamentName }));
             File.WriteAllText($"{dir}/stages.json", JsonConvert.SerializeObject(Stages));
             File.WriteAllText($"{dir}/teams.json", JsonConvert.SerializeObject(Teams));
         }

@@ -27,11 +27,11 @@ namespace RefereeAssistant3.Visual.Overlays
         private readonly FillFlowContainer team1MembersDisplay;
         private readonly FillFlowContainer team2MembersDisplay;
         private readonly Container teamMembersDisplay;
-        private SelectionOverlay<TournamentStage> stageSelectionOverlay;
+        private SelectionOverlay<TournamentStageConfiguration> stageSelectionOverlay;
         private SelectionOverlay<TeamStorage> teamSelectionOverlay;
 
         private Tournament tournament;
-        private TournamentStage stage;
+        private TournamentStageConfiguration stage;
         private TeamStorage team1;
         private TeamStorage team2;
 
@@ -208,7 +208,7 @@ namespace RefereeAssistant3.Visual.Overlays
             team1 = team2 = null;
             if (stageSelectionOverlay != null)
                 Remove(stageSelectionOverlay);
-            Add(stageSelectionOverlay = new SelectionOverlay<TournamentStage>(tournament.Stages));
+            Add(stageSelectionOverlay = new SelectionOverlay<TournamentStageConfiguration>(tournament.Stages));
             stageSelectionOverlay.Hide();
             stageSelectionButton.Action = () =>
             {
@@ -218,7 +218,7 @@ namespace RefereeAssistant3.Visual.Overlays
             UpdateDisplay();
         }
 
-        private void SetStage(TournamentStage stage)
+        private void SetStage(TournamentStageConfiguration stage)
         {
             this.stage = stage;
             team1 = team2 = null;
@@ -271,6 +271,7 @@ namespace RefereeAssistant3.Visual.Overlays
                 team1SelectionButton.Action = team2SelectionButton.Action = null;
 
             addNewMatchButton.Action = AreOptionsValid() ? AddNewMatch : (Action)null;
+            addNewMatchButton.Text = stage != null ? $"Create new {stage.RoomSettings.TeamMode} match" : "Create new match";
 
             vsLabel.FadeTo(stage != null ? 1 : 0.5f);
 

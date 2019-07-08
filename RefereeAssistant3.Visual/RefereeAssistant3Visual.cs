@@ -161,13 +161,16 @@ namespace RefereeAssistant3.Visual
 
         private void OnNewMatchAdded(OsuMatch match)
         {
-            var matchPreviewPanel = new MatchPreviewPanel(match)
+            Schedule(() =>
             {
-                Action = () => SelectMatch(match)
-            };
-            matchListDisplayer.Add(matchPreviewPanel);
-            match.Alert += OnMatchAlert;
-            SelectMatch(match);
+                var matchPreviewPanel = new MatchPreviewPanel(match)
+                {
+                    Action = () => SelectMatch(match)
+                };
+                matchListDisplayer.Add(matchPreviewPanel);
+                match.Alert += OnMatchAlert;
+                SelectMatch(match);
+            });
         }
 
         private void OnMatchAlert(OsuMatch source, string text)

@@ -24,7 +24,7 @@ namespace RefereeAssistant3.Main.Matches
             PlayerId.HasValue ? $"#{PlayerId.Value}" : null :
             Username?.Replace(' ', '_');
 
-        public override string Name => Username;
+        public override string Name => IRCUsername;
 
         public Texture Avatar;
 

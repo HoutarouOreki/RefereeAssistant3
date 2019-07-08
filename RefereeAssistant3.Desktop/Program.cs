@@ -26,6 +26,8 @@ namespace RefereeAssistant3
                 PathUtilities.MapsCacheDirectory.Create();
                 PathUtilities.PlayersCacheDirectory.Create();
                 PathUtilities.SavedMatchesDirectory.Create();
+                PathUtilities.SavedHeadToHeadMatchesDirectory.Create();
+                PathUtilities.SavedTeamVsMatchesDirectory.Create();
                 PathUtilities.TournamentsDirectory.Create();
 
                 var core = new Core();

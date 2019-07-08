@@ -5,6 +5,7 @@ using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.UserInterface;
 using osuTK;
 using RefereeAssistant3.Main;
+using RefereeAssistant3.Main.Matches;
 using RefereeAssistant3.Main.Storage;
 using RefereeAssistant3.Main.Tournaments;
 using RefereeAssistant3.Visual.UI;
@@ -16,10 +17,10 @@ namespace RefereeAssistant3.Visual.Overlays
     public class TournamentsOverlay : RA3OverlayContainer
     {
         private readonly Bindable<Tournament> selectedTournament = new Bindable<Tournament>();
-        private readonly Bindable<TournamentStage> selectedStage = new Bindable<TournamentStage>();
+        private readonly Bindable<TournamentStageConfiguration> selectedStage = new Bindable<TournamentStageConfiguration>();
         private readonly BasicTextBox tournamentNameTextBox;
         private readonly RA3Button stageSelectionButton;
-        private readonly SelectionOverlay<TournamentStage> stageSelection;
+        private readonly SelectionOverlay<TournamentStageConfiguration> stageSelection;
         private readonly BasicTextBox stageNameTextBox;
         private readonly Core core;
         private readonly RA3Button newStageButton;
@@ -34,7 +35,7 @@ namespace RefereeAssistant3.Visual.Overlays
         {
             this.core = core;
             var tournamentSelection = new SelectionOverlay<Tournament>(core.Tournaments) { Action = t => selectedTournament.Value = t };
-            stageSelection = new SelectionOverlay<TournamentStage>(new List<TournamentStage>()) { Action = s => selectedStage.Value = s };
+            stageSelection = new SelectionOverlay<TournamentStageConfiguration>(new List<TournamentStageConfiguration>()) { Action = s => selectedStage.Value = s };
             Add(tournamentSelection);
             Add(stageSelection);
             Add(new BasicScrollContainer
@@ -192,7 +193,7 @@ namespace RefereeAssistant3.Visual.Overlays
             }
             var s = selectedStage.Value;
             s.TournamentStageName = stageNameTextBox.Text;
-            s.RoomName = roomNameTextBox.Text;
+            s.RoomSettings.RoomName = roomNameTextBox.Text;
             s.ScoreRequiredToWin = scoreToWinSlider.Current.Value;
             selectedTournament.Value.Save();
             GenerateLayout();
@@ -200,15 +201,28 @@ namespace RefereeAssistant3.Visual.Overlays
 
         private void OnNewStageButtonClicked()
         {
-            var stage = new TournamentStage("New stage", "Room name: (TEAM1) vs (TEAM2)", new List<string>(), 20, new Mappool());
+            var stage = new TournamentStageConfiguration
+            {
+                TournamentStageName = "New stage",
+                MatchProceedings = new List<string>(),
+                ScoreRequiredToWin = 20,
+                Mappool = new Mappool(),
+                DoFailedScoresCount = false,
+                RoomSettings = new MpRoomSettings
+                {
+                    RoomName = "Room name: (TEAM1) vs (TEAM2)",
+                    ScoreMode = ScoreMode.ScoreV2,
+                    TeamMode = TeamMode.TeamVs
+                }
+            };
             selectedTournament.Value.Stages.Add(stage);
             GenerateLayout();
         }
 
         private void OnNewTournamentButtonClicked()
         {
-            var config = new TournamentConfiguration("New tournament");
-            core.Tournaments.Add(new Tournament(config, new List<TournamentStage>(), new List<TeamStorage>()));
+            var config = new TournamentConfiguration() { TournamentName = "New tournament" };
+            core.Tournaments.Add(new Tournament(config, new List<TournamentStageConfiguration>(), new List<TeamStorage>()));
             GenerateLayout();
         }
 
@@ -218,7 +232,7 @@ namespace RefereeAssistant3.Visual.Overlays
             GenerateLayout();
         }
 
-        private void OnStageChanged(ValueChangedEvent<TournamentStage> obj) => GenerateLayout();
+        private void OnStageChanged(ValueChangedEvent<TournamentStageConfiguration> obj) => GenerateLayout();
 
         private void GenerateLayout()
         {
@@ -235,7 +249,7 @@ namespace RefereeAssistant3.Visual.Overlays
 
             var s = selectedStage.Value;
             stageNameTextBox.Text = s?.TournamentStageName;
-            roomNameTextBox.Text = s?.RoomName;
+            roomNameTextBox.Text = s?.RoomSettings.RoomName;
             if (s != null)
             {
                 scoreToWinSlider.Current.Value = s.ScoreRequiredToWin;

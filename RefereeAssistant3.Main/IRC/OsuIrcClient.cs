@@ -141,7 +141,7 @@ namespace RefereeAssistant3.Main.IRC
             if (lastRequestedMatch != null)
                 return false;
             lastRequestedMatch = match;
-            client.SendMessage(bancho_bot, $"!mp make {match.TournamentStage.RoomName}");
+            client.SendMessage(bancho_bot, $"!mp make {match.TournamentStage.RoomSettings.RoomName}");
             return true;
         }
 
@@ -165,6 +165,7 @@ namespace RefereeAssistant3.Main.IRC
             client.JoinChannel(channelName);
             SendLocalMessage(channelName, $"Chat room created successfully ({channelName})", true);
             LockMatch(match);
+            SetProperties(match, match.TournamentStage.RoomSettings.TeamMode, match.TournamentStage.RoomSettings.ScoreMode, 8);
             return;
         }
 

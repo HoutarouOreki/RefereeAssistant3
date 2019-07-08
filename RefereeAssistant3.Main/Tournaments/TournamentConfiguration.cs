@@ -7,14 +7,6 @@ namespace RefereeAssistant3.Main.Tournaments
         [JsonRequired]
         public string TournamentName;
 
-        public bool DoFailedScoresCount;
-
-        public TournamentConfiguration(string tournamentName, bool doFailedScoresCount = false)
-        {
-            TournamentName = tournamentName;
-            DoFailedScoresCount = doFailedScoresCount;
-        }
-
-        public TournamentConfiguration() { }
+        public override string ToString() => TournamentName;
     }
 }

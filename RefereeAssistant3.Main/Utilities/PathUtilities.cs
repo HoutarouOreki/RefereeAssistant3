@@ -14,5 +14,9 @@ namespace RefereeAssistant3.Main.Utilities
         public static readonly DirectoryInfo TournamentsDirectory = new DirectoryInfo($"{RootProgramDirectory.FullName}/tournaments");
 
         public static readonly DirectoryInfo SavedMatchesDirectory = new DirectoryInfo($"{RootProgramDirectory.FullName}/savedMatches");
+
+        public static readonly DirectoryInfo SavedTeamVsMatchesDirectory = new DirectoryInfo($"{SavedMatchesDirectory}/teamVs");
+
+        public static readonly DirectoryInfo SavedHeadToHeadMatchesDirectory = new DirectoryInfo($"{SavedMatchesDirectory}/headToHead");
     }
 }

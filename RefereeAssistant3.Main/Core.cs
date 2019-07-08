@@ -3,7 +3,6 @@ using osu.Framework.Bindables;
 using RefereeAssistant3.Main.IRC;
 using RefereeAssistant3.Main.Matches;
 using RefereeAssistant3.Main.Online.APIModels;
-using RefereeAssistant3.Main.Online.APIRequests;
 using RefereeAssistant3.Main.Storage;
 using RefereeAssistant3.Main.Tournaments;
 using RefereeAssistant3.Main.Utilities;
@@ -49,6 +48,7 @@ namespace RefereeAssistant3.Main
             match.BanchoIrc = ChatBot;
             match.PreparePlayersInfo().ContinueWith(t =>
             {
+                match.GenerateMatchProcedures();
                 match.Updated += () => OnMatchUpdated(match);
                 matches.Add(match);
                 NewMatchAdded?.Invoke(match);
@@ -58,12 +58,30 @@ namespace RefereeAssistant3.Main
         private void OnMatchUpdated(OsuMatch match)
         {
             var serializedMatch = JsonConvert.SerializeObject(match.GenerateAPIMatch());
-            File.WriteAllText($"{PathUtilities.SavedMatchesDirectory}/{match.CreationDate:yyyy-MM-dd-HH-mm-ss}.json", serializedMatch);
+            if (match is OsuTeamVsMatch teamVsMatch)
+                File.WriteAllText($"{PathUtilities.SavedTeamVsMatchesDirectory}/{teamVsMatch.CreationDate:yyyy-MM-dd-HH-mm-ss}.json", serializedMatch);
         }
 
         private void LoadSavedMatches()
         {
-            foreach (var savedMatchFile in PathUtilities.SavedMatchesDirectory.EnumerateFiles("*.json"))
+            foreach (var savedMatchFile in PathUtilities.SavedTeamVsMatchesDirectory.EnumerateFiles("*.json"))
+            {
+                var text = File.ReadAllText(savedMatchFile.FullName);
+                var apiMatch = JsonConvert.DeserializeObject<APIMatch>(text);
+                var tournament = Tournaments.Find(t => t.Configuration.TournamentName == apiMatch.TournamentName);
+                var tournamentStage = tournament.Stages.Find(s => s.TournamentStageName == apiMatch.TournamentStage);
+                var match = new OsuTeamVsMatch(apiMatch, tournament.Teams.Find(t => t.TeamName == apiMatch.Participants[0].Name), tournament.Teams.Find(t => t.TeamName == apiMatch.Participants[1].Name), tournament, tournamentStage);
+                var nameData = savedMatchFile.Name.Replace(".json", "").Split('-');
+                var year = int.Parse(nameData[0]);
+                var month = int.Parse(nameData[1]);
+                var day = int.Parse(nameData[2]);
+                var hour = int.Parse(nameData[3]);
+                var minute = int.Parse(nameData[4]);
+                var second = int.Parse(nameData[5]);
+                match.CreationDate = new DateTime(year, month, day, hour, minute, second);
+                AddNewMatch(match);
+            }
+            foreach (var savedMatchFile in PathUtilities.SavedHeadToHeadMatchesDirectory.EnumerateFiles("*.json"))
             {
                 var text = File.ReadAllText(savedMatchFile.FullName);
                 var apiMatch = JsonConvert.DeserializeObject<APIMatch>(text);
@@ -112,17 +130,38 @@ namespace RefereeAssistant3.Main
             await Task.WhenAll(teamsFileTask, confFileTask, stagesFileTask);
 
             var teams = JsonConvert.DeserializeObject<List<TeamStorage>>(teamsFileTask.Result);
-            var stages = JsonConvert.DeserializeObject<List<TournamentStage>>(stagesFileTask.Result);
+            var stages = JsonConvert.DeserializeObject<List<TournamentStageConfiguration>>(stagesFileTask.Result);
             var configuration = JsonConvert.DeserializeObject<TournamentConfiguration>(confFileTask.Result);
             return new Tournament(configuration, stages, teams);
         }
 
         private static void CreateExampleTournament()
         {
-            var exampleConfiguration = new TournamentConfiguration("Example Tournament");
-            var exampleStages = new List<TournamentStage>
+            var exampleConfiguration = new TournamentConfiguration { TournamentName = "Example Tournament" };
+            var exampleStages = new List<TournamentStageConfiguration>
             {
-                new TournamentStage
+                new TournamentStageConfiguration
+                {
+                    TournamentStageName = "Qualifiers",
+                    Mappool = new Mappool
+                    {
+                        NoMod = new List<Map> { new Map(776951, "NM1"), new Map(100784, "NM2"), new Map(1467593, "NM3") },
+                        Hidden = new List<Map> { new Map(1070437, "HD1"), new Map(975036, "HD2") },
+                        HardRock = new List<Map> { new Map(390889, "HR1"), new Map(1490853, "HR2") },
+                        DoubleTime = new List<Map> { new Map(42352, "DT1"), new Map(125325, "DT2") },
+                        FreeMod = new List<Map> { new Map(441472, "FM1"), new Map(1827324, "FM2") }
+                    },
+                    MatchProceedings = "BL BW PW PL PW PL PW PL PW PL TB".Split(' ').ToList(),
+                    ScoreRequiredToWin = 5,
+                    DoFailedScoresCount = true,
+                    RoomSettings = new MpRoomSettings
+                    {
+                        RoomName = "osu! Example Tournament: (TEAM1) vs (TEAM2)",
+                        ScoreMode = ScoreMode.ScoreV2,
+                        TeamMode = TeamMode.TeamVs
+                    }
+                },
+                new TournamentStageConfiguration
                 {
                     TournamentStageName = "Group Stage",
                     Mappool = new Mappool
@@ -134,10 +173,16 @@ namespace RefereeAssistant3.Main
                         FreeMod = new List<Map> { new Map(441472, "FM1"), new Map(1827324, "FM2") }
                     },
                     MatchProceedings = "Roll BL BW PW PL PW PL PW PL PW PL TB".Split(' ').ToList(),
-                    RoomName = "osu! Example Tournament: (TEAM1) vs (TEAM2)",
-                    ScoreRequiredToWin = 5
+                    ScoreRequiredToWin = 5,
+                    DoFailedScoresCount = true,
+                    RoomSettings = new MpRoomSettings
+                    {
+                        RoomName = "osu! Example Tournament: (TEAM1) vs (TEAM2)",
+                        ScoreMode = ScoreMode.ScoreV2,
+                        TeamMode = TeamMode.TeamVs
+                    }
                 },
-                new TournamentStage
+                new TournamentStageConfiguration
                 {
                     TournamentStageName = "Grand Finals",
                     Mappool = new Mappool
@@ -149,8 +194,14 @@ namespace RefereeAssistant3.Main
                         FreeMod = new List<Map> { new Map(441472, "FM1"), new Map(1827324, "FM2") }
                     },
                     MatchProceedings = "Free1 Warm1 Warm2 Roll BL BW PW PL PW PL BL BW PW PL B1 PW PL PW PL PW TB".Split(' ').ToList(),
-                    RoomName = "o!ExT Grand Finals: (TEAM1) vs (TEAM2)",
-                    ScoreRequiredToWin = 7
+                    ScoreRequiredToWin = 7,
+                    RoomSettings = new MpRoomSettings
+                    {
+                        RoomName = "o!ExT Grand Finals: (TEAM1) vs (TEAM2)",
+                        ScoreMode = ScoreMode.ScoreV2,
+                        TeamMode = TeamMode.TeamVs,
+                    },
+                    DoFailedScoresCount = true
                 },
             };
             var exampleTeams = new List<TeamStorage>
