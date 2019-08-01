@@ -71,6 +71,8 @@ namespace RefereeAssistant3.Main.Matches
 
         public BanchoIrcManager BanchoIrc { get; set; }
 
+        public virtual string RoomName => TournamentStage.RoomSettings.RoomName;
+
         protected OsuMatch(Tournament tournament, TournamentStageConfiguration tournamentStage)
         {
             Tournament = tournament;

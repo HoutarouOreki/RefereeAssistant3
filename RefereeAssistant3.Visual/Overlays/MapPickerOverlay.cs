@@ -20,6 +20,7 @@ namespace RefereeAssistant3.Visual.Overlays
         private IEnumerable<Map> hardRock => mappool.HardRock.Except(core.SelectedMatch.Value.UsedMaps);
         private IEnumerable<Map> doubleTime => mappool.DoubleTime.Except(core.SelectedMatch.Value.UsedMaps);
         private IEnumerable<Map> freeMod => mappool.FreeMod.Except(core.SelectedMatch.Value.UsedMaps);
+        private IEnumerable<Map> other => mappool.Other.Except(core.SelectedMatch.Value.UsedMaps);
 
         public MapPickerOverlay(Core core)
         {
@@ -87,6 +88,13 @@ namespace RefereeAssistant3.Visual.Overlays
                 mapFlowContainer.Add(new SpriteText
                 { Text = "Free mod", Font = font, Margin = new MarginPadding { Top = 8 } });
                 AddMap(freeMod);
+            }
+
+            if (other.Any())
+            {
+                mapFlowContainer.Add(new SpriteText
+                { Text = "Other", Font = font, Margin = new MarginPadding { Top = 8 } });
+                AddMap(other);
             }
         }
 

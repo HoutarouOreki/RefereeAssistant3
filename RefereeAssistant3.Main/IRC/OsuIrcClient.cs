@@ -141,7 +141,7 @@ namespace RefereeAssistant3.Main.IRC
             if (lastRequestedMatch != null)
                 return false;
             lastRequestedMatch = match;
-            client.SendMessage(bancho_bot, $"!mp make {match.TournamentStage.RoomSettings.RoomName}");
+            client.SendMessage(bancho_bot, $"!mp make {match.RoomName}");
             return true;
         }
 

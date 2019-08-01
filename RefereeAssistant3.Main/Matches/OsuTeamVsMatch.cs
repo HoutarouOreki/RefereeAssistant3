@@ -19,7 +19,7 @@ namespace RefereeAssistant3.Main.Matches
 
         public override string WinnerName => Winner?.Name;
 
-        public string RoomName => TournamentStage.RoomSettings.RoomName.Replace("TEAM1", Team1.TeamName).Replace("TEAM2", Team2.TeamName);
+        public override string RoomName => TournamentStage.RoomSettings.RoomName.Replace("TEAM1", Team1.TeamName).Replace("TEAM2", Team2.TeamName);
 
         public OsuTeamVsMatch(TeamStorage team1, TeamStorage team2, Tournament tournament, TournamentStageConfiguration tournamentStage) : base(tournament, tournamentStage)
         {
@@ -63,9 +63,17 @@ namespace RefereeAssistant3.Main.Matches
             foreach (var player in Players)
             {
                 if (Team1.Members.Any(p => p.Equals(player)))
-                    team1Score += player.MapResults.LastOrDefault(mr => mr.DifficultyId == SelectedMap.DifficultyId)?.Score ?? 0;
+                {
+                    var result = player.MapResults.LastOrDefault(mr => mr.DifficultyId == SelectedMap.DifficultyId);
+                    if (result != null && (TournamentStage.DoFailedScoresCount || result.Passed))
+                        team1Score += result.Score;
+                }
                 if (Team2.Members.Any(p => p.Equals(player)))
-                    team2Score += player.MapResults.LastOrDefault(mr => mr.DifficultyId == SelectedMap.DifficultyId)?.Score ?? 0;
+                {
+                    var result = player.MapResults.LastOrDefault(mr => mr.DifficultyId == SelectedMap.DifficultyId);
+                    if (result != null && (TournamentStage.DoFailedScoresCount || result.Passed))
+                        team2Score += result.Score;
+                }
             }
             BanchoIrc.SendMessage(IrcChannel, $"{Team1.Name}: {team1Score}");
             BanchoIrc.SendMessage(IrcChannel, $"{Team2.Name}: {team2Score}");
