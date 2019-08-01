@@ -66,20 +66,24 @@ namespace RefereeAssistant3.Main
         {
             foreach (var savedMatchFile in PathUtilities.SavedTeamVsMatchesDirectory.EnumerateFiles("*.json"))
             {
-                var text = File.ReadAllText(savedMatchFile.FullName);
-                var apiMatch = JsonConvert.DeserializeObject<APIMatch>(text);
-                var tournament = Tournaments.Find(t => t.Configuration.TournamentName == apiMatch.TournamentName);
-                var tournamentStage = tournament.Stages.Find(s => s.TournamentStageName == apiMatch.TournamentStage);
-                var match = new OsuTeamVsMatch(apiMatch, tournament.Teams.Find(t => t.TeamName == apiMatch.Participants[0].Name), tournament.Teams.Find(t => t.TeamName == apiMatch.Participants[1].Name), tournament, tournamentStage);
-                var nameData = savedMatchFile.Name.Replace(".json", "").Split('-');
-                var year = int.Parse(nameData[0]);
-                var month = int.Parse(nameData[1]);
-                var day = int.Parse(nameData[2]);
-                var hour = int.Parse(nameData[3]);
-                var minute = int.Parse(nameData[4]);
-                var second = int.Parse(nameData[5]);
-                match.CreationDate = new DateTime(year, month, day, hour, minute, second);
-                AddNewMatch(match);
+                try
+                {
+                    var text = File.ReadAllText(savedMatchFile.FullName);
+                    var apiMatch = JsonConvert.DeserializeObject<APIMatch>(text);
+                    var tournament = Tournaments.Find(t => t.Configuration.TournamentName == apiMatch.TournamentName);
+                    var tournamentStage = tournament.Stages.Find(s => s.TournamentStageName == apiMatch.TournamentStage);
+                    var match = new OsuTeamVsMatch(apiMatch, tournament.Teams.Find(t => t.TeamName == apiMatch.Participants[0].Name), tournament.Teams.Find(t => t.TeamName == apiMatch.Participants[1].Name), tournament, tournamentStage);
+                    var nameData = savedMatchFile.Name.Replace(".json", "").Split('-');
+                    var year = int.Parse(nameData[0]);
+                    var month = int.Parse(nameData[1]);
+                    var day = int.Parse(nameData[2]);
+                    var hour = int.Parse(nameData[3]);
+                    var minute = int.Parse(nameData[4]);
+                    var second = int.Parse(nameData[5]);
+                    match.CreationDate = new DateTime(year, month, day, hour, minute, second);
+                    AddNewMatch(match);
+                }
+                catch { }
             }
             foreach (var savedMatchFile in PathUtilities.SavedHeadToHeadMatchesDirectory.EnumerateFiles("*.json"))
             {
@@ -755,7 +759,7 @@ namespace RefereeAssistant3.Main
     ]
   },
   {
-    ""TeamName"": ""Test1"",
+    ""TeamName"": ""Dogs"",
     ""Members"": [
       {
         ""PlayerId"": 4185566
@@ -763,7 +767,7 @@ namespace RefereeAssistant3.Main
     ]
   },
   {
-    ""TeamName"": ""Test2"",
+    ""TeamName"": ""Cats"",
     ""Members"": [
       {
         ""PlayerId"": 1372608

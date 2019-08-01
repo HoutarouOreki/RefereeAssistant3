@@ -63,11 +63,15 @@ namespace RefereeAssistant3.Main
                     var coverReq = textures.GetStream($"https://assets.ppy.sh/beatmaps/{MapsetId}/covers/cover.jpg");
                     if (coverReq == null)
                         return null;
-                    using (var stream = new FileStream(coverCachePath, FileMode.CreateNew, FileAccess.Write))
+                    try
                     {
-                        var img = SixLabors.ImageSharp.Image.Load(coverReq);
-                        SixLabors.ImageSharp.ImageExtensions.SaveAsJpeg(img, stream);
+                        using (var stream = new FileStream(coverCachePath, FileMode.CreateNew, FileAccess.Write))
+                        {
+                            var img = SixLabors.ImageSharp.Image.Load(coverReq);
+                            SixLabors.ImageSharp.ImageExtensions.SaveAsJpeg(img, stream);
+                        }
                     }
+                    catch { }
                 }
                 using (var stream = new FileStream(coverCachePath, FileMode.Open, FileAccess.Read))
                 { return Cover = Texture.FromStream(stream); }

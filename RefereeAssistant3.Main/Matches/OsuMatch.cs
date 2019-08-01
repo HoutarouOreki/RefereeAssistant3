@@ -273,7 +273,7 @@ namespace RefereeAssistant3.Main.Matches
 
         public override bool Proceed()
         {
-            if (new[] { MatchProcedureTypes.Banning, MatchProcedureTypes.GettingReady, MatchProcedureTypes.Picking, MatchProcedureTypes.Playing, MatchProcedureTypes.PlayingWarmUp, MatchProcedureTypes.WarmUp }.Contains(CurrentProcedure.ProcedureType) && SelectedMap == null)
+            if (new[] { MatchProcedureTypes.Banning, MatchProcedureTypes.GettingReady, MatchProcedureTypes.Picking, MatchProcedureTypes.Playing, MatchProcedureTypes.PlayingWarmUp, MatchProcedureTypes.WarmUp, MatchProcedureTypes.TieBreaker }.Contains(CurrentProcedure.ProcedureType) && SelectedMap == null)
             {
                 SendAlert($"Current procedure ({CurrentProcedure.Name}) requires a map to be specified.");
                 return false;
@@ -316,10 +316,11 @@ namespace RefereeAssistant3.Main.Matches
                         mod = ModsLetters.HD;
                     BanchoIrc?.SetMods(this, mod);
                     break;
+                case MatchProcedureTypes.TieBreaker:
+                    BanchoIrc?.SetMap(this, SelectedMap, PlayMode.osu);
+                    break;
                 case MatchProcedureTypes.GettingReady:
                     BanchoIrc?.StartMatch(this, 10);
-                    break;
-                case MatchProcedureTypes.TieBreaker:
                     break;
                 case MatchProcedureTypes.Playing:
                     if (SelectedWinner == null)
@@ -396,7 +397,9 @@ namespace RefereeAssistant3.Main.Matches
             if (CurrentProcedure.ProcedureType == MatchProcedureTypes.Rolling)
                 RollWinner = null;
             if (CurrentProcedure.ProcedureType == MatchProcedureTypes.Playing || CurrentProcedure.ProcedureType == MatchProcedureTypes.PlayingWarmUp)
-                MapStartTime = DateTime.UtcNow;
+                MapStartTime = DateTime.UtcNow + TimeSpan.FromSeconds(10);
+            if (CurrentProcedure.ProcedureType == MatchProcedureTypes.TieBreaker && IrcChannel != null)
+                BanchoIrc?.SendLocalMessage(IrcChannel.ChannelName, "  Referee, please set the mods accordingly", true);
         }
 
         private void GenerateMatchProcedure(string param)

@@ -473,6 +473,7 @@ namespace RefereeAssistant3.Visual.UI
                     OnGettingReadyProcedure();
                     break;
                 case MatchProcedureTypes.TieBreaker:
+                    OnPickingProcedure();
                     break;
                 case MatchProcedureTypes.Playing:
                     OnPlayingProcedure();
