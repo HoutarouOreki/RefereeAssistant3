@@ -305,6 +305,16 @@ namespace RefereeAssistant3.Main.Matches
                 case MatchProcedureTypes.Picking:
                     CurrentProcedure.Participant.PickedMaps.Add(SelectedMap);
                     BanchoIrc?.SetMap(this, SelectedMap, PlayMode.osu);
+                    var mod = ModsLetters.None;
+                    if (TournamentStage.Mappool.DoubleTime.Contains(SelectedMap))
+                        mod = ModsLetters.DT;
+                    if (TournamentStage.Mappool.FreeMod.Contains(SelectedMap))
+                        mod = ModsLetters.Freemod;
+                    if (TournamentStage.Mappool.HardRock.Contains(SelectedMap))
+                        mod = ModsLetters.HR;
+                    if (TournamentStage.Mappool.Hidden.Contains(SelectedMap))
+                        mod = ModsLetters.HD;
+                    BanchoIrc?.SetMods(this, mod);
                     break;
                 case MatchProcedureTypes.GettingReady:
                     BanchoIrc?.StartMatch(this, 10);

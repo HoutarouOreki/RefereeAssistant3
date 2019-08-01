@@ -56,6 +56,16 @@ namespace RefereeAssistant3.Main.Matches
 
         public override Player GetPlayer(string username) => Team1 == null ? null : base.GetPlayer(username);
 
+        public override bool Proceed()
+        {
+            var currentProcedure = CurrentProcedure;
+            if (!base.Proceed())
+                return false;
+            if (currentProcedure.ProcedureType == MatchProcedureTypes.Playing)
+                BanchoIrc?.SendMessage(IrcChannel, $"{Team1.Name} | {Scores[Team1]} - {Scores[Team2]} | {Team2.Name}");
+            return true;
+        }
+
         protected override void OnMatchFinished()
         {
             var team1Score = 0;
@@ -75,8 +85,8 @@ namespace RefereeAssistant3.Main.Matches
                         team2Score += result.Score;
                 }
             }
-            BanchoIrc.SendMessage(IrcChannel, $"{Team1.Name}: {team1Score}");
-            BanchoIrc.SendMessage(IrcChannel, $"{Team2.Name}: {team2Score}");
+            BanchoIrc.SendMessage(IrcChannel.ChannelName, $"{Team1.Name}: {team1Score}");
+            BanchoIrc.SendMessage(IrcChannel.ChannelName, $"{Team2.Name}: {team2Score}");
         }
 
         protected override OsuMatchSnapshot CreateSnapshot() => new OsuMatchSnapshot
