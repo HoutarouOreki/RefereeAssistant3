@@ -1,4 +1,5 @@
-﻿using RefereeAssistant3.Main.IRC;
+﻿using osu.Framework.Logging;
+using RefereeAssistant3.Main.IRC;
 using RefereeAssistant3.Main.Online.APIModels;
 using RefereeAssistant3.Main.Online.APIRequests;
 using RefereeAssistant3.Main.Tournaments;
@@ -161,7 +162,7 @@ namespace RefereeAssistant3.Main.Matches
             if (req?.Response?.IsSuccessful == true)
                 lastUploadTime = DateTime.UtcNow;
             else
-                SendAlert($"Updating match {Code} failed with code {req?.Response?.StatusCode}:\n{req?.Response?.Content}");
+                Logger.Log($"Updating match {Code} failed with code {req?.Response?.StatusCode}:\n{req?.Response?.Content}", LoggingTarget.Runtime, LogLevel.Error);
         }
 
         public async Task PostMatchAsync()
@@ -171,13 +172,13 @@ namespace RefereeAssistant3.Main.Matches
             if (req?.Response?.IsSuccessful == true)
             {
                 Id = req.Object.Id;
-                SendAlert($"Match {req.Object.Code} posted successfully");
+                //SendAlert($"Match {req.Object.Code} posted successfully");
                 lastUploadTime = DateTime.UtcNow;
             }
             else
             {
                 Id = -1;
-                SendAlert($"Failed to post match {Code}, code {req?.Response?.StatusCode}\n{req?.Response?.ErrorMessage}\n{req?.Response?.Content}");
+                Logger.Log($"Failed to post match {Code}, code {req?.Response?.StatusCode}\n{req?.Response?.ErrorMessage}\n{req?.Response?.Content}", LoggingTarget.Runtime, LogLevel.Error);
             }
         }
 
@@ -389,6 +390,14 @@ namespace RefereeAssistant3.Main.Matches
             DoNewProcedureJobs();
             Snapshots.Add(CreateSnapshot());
             SignalChanges();
+
+            Task.Run(async () =>
+            {
+                if (Id <= -1)
+                    await PostMatchAsync();
+                else
+                    await UpdateMatchAsync();
+            });
             return true;
         }
 

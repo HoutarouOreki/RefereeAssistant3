@@ -8,8 +8,7 @@ namespace RefereeAssistant3.IRC
     {
         public string ServerName { get; }
         public string ChannelName { get; }
-        private readonly List<IrcMessage> messages = new List<IrcMessage>();
-        public IReadOnlyList<IrcMessage> Messages => messages;
+        public List<IrcMessage> Messages = new List<IrcMessage>();
 
         [JsonIgnore]
         public IEnumerable<string> IrcUsers { get; private set; } = new List<string>();
@@ -27,7 +26,7 @@ namespace RefereeAssistant3.IRC
 
         public void AddMessage(IrcMessage message)
         {
-            messages.Add(message);
+            Messages.Add(message);
             NewMessage?.Invoke(message);
         }
 

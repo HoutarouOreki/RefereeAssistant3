@@ -73,8 +73,15 @@ namespace RefereeAssistant3.Main
                     }
                     catch { }
                 }
-                using (var stream = new FileStream(coverCachePath, FileMode.Open, FileAccess.Read))
-                { return Cover = Texture.FromStream(stream); }
+                try
+                {
+                    using (var stream = new FileStream(coverCachePath, FileMode.Open, FileAccess.Read))
+                    { return Cover = Texture.FromStream(stream); }
+                }
+                catch
+                {
+                    return null;
+                }
             }
             else if (Cover != null)
                 return Cover;

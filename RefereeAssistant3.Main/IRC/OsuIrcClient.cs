@@ -166,6 +166,7 @@ namespace RefereeAssistant3.Main.IRC
             SendLocalMessage(channelName, $"Chat room created successfully ({channelName})", true);
             LockMatch(match);
             SetProperties(match, match.TournamentStage.RoomSettings.TeamMode, match.TournamentStage.RoomSettings.ScoreMode, 8);
+            match.IrcChannel = GetChannel(match);
             return;
         }
 

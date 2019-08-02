@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using MongoDB.Bson.Serialization.Attributes;
+using Newtonsoft.Json;
 using RefereeAssistant3.IRC;
 using RefereeAssistant3.Main.Matches;
 using System;
@@ -20,9 +21,11 @@ namespace RefereeAssistant3.Main.IRC
         public DateTime TimeOutTime { get; private set; } = DateTime.UtcNow;
 
         [JsonIgnore]
+        [BsonIgnore]
         public Dictionary<int, Player> Slots { get; private set; } = new Dictionary<int, Player>();
 
         [JsonIgnore]
+        [BsonIgnore]
         public OsuMatch Match { get; }
 
         public bool AddSlotUser(string username, int slot)

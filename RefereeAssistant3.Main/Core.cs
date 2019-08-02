@@ -39,7 +39,7 @@ namespace RefereeAssistant3.Main
             MainConfig.Load();
             ChatBot = new BanchoIrcManager();
             new OsuIrcMatchParseHandler(this);
-            LoadSavedMatches();
+            //LoadSavedMatches();
         }
 
         public void AddNewMatch(OsuMatch match)

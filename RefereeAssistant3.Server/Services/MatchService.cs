@@ -32,7 +32,7 @@ namespace RefereeAssistant3.Server.Services
             var find = Builders<APIMatch>.Filter.Eq(m => m.Id, matchId);
             return matches.FindOneAndReplace(find, match, new FindOneAndReplaceOptions<APIMatch>
             {
-                ReturnDocument = ReturnDocument.After
+                ReturnDocument = ReturnDocument.After,
             });
         }
     }

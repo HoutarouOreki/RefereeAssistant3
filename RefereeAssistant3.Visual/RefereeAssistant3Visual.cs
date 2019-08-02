@@ -175,12 +175,15 @@ namespace RefereeAssistant3.Visual
 
         private void OnMatchAlert(OsuMatch source, string text)
         {
-            if (source == core.SelectedMatch.Value)
+            Schedule(() =>
             {
-                var alert = new Alert(text);
-                Add(alert);
-                alert.Show();
-            }
+                if (source == core.SelectedMatch.Value)
+                {
+                    var alert = new Alert(text);
+                    Add(alert);
+                    alert.Show();
+                }
+            });
         }
 
         public void ShowAlert(string text)

@@ -74,18 +74,26 @@ namespace RefereeAssistant3.Main.Matches
                 {
                     await Task.Run(() =>
                     {
-                        using (var fileStream = new FileStream(avatarCachePath, FileMode.OpenOrCreate, FileAccess.Write))
+                        try
                         {
-                            var avatarOnlineStream = textures.GetStream($"https://a.ppy.sh/{PlayerId}");
-                            var img = SixLabors.ImageSharp.Image.Load(avatarOnlineStream);
-                            SixLabors.ImageSharp.ImageExtensions.SaveAsPng(img, fileStream);
+                            using (var fileStream = new FileStream(avatarCachePath, FileMode.OpenOrCreate, FileAccess.Write))
+                            {
+                                var avatarOnlineStream = textures.GetStream($"https://a.ppy.sh/{PlayerId}");
+                                var img = SixLabors.ImageSharp.Image.Load(avatarOnlineStream);
+                                SixLabors.ImageSharp.ImageExtensions.SaveAsPng(img, fileStream);
+                            }
                         }
+                        catch { }
                     });
                 }
-                using (var s = new FileStream(avatarCachePath, FileMode.Open, FileAccess.Read))
+                try
                 {
-                    await Task.Run(() => Avatar = Texture.FromStream(s));
+                    using (var s = new FileStream(avatarCachePath, FileMode.Open, FileAccess.Read))
+                    {
+                        await Task.Run(() => Avatar = Texture.FromStream(s));
+                    }
                 }
+                catch { }
             }
         }
 

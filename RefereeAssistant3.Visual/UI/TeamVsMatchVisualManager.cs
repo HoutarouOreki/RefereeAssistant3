@@ -404,29 +404,29 @@ namespace RefereeAssistant3.Visual.UI
 
             matchSubmissionButton.Action = null;
             matchSubmissionButton.Text = "";
-            if (string.IsNullOrEmpty(MainConfig.ServerURL))
-                matchSubmissionButton.Text = "Server URL not set";
-            else if (!Uri.IsWellFormedUriString(MainConfig.ServerURL, UriKind.Absolute))
-                matchSubmissionButton.Text = "Server URL invalid";
-            else if (Match?.Id == -1)
-            {
-                matchSubmissionButton.Action = postOverlay.Show;
-                matchSubmissionButton.Text = "Upload match";
-            }
-            else if (Match?.Id > -1 && Match.ModifiedSinceUpdate)
-            {
-                matchSubmissionButton.Action = () =>
-                {
-                    matchSubmissionButton.Text = "Submitting update...";
-                    Task.Run(core.SelectedMatch.Value.PostMatchAsync);
-                };
-                matchSubmissionButton.Text = "Submit match update";
-            }
-            else if (Match?.Id > -1 && !Match.ModifiedSinceUpdate)
-            {
-                matchSubmissionButton.Action = null;
-                matchSubmissionButton.Text = "Match uploaded";
-            }
+            //if (string.IsNullOrEmpty(MainConfig.ServerURL))
+            //    matchSubmissionButton.Text = "Server URL not set";
+            //else if (!Uri.IsWellFormedUriString(MainConfig.ServerURL, UriKind.Absolute))
+            //    matchSubmissionButton.Text = "Server URL invalid";
+            //else if (Match?.Id == -1)
+            //{
+            //    //matchSubmissionButton.Action = postOverlay.Show;
+            //    matchSubmissionButton.Text = "Upload match";
+            //}
+            //else if (Match?.Id > -1 && Match.ModifiedSinceUpdate)
+            //{
+            //    matchSubmissionButton.Action = () =>
+            //    {
+            //        matchSubmissionButton.Text = "Submitting update...";
+            //        Task.Run(core.SelectedMatch.Value.PostMatchAsync);
+            //    };
+            //    matchSubmissionButton.Text = "Submit match update";
+            //}
+            //else if (Match?.Id > -1 && !Match.ModifiedSinceUpdate)
+            //{
+            //    matchSubmissionButton.Action = null;
+            //    matchSubmissionButton.Text = "Match uploaded";
+            //}
 
             Task.Run(() =>
             {
