@@ -222,8 +222,9 @@ namespace RefereeAssistant3.Visual.Overlays
         private void OnNewTournamentButtonClicked()
         {
             var config = new TournamentConfiguration() { TournamentName = "New tournament" };
-            core.Tournaments.Add(new Tournament(config, new List<TournamentStageConfiguration>(), new List<TeamStorage>()));
-            GenerateLayout();
+            var newTournament = new Tournament(config, new List<TournamentStageConfiguration>(), new List<TeamStorage>());
+            core.Tournaments.Add(newTournament);
+            selectedTournament.Value = newTournament;
         }
 
         private void OnTournamentSelected(ValueChangedEvent<Tournament> obj)
