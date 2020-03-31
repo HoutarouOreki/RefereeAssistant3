@@ -129,7 +129,7 @@ namespace RefereeAssistant3.Visual
                                     RelativeSizeAxes = Axes.X,
                                     Width = 1,
                                     BackgroundColour = FrameworkColour.BlueGreen,
-                                    Text = "Tournaments",
+                                    Text = "Configure Tournaments",
                                     Action = tournamentsOverlay.Show
                                 },
                                 new RA3Button
