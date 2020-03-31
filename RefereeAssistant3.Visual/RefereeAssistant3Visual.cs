@@ -9,6 +9,7 @@ using osuTK;
 using RefereeAssistant3.Main;
 using RefereeAssistant3.Main.Matches;
 using RefereeAssistant3.Visual.Overlays;
+using RefereeAssistant3.Visual.Overlays.TournamentConfigurationOverlays;
 using RefereeAssistant3.Visual.UI;
 using System;
 

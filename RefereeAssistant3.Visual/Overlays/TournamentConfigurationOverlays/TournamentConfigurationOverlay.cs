@@ -13,7 +13,7 @@ using RefereeAssistant3.Visual.UI;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace RefereeAssistant3.Visual.Overlays
+namespace RefereeAssistant3.Visual.Overlays.TournamentConfigurationOverlays
 {
     public class TournamentConfigurationOverlay : RA3OverlayContainer
     {
