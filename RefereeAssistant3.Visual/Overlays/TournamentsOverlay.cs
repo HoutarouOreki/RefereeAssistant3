@@ -216,7 +216,7 @@ namespace RefereeAssistant3.Visual.Overlays
                 }
             };
             selectedTournament.Value.Stages.Add(stage);
-            GenerateLayout();
+            selectedStage.Value = stage;
         }
 
         private void OnNewTournamentButtonClicked()
