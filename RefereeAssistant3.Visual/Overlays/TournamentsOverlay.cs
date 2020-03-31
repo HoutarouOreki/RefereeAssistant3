@@ -8,6 +8,7 @@ using RefereeAssistant3.Main;
 using RefereeAssistant3.Main.Matches;
 using RefereeAssistant3.Main.Storage;
 using RefereeAssistant3.Main.Tournaments;
+using RefereeAssistant3.Main.Utilities;
 using RefereeAssistant3.Visual.UI;
 using System.Collections.Generic;
 using System.Linq;
@@ -201,9 +202,10 @@ namespace RefereeAssistant3.Visual.Overlays
 
         private void OnNewStageButtonClicked()
         {
+            var stageName = NameUtilities.GetUniqueNewName("New stage", selectedTournament.Value.Stages.Select(existingStage => existingStage.TournamentStageName));
             var stage = new TournamentStageConfiguration
             {
-                TournamentStageName = "New stage",
+                TournamentStageName = stageName,
                 MatchProceedings = new List<string>(),
                 ScoreRequiredToWin = 20,
                 Mappool = new Mappool(),
@@ -221,7 +223,10 @@ namespace RefereeAssistant3.Visual.Overlays
 
         private void OnNewTournamentButtonClicked()
         {
-            var config = new TournamentConfiguration() { TournamentName = "New tournament" };
+            var config = new TournamentConfiguration()
+            {
+                TournamentName = NameUtilities.GetUniqueNewName("New tournament", core.Tournaments.Select(existingTournament => existingTournament.Configuration.TournamentName))
+            };
             var newTournament = new Tournament(config, new List<TournamentStageConfiguration>(), new List<TeamStorage>());
             core.Tournaments.Add(newTournament);
             selectedTournament.Value = newTournament;
