@@ -15,7 +15,7 @@ using System.Linq;
 
 namespace RefereeAssistant3.Visual.Overlays
 {
-    public class TournamentsOverlay : RA3OverlayContainer
+    public class TournamentConfigurationOverlay : RA3OverlayContainer
     {
         private readonly Bindable<Tournament> selectedTournament = new Bindable<Tournament>();
         private readonly Bindable<TournamentStageConfiguration> selectedStage = new Bindable<TournamentStageConfiguration>();
@@ -32,7 +32,7 @@ namespace RefereeAssistant3.Visual.Overlays
         private readonly RA3Button saveStageButton;
         private readonly RA3Button saveTournamentButton;
 
-        public TournamentsOverlay(Core core)
+        public TournamentConfigurationOverlay(Core core)
         {
             this.core = core;
             var tournamentSelection = new SelectionOverlay<Tournament>(core.Tournaments) { Action = t => selectedTournament.Value = t };

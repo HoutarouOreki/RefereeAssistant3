@@ -67,7 +67,7 @@ namespace RefereeAssistant3.Visual
             var mapPickerOverlay = new MapPickerOverlay(core);
             var mapFinderOverlay = new MapFinderOverlay(core);
             var matchPostOverlay = new MatchPostOverlay(core);
-            var tournamentsOverlay = new TournamentsOverlay(core);
+            var tournamentsOverlay = new TournamentConfigurationOverlay(core);
             Children = new Drawable[]
             {
                 new Box { RelativeSizeAxes = Axes.Both, Colour = FrameworkColour.GreenDarker },
