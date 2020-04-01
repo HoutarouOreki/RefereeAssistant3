@@ -5,7 +5,11 @@
     <LangVersion>7.3</LangVersion>
     <ApplicationIcon />
     <OutputType>Exe</OutputType>
-    <StartupObject />
+    <StartupObject>RefereeAssistant3.Basic.Program</StartupObject>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RefereeAssistant3.Main\RefereeAssistant3.Main.csproj" />
+  </ItemGroup>
 
 </Project>
