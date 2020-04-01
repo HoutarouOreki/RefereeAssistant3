@@ -6,9 +6,9 @@ namespace RefereeAssistant3.Basic
     {
         public readonly char Character;
         public readonly string Description;
-        public readonly Action Function;
+        public readonly Action? Function;
 
-        public UserSelectionOption(char character, string description, Action function)
+        public UserSelectionOption(char character, string description, Action? function = null)
         {
             Character = character;
             Description = description;

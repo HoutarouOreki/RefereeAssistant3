@@ -36,7 +36,7 @@ namespace RefereeAssistant3.Basic
                     Console.WriteLine("Incorrect option selection. Try again.");
                 else
                 {
-                    options.First(o => o.Character == inputLine[0]).Function();
+                    options.First(o => o.Character == inputLine[0]).Function?.Invoke();
                     return inputLine[0];
                 }
             }
