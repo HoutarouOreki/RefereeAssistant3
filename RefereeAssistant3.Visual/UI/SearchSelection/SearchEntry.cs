@@ -49,6 +49,13 @@ namespace RefereeAssistant3.Visual.UI.SearchSelection
             UpdateNameText();
             selectedEntryBindable.BindValueChanged(OnSelectedEntryChanged, true);
         }
+        public void UpdateNameText() => nameText.Text = getTNameFunc(Value);
+
+        protected override bool OnClick(ClickEvent e)
+        {
+            selectedEntryBindable.Value = Value;
+            return true;
+        }
 
         private void OnSelectedEntryChanged(ValueChangedEvent<T> selectionChange)
         {
@@ -58,16 +65,8 @@ namespace RefereeAssistant3.Visual.UI.SearchSelection
                 OnDeselected();
         }
 
-        protected override bool OnClick(ClickEvent e)
-        {
-            selectedEntryBindable.Value = Value;
-            return true;
-        }
-
         private void OnDeselected() => background.FadeColour(deselected_colour);
 
         private void OnSelected() => background.FadeColour(selected_colour);
-
-        private void UpdateNameText() => nameText.Text = getTNameFunc(Value);
     }
 }

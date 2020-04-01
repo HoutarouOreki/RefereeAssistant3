@@ -2,6 +2,7 @@
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input.Events;
 using osu.Framework.Screens;
 using RefereeAssistant3.Visual.UI.SearchSelection;
@@ -14,17 +15,22 @@ namespace RefereeAssistant3.Visual.Screens
     {
         protected readonly Bindable<T> Current = new Bindable<T>();
         private readonly Box background;
+        private readonly SpriteText selectedNameText;
+        private readonly Func<T, string> getTNameFunc;
+        private readonly string typeName;
+        private readonly SearchSelection<T> searchSelection;
         private const float selection_column_width = 300;
+        private const float selected_name_container_height = 40;
 
         protected Container<Drawable> Content { get; } = new Container<Drawable>
         {
             RelativeSizeAxes = Axes.Both,
-            Padding = new MarginPadding { Left = selection_column_width },
+            Padding = new MarginPadding { Left = selection_column_width, Top = selected_name_container_height },
             Anchor = Anchor.Centre,
             Origin = Anchor.Centre
         };
 
-        public ScreenWithSelection(Func<T, string> getTNameFunc, IEnumerable<T> items)
+        public ScreenWithSelection(Func<T, string> getTNameFunc, IEnumerable<T> items, string typeName)
         {
             Anchor = Anchor.Centre;
             Origin = Anchor.Centre;
@@ -44,11 +50,40 @@ namespace RefereeAssistant3.Visual.Screens
                     Children = new Drawable[]
                     {
                         new Box { RelativeSizeAxes = Axes.Both, Colour = FrameworkColour.BlueDark },
-                        new SearchSelection<T>(getTNameFunc, items, Current)
+                        searchSelection = new SearchSelection<T>(getTNameFunc, items, Current)
+                    }
+                },
+                new Container
+                {
+                    RelativeSizeAxes = Axes.X,
+                    Height = selected_name_container_height,
+                    Padding = new MarginPadding { Left = selection_column_width },
+                    Children = new Drawable[]
+                    {
+                        new Box { RelativeSizeAxes = Axes.Both, Colour = FrameworkColour.GreenDark },
+                        new Container
+                        {
+                            RelativeSizeAxes = Axes.Both,
+                            Padding = new MarginPadding { Left = 10, Vertical = 5 },
+                            Child = selectedNameText = new SpriteText
+                            {
+                                Anchor = Anchor.CentreLeft,
+                                Origin = Anchor.CentreLeft,
+                                Font = new FontUsage(null, selected_name_container_height - 10)
+                            }
+                        }
                     }
                 },
                 Content
             };
+            this.getTNameFunc = getTNameFunc;
+            this.typeName = typeName;
+        }
+
+        protected override void LoadComplete()
+        {
+            Current.BindValueChanged(OnCurrentChangedPrivate, true);
+            base.LoadComplete();
         }
 
         public override void OnEntering(IScreen last)
@@ -86,6 +121,19 @@ namespace RefereeAssistant3.Visual.Screens
                 return true;
             }
             return base.OnMouseUp(e);
+        }
+
+        protected virtual void OnCurrentChanged(ValueChangedEvent<T> currentChange) { }
+
+        protected void NameUpdated(T value) => searchSelection.NameUpdated(value);
+
+        private void OnCurrentChangedPrivate(ValueChangedEvent<T> currentChange)
+        {
+            if (currentChange.NewValue == null)
+                selectedNameText.Text = typeName;
+            else
+                selectedNameText.Text = $"{typeName} > {getTNameFunc(currentChange.NewValue)}";
+            OnCurrentChanged(currentChange);
         }
     }
 }

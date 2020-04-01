@@ -73,6 +73,15 @@ namespace RefereeAssistant3.Visual.UI.SearchSelection
 
         public void AddEntry(T entry) => entriesFlow.Add(new SearchEntry<T>(entry, selectedValueBindable, getTNameFunc));
 
+        public void NameUpdated(T value)
+        {
+            foreach (var entry in entriesFlow)
+            {
+                if (entry.Value == value)
+                    entry.UpdateNameText();
+            }
+        }
+
         private void OnSearchChanged(ValueChangedEvent<string> searchChange)
         {
             foreach (var entry in entriesFlow)
