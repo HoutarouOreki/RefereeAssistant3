@@ -1,13 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <AssemblyName>RefereeAssistant3.IRC</AssemblyName>
     <RootNamespace>RefereeAssistant3.IRC</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ppy.osu.Framework" Version="2019.704.0" />
+    <PackageReference Include="ppy.osu.Framework" Version="2020.331.0" />
   </ItemGroup>
 
 </Project>

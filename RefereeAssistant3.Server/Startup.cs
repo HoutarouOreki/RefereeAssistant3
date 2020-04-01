@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using NLog;
 using NLog.Conditions;
 using NLog.Config;
@@ -20,16 +21,16 @@ namespace RefereeAssistant3.Server
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
+            if (env.EnvironmentName == Environments.Development)
             {
                 app.UseDeveloperExceptionPage();
             }
 
             ConfigureLogging();
 
-            app.UseMvc();
+            //app.UseMvc();
         }
 
         private void ConfigureLogging()

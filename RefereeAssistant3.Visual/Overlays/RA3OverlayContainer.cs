@@ -53,24 +53,34 @@ namespace RefereeAssistant3.Visual.Overlays
             base.PopOut();
         }
 
-        protected override bool OnKeyUp(KeyUpEvent e)
+        protected override bool OnKeyDown(KeyDownEvent e)
         {
             if (e.Key == osuTK.Input.Key.Escape)
-            {
-                Hide();
                 return true;
-            }
-            return base.OnKeyUp(e);
+            return base.OnKeyDown(e);
         }
 
-        protected override bool OnMouseUp(MouseUpEvent e)
+        protected override void OnKeyUp(KeyUpEvent e)
+        {
+            if (e.Key == osuTK.Input.Key.Escape)
+                Hide();
+            else
+                base.OnKeyUp(e);
+        }
+
+        protected override bool OnMouseDown(MouseDownEvent e)
         {
             if (e.Button == osuTK.Input.MouseButton.Button1)
-            {
-                Hide();
                 return true;
-            }
-            return base.OnMouseUp(e);
+            return base.OnMouseDown(e);
+        }
+
+        protected override void OnMouseUp(MouseUpEvent e)
+        {
+            if (e.Button == osuTK.Input.MouseButton.Button1)
+                Hide();
+            else
+                base.OnMouseUp(e);
         }
     }
 }

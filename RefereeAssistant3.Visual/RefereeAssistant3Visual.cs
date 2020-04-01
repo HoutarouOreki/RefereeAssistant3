@@ -54,7 +54,7 @@ namespace RefereeAssistant3.Visual
 
             Window.Title = "Referee Assistant 3";
 
-            Window.WindowState = VisualConfig.WindowState != WindowState.Minimized ? VisualConfig.WindowState : WindowState.Normal;
+            Window.WindowState = VisualConfig.WindowState != osuTK.WindowState.Minimized ? VisualConfig.WindowState : osuTK.WindowState.Normal;
             Window.WindowStateChanged += OnWindowStateChanged;
 
             Resources.AddStore(new DllResourceStore(@"RefereeAssistant3.Resources.dll"));

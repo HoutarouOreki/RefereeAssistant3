@@ -23,7 +23,7 @@ namespace RefereeAssistant3.Main.Online.APIRequests
                 return new APIResponse<T>(null, default);
 
             PrepareRequest();
-            var res = await Client?.ExecuteTaskAsync(Request);
+            var res = await Client?.ExecuteAsync(Request);
 
             if (res?.IsSuccessful == true)
                 return new APIResponse<T>(res, JsonConvert.DeserializeObject<T>(res?.Content));

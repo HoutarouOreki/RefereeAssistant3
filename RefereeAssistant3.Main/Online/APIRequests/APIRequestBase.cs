@@ -55,7 +55,7 @@ namespace RefereeAssistant3.Main.Online.APIRequests
                 return null;
             }
             PrepareRequest();
-            return Client?.ExecuteTaskAsync(Request);
+            return Client?.ExecuteAsync(Request);
         }
 
         protected void SetJsonObject(object obj) => Request.AddJsonBody(JsonConvert.SerializeObject(obj));
