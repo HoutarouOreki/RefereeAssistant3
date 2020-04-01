@@ -5,11 +5,12 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.IO.Stores;
 using osu.Framework.Platform;
+using osu.Framework.Screens;
 using osuTK;
 using RefereeAssistant3.Main;
 using RefereeAssistant3.Main.Matches;
 using RefereeAssistant3.Visual.Overlays;
-using RefereeAssistant3.Visual.Overlays.TournamentConfigurationOverlays;
+using RefereeAssistant3.Visual.Screens.TournamentConf;
 using RefereeAssistant3.Visual.UI;
 using System;
 
@@ -22,6 +23,8 @@ namespace RefereeAssistant3.Visual
         private readonly Core core;
         private FillFlowContainer<MatchPreviewPanel> matchListDisplayer;
         private TeamVsMatchVisualManager matchVisualManager;
+
+        private ScreenStack screenStack;
 
         public new GameHost Host => base.Host;
 
@@ -68,7 +71,6 @@ namespace RefereeAssistant3.Visual
             var mapPickerOverlay = new MapPickerOverlay(core);
             var mapFinderOverlay = new MapFinderOverlay(core);
             var matchPostOverlay = new MatchPostOverlay(core);
-            var tournamentsOverlay = new TournamentConfigurationOverlay(core);
             Children = new Drawable[]
             {
                 new Box { RelativeSizeAxes = Axes.Both, Colour = FrameworkColour.GreenDarker },
@@ -131,7 +133,7 @@ namespace RefereeAssistant3.Visual
                                     Width = 1,
                                     BackgroundColour = FrameworkColour.BlueGreen,
                                     Text = "Configure Tournaments",
-                                    Action = tournamentsOverlay.Show
+                                    Action = () => screenStack.Push(new TournamentConfigurationScreen(core))
                                 },
                                 new RA3Button
                                 {
@@ -151,7 +153,10 @@ namespace RefereeAssistant3.Visual
                 mapPickerOverlay,
                 mapFinderOverlay,
                 matchPostOverlay,
-                tournamentsOverlay
+                screenStack = new ScreenStack
+                {
+                    RelativeSizeAxes = Axes.Both
+                }
             };
             foreach (var match in core.Matches)
                 OnNewMatchAdded(match);
