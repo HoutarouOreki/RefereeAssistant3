@@ -9,7 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\RefereeAssistant3.Basic\RefereeAssistant3.Basic.csproj" />
     <ProjectReference Include="..\RefereeAssistant3.Visual\RefereeAssistant3.Visual.csproj" />
   </ItemGroup>
 
